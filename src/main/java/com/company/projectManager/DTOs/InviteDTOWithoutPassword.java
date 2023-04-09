@@ -3,19 +3,19 @@ package com.company.projectManager.DTOs;
 import com.company.projectManager.utils.InviteState;
 import jakarta.validation.constraints.NotNull;
 
-public record InviteDTO(
+public record InviteDTOWithoutPassword(
         Long id,
 
         @NotNull
         InviteState state,
 
         @NotNull
-        UserDTO sender,
+        UserWithoutPasswordDTO sender,
 
         @NotNull
-        UserDTO receiver,
+        UserWithoutPasswordDTO receiver,
 
         @NotNull
         BusinessUnitDTO businessUnit
-) {
+){
 }
