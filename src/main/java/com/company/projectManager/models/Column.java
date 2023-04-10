@@ -3,9 +3,10 @@ package com.company.projectManager.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.CascadeType;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.Hibernate;
 import org.hibernate.annotations.Cascade;
 
 import java.util.Objects;
@@ -13,8 +14,8 @@ import java.util.Objects;
 @Entity
 @Setter
 @NoArgsConstructor
-@Table(name = "Notes")
-public class Note {
+@Table(name = "Columns")
+public class Column {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,30 +25,27 @@ public class Note {
     @NotNull
     private String name;
 
-    @NotBlank
-    @NotNull
-    private String description;
-
-    @NotNull
     @ManyToOne
-    @JoinColumn(name = "ColumnsId")
-    @Cascade(org.hibernate.annotations.CascadeType.MERGE)
-    private Column column;
+    @JoinColumn(name = "WhiteboardsId")
+    @Cascade(CascadeType.MERGE)
+    private Whiteboard whiteboard;
 
 
-    public Note(Long id, String name, String description, Column column) {
+    @NotNull
+    private int position;
+
+    public Column(Long id, String name, Whiteboard whiteboard) {
         this.id = id;
         this.name = name;
-        this.description = description;
-        this.column = column;
+        this.whiteboard = whiteboard;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Note note = (Note) o;
-        return getId() != null && Objects.equals(getId(), note.getId());
+        Column column = (Column) o;
+        return id != null && Objects.equals(id, column.id);
     }
 
     @Override
@@ -63,12 +61,12 @@ public class Note {
         return name;
     }
 
-    public String getDescription() {
-        return description;
+    public Whiteboard getWhiteboard() {
+        setWhiteboard((Whiteboard) Hibernate.unproxy(this.whiteboard));
+        return whiteboard;
     }
 
-    public Column getColumn() {
-        setColumn((Column) Hibernate.unproxy(this.column));
-        return column;
+    public int getPosition() {
+        return position;
     }
 }
