@@ -5,14 +5,9 @@ import org.springframework.stereotype.Repository;
 
 import com.company.projectManager.models.Whiteboard;
 
-import java.util.Optional;
-
-
-//I don't I'll be using this very often
+//I don't think I'll be using this very often
 @Repository
 public interface WhiteboardRepository extends CrudRepository<Whiteboard, Long> {
-
-    Optional<Whiteboard> findByName(String name);
 
 }
 

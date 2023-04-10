@@ -1,7 +1,5 @@
 package com.company.projectManager.repositories;
 
-import com.company.projectManager.models.BusinessUnit;
-import com.company.projectManager.models.Type;
 import com.company.projectManager.models.UserBusinessUnitRole;
 import com.company.projectManager.utils.TypeName;
 import com.company.projectManager.utils.UserBusinessUnitRoleId;
@@ -30,4 +28,5 @@ public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBu
 
     Optional<UserBusinessUnitRole> findByUserIdAndBusinessUnitId(Long userId, Long businessUnitId);
 
+    Optional<UserBusinessUnitRole> findByUserIdAndBusinessUnitWhiteboardId(Long userId, Long whiteboardId);
 }
