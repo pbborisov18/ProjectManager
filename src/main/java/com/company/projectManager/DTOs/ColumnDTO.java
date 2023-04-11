@@ -3,19 +3,17 @@ package com.company.projectManager.DTOs;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-
-public record NoteDTO(
+public record ColumnDTO(
         Long id,
 
-        @NotNull
-        @NotBlank
+        @NotNull @NotBlank
         String name,
 
         @NotNull
-        @NotBlank
-        String description,
+        WhiteboardDTO whiteboardDTO,
 
         @NotNull
-        ColumnDTO columnDTO
+        int position
 ) {
+
 }
