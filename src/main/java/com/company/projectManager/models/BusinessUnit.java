@@ -2,11 +2,14 @@ package com.company.projectManager.models;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.CascadeType;
 
 import java.util.Objects;
 
@@ -43,6 +46,7 @@ public class BusinessUnit {
         @Nullable
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "WhiteboardsId", referencedColumnName = "Id")
+        @Cascade(CascadeType.MERGE)
         private Whiteboard whiteboard;
 
         public BusinessUnit(Long id, String name, Type type, @Nullable BusinessUnit company, @Nullable BusinessUnit project, @Nullable Whiteboard whiteboard) {

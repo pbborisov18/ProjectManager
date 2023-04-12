@@ -1,12 +1,14 @@
 package com.company.projectManager.models;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.CascadeType;
 
 import java.util.Objects;
 
@@ -31,7 +33,7 @@ public class Note {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "ColumnsId")
-    @Cascade(org.hibernate.annotations.CascadeType.MERGE)
+    @Cascade(CascadeType.MERGE)
     private Column column;
 
 
