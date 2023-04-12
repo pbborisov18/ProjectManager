@@ -43,7 +43,7 @@ public abstract class BusinessUnitService {
     }
 
 
-
+    @Transactional
     public void updateBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToUpdateException, EntityNotFoundException {
         try {
             Optional<BusinessUnit> existingBusinessUnit = businessUnitRepository.findById(businessUnitDTO.id());
