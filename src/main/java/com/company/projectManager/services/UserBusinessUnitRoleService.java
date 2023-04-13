@@ -51,6 +51,9 @@ public abstract class UserBusinessUnitRoleService {
     @Autowired
     BusinessUnitRepository businessUnitRepository;
 
+    @Autowired
+    InviteService inviteService;
+
     @Transactional
     public void saveUserBURole(UserWithPassBusinessUnitRoleDTO userBURole) throws FailedToSaveException {
         try {
@@ -183,7 +186,6 @@ public abstract class UserBusinessUnitRoleService {
                 if(userBURoleEntity.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the company!");
                 } else {
-
                     UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserWithPassBusinessUnitRoleDTO(
                             userMapper.toUserDTO(user.get()),
                             companyDTO,
@@ -221,11 +223,26 @@ public abstract class UserBusinessUnitRoleService {
                         //Delete the relationship before the businessUnit
                         userBURoleRepository.deleteAll(userBURoleRepository.findAllByBusinessUnitId(companyDTO.id()));
 
-                        //Delete all relationships of the children projects and teams of the company
-                        userBURoleRepository.deleteAll(userBURoleRepository.findAllByUserIdAndBusinessUnitCompanyId(user.get().getId(), companyDTO.id()));
+                        //Delete all children invites
+                        for (UserBusinessUnitRole BUDTO : userBURoleRepository.findAllByUserIdAndBusinessUnitCompanyId(user.get().getId(), companyDTO.id())) {
+                            inviteService.deleteAllInvitesByBusinessUnit(userBURoleMapper.toDTO(BUDTO).businessUnit());
+                        }
 
-                        //Delete all children projects and teams of the company
-                        businessUnitRepository.deleteAll(businessUnitMapper.toBusinessUnitEntities(businessUnitService.findBusinessUnitsByCompany(companyDTO)));
+                        //delete all invites for the company
+                        inviteService.deleteAllInvitesByBusinessUnit(companyDTO);
+
+
+                        //Delete all relationships of the children projects and teams of the company
+                        userBURoleRepository.deleteAll(
+                                userBURoleRepository.findAllByUserIdAndBusinessUnitCompanyId(user.get().getId(), companyDTO.id()));
+                        try {
+                            //Delete all children projects and teams of the company
+                            businessUnitRepository.deleteAll(
+                                    businessUnitMapper.toBusinessUnitEntities(
+                                            businessUnitService.findBusinessUnitsByCompany(companyDTO)));
+                        } catch (EntityNotFoundException e) {
+                            //No kids to delete
+                        }
 
                         //Delete the company
                         businessUnitService.deleteBusinessUnit(companyDTO);
@@ -371,14 +388,25 @@ public abstract class UserBusinessUnitRoleService {
                         userBURoleRepository.deleteAll(
                                 userBURoleRepository.findAllByBusinessUnitId(projectDTO.id()));
 
+                        //Delete all children invites
+                        for (UserBusinessUnitRole BUDTO : userBURoleRepository.findAllByUserIdAndBusinessUnitProjectId(user.get().getId(), projectDTO.id())) {
+                            inviteService.deleteAllInvitesByBusinessUnit(userBURoleMapper.toDTO(BUDTO).businessUnit());
+                        }
+
+                        //delete all invites for the company
+                        inviteService.deleteAllInvitesByBusinessUnit(projectDTO);
+
                         //Delete all relationships of the children teams of the project
                         userBURoleRepository.deleteAll(
                                 userBURoleRepository.findAllByUserIdAndBusinessUnitProjectId(user.get().getId(), projectDTO.id()));
-
-                        //Delete all children teams of the project
-                        businessUnitRepository.deleteAll(
-                                businessUnitMapper.toBusinessUnitEntities(
-                                        businessUnitService.findBusinessUnitsByProject(projectDTO)));
+                        try{
+                            //Delete all children teams of the project
+                            businessUnitRepository.deleteAll(
+                                    businessUnitMapper.toBusinessUnitEntities(
+                                            businessUnitService.findBusinessUnitsByProject(projectDTO)));
+                        } catch (EntityNotFoundException e) {
+                            //No kids to delete
+                        }
 
                         //Delete the project
                         businessUnitService.deleteBusinessUnit(projectDTO);

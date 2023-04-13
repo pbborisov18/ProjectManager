@@ -2,11 +2,14 @@ package com.company.projectManager.models;
 
 import com.company.projectManager.utils.InviteState;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.CascadeType;
 
 import java.util.Objects;
 
@@ -37,6 +40,7 @@ public class Invite {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "BusinessUnitsId")
+    @Cascade(CascadeType.MERGE)
     private BusinessUnit businessUnit;
 
     public Invite(Long id, InviteState state, User sender, User receiver, BusinessUnit businessUnit) {

@@ -215,6 +215,20 @@ public abstract class InviteService {
         }
     }
 
+    public void deleteAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToDeleteException {
+        try {
+            List<Invite> invites = inviteRepository.findAllByBusinessUnitId(businessUnitDTO.id());
+
+            if(invites.isEmpty()){
+                return;
+            }
+
+            inviteRepository.deleteAll(invites);
+        } catch (ConstraintViolationException | DataAccessException e){
+            throw new FailedToDeleteException("Unsuccessful delete! " + e.getMessage());
+        }
+    }
+
     public List<InviteDTOWithoutPassword> findAllInvites() throws FailedToSelectException {
         try {
             List<Invite> existingInvites = (List<Invite>) inviteRepository.findAll();

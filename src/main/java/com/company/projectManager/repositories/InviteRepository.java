@@ -11,4 +11,6 @@ public interface InviteRepository extends CrudRepository<Invite, Long>{
             "FROM Invite i " +
             "WHERE i.receiver.id = :receiverId AND i.state = 'PENDING'")
     List<Invite> findByReceiverIdAndStateNotIn(Long receiverId);
+
+    List<Invite> findAllByBusinessUnitId(Long businessUnitId);
 }
