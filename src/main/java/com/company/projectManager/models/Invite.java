@@ -16,7 +16,7 @@ import java.util.Objects;
 @Entity
 @Getter @Setter
 @NoArgsConstructor
-@Table(name = "Invites")
+@Table(name = "Invites", uniqueConstraints = {@UniqueConstraint(columnNames = {"ReceiverId", "BusinessUnitsId"})})
 public class Invite {
 
     @Id

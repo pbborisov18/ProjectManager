@@ -19,7 +19,7 @@ public class ColumnController {
     @Autowired
     ColumnService columnService;
 
-    @GetMapping(value = {"/company/columns", "/company/project/columns", "/company/project/team/columns"})
+    @PostMapping(value = {"/company/columns", "/company/project/columns", "/company/project/team/columns"})
     public ResponseEntity<Object> getAllColumnsOfWhiteboard(@RequestBody WhiteboardDTO whiteboardDTO){
         try {
             List<ColumnDTO> columns = columnService.findAllColumnsByWhiteboardIdByAuthenticatedUser(whiteboardDTO.id());

@@ -548,6 +548,9 @@ public abstract class UserBusinessUnitRoleService {
                         //Delete the relationship before the businessUnit
                         userBURoleRepository.deleteAll(userBURoleRepository.findAllByBusinessUnitId(teamDTO.id()));
 
+                        //Delete invites
+                        inviteService.deleteAllInvitesByBusinessUnit(teamDTO);
+
                         //Delete the project
                         businessUnitService.deleteBusinessUnit(teamDTO);
                     }

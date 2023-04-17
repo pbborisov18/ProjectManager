@@ -3,6 +3,7 @@ package com.company.projectManager.services;
 import com.company.projectManager.DTOs.BusinessUnitDTO;
 import com.company.projectManager.DTOs.ColumnDTO;
 import com.company.projectManager.DTOs.NoteDTO;
+import com.company.projectManager.DTOs.WhiteboardDTO;
 import com.company.projectManager.exceptions.*;
 import com.company.projectManager.mappers.NoteMapper;
 import com.company.projectManager.models.Note;
@@ -155,14 +156,14 @@ public abstract class NoteService {
     }
 
     @Transactional
-    public List<NoteDTO> findAllNotesByColumnIdByAuthenticatedUser(ColumnDTO columnDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, EntityNotFoundException {
+    public List<NoteDTO> findAllNotesByColumnIdByAuthenticatedUser(ColumnDTO columnDTO, WhiteboardDTO whiteboardDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, EntityNotFoundException {
         try {
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
             if (user.isEmpty()) {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             } else {
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), businessUnitDTO.whiteboard().id());
+                Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), whiteboardDTO.id());
 
                 if (userBusinessUnitRole.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");

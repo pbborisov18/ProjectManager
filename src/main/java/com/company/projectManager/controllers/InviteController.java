@@ -76,13 +76,37 @@ public class InviteController {
     }
 
     @PostMapping("/company/project/invite")
-    public ResponseEntity<Object> createInviteForProject(@RequestBody ProjectDTO projectDTO, @RequestBody UserWithoutPasswordDTO receiver){
-        return createInviteForBusinessUnit(projectDTO, receiver);
+    public ResponseEntity<Object> createInviteForProject(@RequestBody HashMap<String, Object> requestBody/*@RequestBody ProjectDTO projectDTO, @RequestBody UserWithoutPasswordDTO receiver*/){
+        try {
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String projectJSON = ow.writeValueAsString(requestBody.get("projectDTO"));
+            String userJSON = ow.writeValueAsString(requestBody.get("receiver"));
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            return createInviteForBusinessUnit(
+                    objectMapper.readValue(projectJSON, ProjectDTO.class),
+                    objectMapper.readValue(userJSON, UserWithoutPasswordDTO.class));
+        } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+        }
     }
 
-    @PostMapping("/company/project/team/invite")
-    public ResponseEntity<Object> createInviteForTeam(@RequestBody TeamDTO teamDTO, @RequestBody UserWithoutPasswordDTO receiver){
-        return createInviteForBusinessUnit(teamDTO, receiver);
+    //Have to fix that
+        @PostMapping("/company/project/team/invite")
+    public ResponseEntity<Object> createInviteForTeam(@RequestBody HashMap<String, Object> requestBody/*@RequestBody TeamDTO teamDTO, @RequestBody UserWithoutPasswordDTO receiver*/){
+            try {
+                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                String teamJSON = ow.writeValueAsString(requestBody.get("teamDTO"));
+                String userJSON = ow.writeValueAsString(requestBody.get("receiver"));
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                return createInviteForBusinessUnit(
+                        objectMapper.readValue(teamJSON, TeamDTO.class),
+                        objectMapper.readValue(userJSON, UserWithoutPasswordDTO.class));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
     }
 
 

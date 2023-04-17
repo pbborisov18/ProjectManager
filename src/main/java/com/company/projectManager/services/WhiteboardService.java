@@ -111,6 +111,11 @@ public abstract class WhiteboardService {
                     throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
 
                 } else {
+
+                    if(businessUnitDTO.whiteboard() == null){
+                        throw new EntityNotFoundException("Whiteboard doesn't exist");
+                    }
+
                     Optional<Whiteboard> foundWhiteboard = whiteboardRepository.findById(businessUnitDTO.whiteboard().id());
                     if (foundWhiteboard.isEmpty()) {
                         throw new EntityNotFoundException("Whiteboard doesn't exist");

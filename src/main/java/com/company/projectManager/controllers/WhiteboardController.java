@@ -22,7 +22,7 @@ public class WhiteboardController {
     @Autowired
     NoteService noteService;
 
-    @GetMapping(value = {"/company/whiteboard","/company/project/whiteboard", "/company/project/team/whiteboard"})
+    @PostMapping(value = {"/company/whiteboard","/company/project/whiteboard", "/company/project/team/whiteboard"})
     public ResponseEntity<Object> getWhiteboardOfCompany(@RequestBody BusinessUnitDTO businessUnitDTO) {
         try {
 
@@ -36,13 +36,11 @@ public class WhiteboardController {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityNotFoundException e){
             //if it isn't send a request back asking to redirect to */createWhiteboard
-            return new ResponseEntity<>("Redirect", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Redirect", HttpStatus.NO_CONTENT);
         }
-
-
     }
 
-    @PostMapping(value = {"/company/createWhiteboard", "/company/project/createWhiteboard", "/company/project/createWhiteboard"})
+    @PostMapping(value = {"/company/createWhiteboard", "/company/project/createWhiteboard", "/company/project/team/createWhiteboard"})
     public ResponseEntity<Object> createWhiteboard(@RequestBody Map<String, Object> requestBody/*Waiting for these 2 objects - WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO*/){
         try {
             whiteboardService.createWhiteboardWithAuthenticatedUser((WhiteboardDTO) requestBody.get("whiteboardDTO"), (BusinessUnitDTO) requestBody.get("businessUnitDTO"));
@@ -63,7 +61,7 @@ public class WhiteboardController {
         }
     }
 
-    @DeleteMapping(value = {"/company/deleteWhiteboard", "/company/project/deleteWhiteboard", "/company/project/deleteWhiteboard"})
+    @DeleteMapping(value = {"/company/deleteWhiteboard", "/company/project/deleteWhiteboard", "/company/project/team/deleteWhiteboard"})
     public ResponseEntity<Object> deleteWhiteboard(@RequestBody Map<String, Object> requestBody/*Waiting for these 2 objects - WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO*/){
         try {
             whiteboardService.deleteWhiteboardWithAuthenticatedUser((WhiteboardDTO) requestBody.get("whiteboardDTO"), (BusinessUnitDTO) requestBody.get("businessUnitDTO"));

@@ -14,7 +14,7 @@ import java.util.Objects;
 @Entity
 @Setter
 @NoArgsConstructor
-@Table(name = "Columns")
+@Table(name = "Columns", uniqueConstraints = {@UniqueConstraint(columnNames = {"WhiteboardsId", "Position"})})
 public class Column {
 
     @Id

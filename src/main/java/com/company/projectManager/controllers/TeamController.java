@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,17 +23,11 @@ public class TeamController {
             List<UserBusinessUnitRoleDTO> userBusinessUnitRoleDTOs =
                     userBusinessUnitRoleService.findAllTeamsByAuthenticatedUserAndProject(projectDTO);
 
-            List<TeamDTO> teams = new ArrayList<>();
-
-            for (UserBusinessUnitRoleDTO userBusinessUnitRoleDTO : userBusinessUnitRoleDTOs){
-                teams.add((TeamDTO) userBusinessUnitRoleDTO.businessUnit());
+            if(userBusinessUnitRoleDTOs.isEmpty()){
+                return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.NO_CONTENT);
             }
 
-            if(teams.isEmpty()){
-                return new ResponseEntity<>(teams, HttpStatus.NO_CONTENT);
-            }
-
-            return new ResponseEntity<>(teams, HttpStatus.OK);
+            return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.OK);
 
         } catch (UserUnauthenticatedException e) {
             //Returns 401 which means unauthenticated (not logged in)
