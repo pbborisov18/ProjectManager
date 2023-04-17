@@ -129,6 +129,7 @@ public abstract class WhiteboardService {
         }
     }
 
+    @Transactional
     public void createWhiteboardWithAuthenticatedUser(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException {
         try {
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -150,8 +151,10 @@ public abstract class WhiteboardService {
                     //Save the business unit (in the process saving the whiteboard)
                     usersBusinessUnitsRolesRepository.save(userBusinessUnitRole.get());
 
+                    WhiteboardDTO whiteboardWithId = new WhiteboardDTO(userBusinessUnitRole.get().getBusinessUnit().getWhiteboard().getId(), whiteboardDTO.name());
+
                     //Initialize the default columns
-                    columnService.initializeDefaultColumns(whiteboardMapper.toEntity(whiteboardDTO));
+                    columnService.initializeDefaultColumns(whiteboardMapper.toEntity(whiteboardWithId));
                 }
             }
         } catch (ConstraintViolationException | DataAccessException e) {

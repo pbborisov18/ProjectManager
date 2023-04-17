@@ -251,10 +251,10 @@ public abstract class ColumnService {
 
     public void initializeDefaultColumns(Whiteboard whiteboard) throws FailedToSaveException {
         try {
-            Column column1 = new Column(null, "To do", whiteboard);
-            Column column2 = new Column(null, "Doing", whiteboard);
-            Column column3 = new Column(null, "Testing", whiteboard);
-            Column column4 = new Column(null, "Done", whiteboard);
+            Column column1 = new Column(null, "To do", whiteboard, 1);
+            Column column2 = new Column(null, "Doing", whiteboard, 2);
+            Column column3 = new Column(null, "Testing", whiteboard, 3);
+            Column column4 = new Column(null, "Done", whiteboard, 4);
 
             columnRepository.saveAll(List.of(column1, column2, column3, column4));
 

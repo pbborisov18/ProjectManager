@@ -6,6 +6,9 @@ import com.company.projectManager.exceptions.*;
 import com.company.projectManager.services.NoteService;
 import com.company.projectManager.services.WhiteboardService;
 import com.company.projectManager.exceptions.EntityNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,10 +43,19 @@ public class WhiteboardController {
         }
     }
 
+    //Fix this
     @PostMapping(value = {"/company/createWhiteboard", "/company/project/createWhiteboard", "/company/project/team/createWhiteboard"})
     public ResponseEntity<Object> createWhiteboard(@RequestBody Map<String, Object> requestBody/*Waiting for these 2 objects - WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO*/){
         try {
-            whiteboardService.createWhiteboardWithAuthenticatedUser((WhiteboardDTO) requestBody.get("whiteboardDTO"), (BusinessUnitDTO) requestBody.get("businessUnitDTO"));
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String whiteboardJSON = ow.writeValueAsString(requestBody.get("whiteboardDTO"));
+            String buJSON = ow.writeValueAsString(requestBody.get("businessUnitDTO"));
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            whiteboardService.createWhiteboardWithAuthenticatedUser(
+                    objectMapper.readValue(whiteboardJSON, WhiteboardDTO.class),
+                    objectMapper.readValue(buJSON, BusinessUnitDTO.class));
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (FailedToSaveException e) {
@@ -56,11 +68,12 @@ public class WhiteboardController {
             //Returns 403 which means unauthorized (no permission)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (ClassCastException e){
+        } catch (ClassCastException | JsonProcessingException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
+    //Fix this
     @DeleteMapping(value = {"/company/deleteWhiteboard", "/company/project/deleteWhiteboard", "/company/project/team/deleteWhiteboard"})
     public ResponseEntity<Object> deleteWhiteboard(@RequestBody Map<String, Object> requestBody/*Waiting for these 2 objects - WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO*/){
         try {

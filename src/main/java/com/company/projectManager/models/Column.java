@@ -34,10 +34,11 @@ public class Column {
     @NotNull
     private int position;
 
-    public Column(Long id, String name, Whiteboard whiteboard) {
+    public Column(Long id, String name, Whiteboard whiteboard, int position) {
         this.id = id;
         this.name = name;
         this.whiteboard = whiteboard;
+        this.position = position;
     }
 
     @Override
