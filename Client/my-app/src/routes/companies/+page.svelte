@@ -1,0 +1,211 @@
+<script>
+    import Header from "$lib/components/Header.svelte";
+    import {goto, afterNavigate} from "$app/navigation";
+    import CompanyComponent from "$lib/components/CompanyComponent.svelte";
+    import {Button, Input, Label, Modal} from "flowbite-svelte";
+    import loadingGif from "$lib/images/loading.gif";
+    import plusIcon from "$lib/images/plus.png";
+
+    export let data;
+    export let error;
+
+    let user;
+    let BURoles;
+
+    if(data.userBURoles){
+        user = data.userBURoles[0].user;
+        BURoles = data.userBURoles.map(({ businessUnit, role }) => ({ businessUnit, role }));
+    } else if(data.user){
+        user = data.user;
+    }
+
+    function handleBUDestroy(BURole) {
+        BURoles = BURoles.filter(deleteThis => deleteThis !== BURole);
+        getCompanies();
+    }
+
+    afterNavigate(() => {
+        if(data.error === 401){
+            goto("/login");
+        }
+    })
+
+    let createPopup = false;
+    let value;
+
+    function createCompany(){
+        let company = {id: null,
+            name: value,
+            type: {
+                id: 1,
+                name:"COMPANY"
+            },
+            whiteboard: null};
+
+        fetch('http://localhost:8080/createCompany', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(company),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 201) {
+                getCompanies();
+            } else if(response.status === 400){
+                response.text().then(text => {
+                    throw new Error(text);
+                })
+            } else if(response.status === 401){
+                response.text().then(text => {
+                    throw new Error(text);
+                });
+                goto("/login");
+            } else if(response.status === 500){
+                response.text().then(text => {
+                    throw new Error(text);
+                });
+            }
+        }).catch(error => {
+            console.error(error);
+        });
+
+    }
+
+    function getCompanies(){
+        fetch('http://localhost:8080/companies', {
+            method: 'GET',
+            headers: {
+                'Content-Type': "application/json",
+            },
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 200) {
+                response.json().then( value =>{
+                    BURoles = value.map(({ businessUnit, role }) => ({ businessUnit, role }));
+                    data.error = 200;
+                });
+            } else if(response.status === 400){
+                response.text().then(text => {
+                    throw new Error(text);
+                })
+            } else if(response.status === 401){
+                response.text().then(text => {
+                    throw new Error(text);
+                });
+                goto("/login");
+            } else if(response.status === 500){
+                response.text().then(text => {
+                    throw new Error(text);
+                });
+            }
+        }).catch(error => {
+            console.error(error);
+        });
+    }
+
+</script>
+
+
+
+{#await data.userBURoles}
+    <img src="{loadingGif}" alt="">
+{:then userBURoles}
+
+    {#if data.error === 204}
+        <Header/>
+        <div class="addCompany">
+            <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
+        </div>
+        <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
+            <h1>Не си част от никакви компании.</h1>
+            <h1>Изчакай да те поканят или си направи своя като натиснеш тук.</h1>
+        </div>
+    {:else if data.error === 500}
+        <!--nikva ideq tuka-->
+        <Header />
+        <p>Internal server error!</p>
+    {:else if data.error === 401}
+        <!--wait for the page to load and then it will redirect-->
+    {:else if BURoles.length === 0}
+        <h1>akita</h1>
+        <Header />
+        <div class="addCompany">
+            <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
+        </div>
+        <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
+            <h1>Не си част от никакви компании.</h1>
+            <h1>Изчакай да те поканят или си направи своя като натиснеш тук.</h1>
+        </div>
+    {:else}
+        <!--tva e usual stranicata (trq sa uprai)-->
+        <Header/>
+        <div class="addCompany">
+            <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
+        </div>
+
+        <div class="mainDiv">
+            {#each BURoles as BURole}
+                    <CompanyComponent BURole={BURole}  onDestroy={() => handleBUDestroy(BURole)} />
+            {/each}
+        </div>
+    {/if}
+
+{/await}
+
+<Modal title="Създаване на компания " bind:open={createPopup} size="XL" autoclose>
+    <form>
+        <div class="grid gap-6 mb-6 md:grid-cols-1">
+            <div>
+                <Label for="companyName" class="mb-2">Име на компанията</Label>
+                <Input type="text" id="companyName" required>
+                    <input type="text" bind:value />
+                </Input>
+            </div>
+            <Button type="stu" on:click={createCompany}>Създаване</Button>
+        </div>
+    </form>
+</Modal>
+
+
+<style lang="scss">
+    .mainDiv{
+        border-radius: 2px;
+        background-color: #F8F8F8;
+        width: 97vw;
+        margin-top: 1vh;
+        margin-left: 1.5vw;
+        height: 85vh;
+        border: 0 solid #BBBBBB;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: sans-serif;
+        font-weight: lighter;
+        box-shadow: 0px 0px 1px 1px #BBBBBB;
+
+    }
+
+    img{
+        width: 3vh;
+    }
+
+    .clickable {
+        cursor: pointer;
+    }
+
+    .not-selectable {
+        -webkit-user-select: none; /* Chrome, Safari, Opera */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE 10+ */
+        user-select: none; /* Standard syntax */
+    }
+
+    .addCompany{
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        margin-right: 1.5vw;
+        margin-top: 1vh;
+    }
+</style>
