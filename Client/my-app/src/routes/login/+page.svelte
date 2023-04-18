@@ -3,11 +3,10 @@
     import Cookies from 'js-cookie';
     import Header from "$lib/components/Header.svelte";
     import {userEmail, loggedIn} from "$lib/stores.js";
-    import agileProLogo from "$lib/images/AlignLogo.png";
 
     let errorText;
 
-    import { useForm, Hint, HintGroup, validators, required, minLength, email } from "svelte-use-form";
+    import { useForm, Hint, HintGroup, validators, required, email } from "svelte-use-form";
 
     const form = useForm();
 
@@ -63,19 +62,14 @@
 
 <Header />
 <main>
-    <div class="logo">
-        <img src="{agileProLogo}" alt="logo" draggable="false">
-        <h2 class="not-selectable">AgileAce</h2>
-    </div>
     <div class="loginPanel">
-        <h2 class="not-selectable">Влизане</h2>
         {#if (errorText) }
             <p class="error">{errorText}</p>
         {/if}
         <form use:form>
             <HintGroup for="email">
                 <Hint on="required">{requiredMessage}</Hint>
-                <Hint on="email" hideWhenRequired>Трябва да е валиден имейл</Hint>
+                    <Hint on="email" hideWhenRequired>Трябва да е валиден имейл</Hint>
             </HintGroup>
             <label>
                 <input type="text" name="email" placeholder="Имейл" use:validators={[required, email]}/>
@@ -85,21 +79,23 @@
             </label>
             <button disabled={!$form.valid} on:click|preventDefault={login}>Влизане</button>
         </form>
-        <h3 class="not-selectable clickable" on:click={goToRegisterPage}>Нямате акаунт?</h3>
+            <h3 class="not-selectable clickable" on:click={goToRegisterPage}>Нямате акаунт?</h3>
     </div>
 </main>
 
 <style lang="scss">
   :root{
     background-color: #F8F8F8;
+      overflow: hidden;
   }
 
   main {
-    height: 80vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
   }
 
   .clickable{
@@ -131,9 +127,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-family: sans-serif;
+    font-family: Bahnschrift, monospace;
     font-weight: lighter;
     box-shadow: 0px 0px 1px 1px #BBBBBB;
+    height: 270px;
+    transform: translateY(-50px);
 
       h3{
           margin-bottom: 1vh;
@@ -152,7 +150,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 20px 20px;
+    padding: 40px 20px 20px;
     font-weight: lighter;
 
     input {
