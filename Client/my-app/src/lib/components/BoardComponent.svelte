@@ -45,19 +45,30 @@
     .board {
         height: 85vh;
         width: 100%;
+
         padding: 0.5em;
         margin-left: 2.5vw;
+
         display: flex;
         flex-wrap: wrap;
         max-width: 95vw;
+
+
+
+        background-color: red;
     }
     .column {
+        background-color: orange;
         height: 100%;
         padding: 0.5em;
-        margin: 0.5em;
-        flex-grow: 1;
+        margin: 10px;
+
+        flex-grow: 2;
+
         border: 1px solid #333333;
         max-width: 25%;
+        overflow-x: hidden;
+        justify-content: space-between;
     }
 
 </style>

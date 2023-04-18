@@ -9,7 +9,6 @@
     } from 'flowbite-svelte'
     import AgileAceLogo from "$lib/images/AlignLogo.png";
     import inviteIcon from "$lib/images/invite.png";
-    export let bgColor = "#BBBBBB";
     export let homePage = false;
 
     function redirectToHomepage() {
@@ -58,7 +57,7 @@
 
 </script>
 
-<header style="background-color: {bgColor}">
+<header>
     <img class="not-selectable clickable" src="{AgileAceLogo}" alt="logo" on:click={redirectToHomepage} draggable="false">
     <span class="not-selectable clickable" on:click={redirectToHomepage}>AgileAce</span>
 
@@ -96,7 +95,11 @@
         font-family: sans-serif;
         display: flex;
         align-items: center;
-        box-shadow: 0px 0px 10px -1px #BBBBBB;
+        box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 1px;
+        //box-shadow: 0px 0px 10px 1px #eae9ea;
+        background-color: #eae9ea;
+
+
     }
 
     img {
@@ -106,7 +109,6 @@
 
 
     span {
-        color: white;
         font-family: Bahnschrift, monospace;
     }
 

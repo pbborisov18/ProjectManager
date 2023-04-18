@@ -188,7 +188,7 @@
                     editPopup = true;
                  }}
                  on:mouseenter={handleHover(item)} on:mouseleave={handleHoverEnd}>
-                <Card>
+                <Card tag="parent">
                     <div class="parent">
                         <h5 class="card mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{item.name}</h5>
                         {#if hoveredItem === item}
@@ -198,8 +198,8 @@
                             }}/>
                         {/if}
                     </div>
-                    <hr>
-                    <p class="card font-normal text-gray-700 dark:text-gray-400 leading-tight">{item.description}</p>
+                        <hr>
+                        <p class="card font-normal text-gray-700 dark:text-gray-400 leading-tight">{item.description}</p>
 
                 </Card>
             </div>
@@ -232,17 +232,21 @@
 </Modal>
 
 <style>
+
     .wrapper {
         height: 100%;
         width: 100%;
         /*Notice we make sure this container doesn't scroll so that the title stays on top and the dndzone inside is scrollable*/
         overflow-y: hidden;
     }
+
     .column-content {
         height: calc(100% - 2.5em);
         /* Notice that the scroll container needs to be the dndzone if you want dragging near the edge to trigger scrolling */
         overflow-y: auto;
+        background-color: blue;
     }
+
     .column-title {
         height: 2.5em;
         font-weight: bold;
@@ -250,6 +254,7 @@
         justify-content: center;
         align-items: center;
     }
+
     .card{
         overflow: hidden;
         overflow-y: auto;
@@ -260,12 +265,14 @@
         height: 50px;
         width: 50px;
     }
+
     .close-button{
         position: absolute;
         top: 0;
         right: 0;
         z-index: 1;
     }
+
     .parent{
         display: flex;
         flex-direction: row;

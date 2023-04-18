@@ -319,8 +319,8 @@
         <Breadcrumb >
             <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
         </Breadcrumb>
-        <div class="addNote">
-            <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
+        <div class="addNote clickable" on:click={() => createPopup = true}>
+            <img class="clickable not-selectable noteAdd" src="{plusIcon}" alt="" draggable="false" />
         </div>
     </div>
     {#if items}
@@ -349,9 +349,33 @@
 <style lang="scss">
 
     .lowerMenuDiv{
-        display: flex;
-        flex-direction: row;
+        //display: flex;
+        //flex-direction: row;
     }
+
+    .noteAdd{
+        position: relative;
+        //background-color:orange;
+        margin-left: 0.45vw;
+    }
+
+    .addNote{
+        //background-color: #dcdcdc;
+        height: 60vh;
+        width: 50px;
+        position: absolute;
+        z-index: 2;
+        margin-top: 2vh;
+        margin-left: 0.2vw;
+        top: 50%;
+        //left: 50%;
+        transform: translate(0%, -50%);
+        display: inline-flex;
+        align-items: center;
+        vertical-align: center;
+        border: 2px solid #BBBBBB;
+    }
+
     .clickable {
         cursor: pointer;
     }
@@ -368,6 +392,7 @@
         margin-right: 1.5vw;
         margin-top: 1vh;
     }
+
 
     img{
         width: 30px;
