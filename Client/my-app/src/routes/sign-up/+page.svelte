@@ -2,7 +2,6 @@
     import {goto} from "$app/navigation";
     import Header from "$lib/components/Header.svelte";
     import {userEmail, loggedIn} from "$lib/stores.js";
-    import agileProLogo from "$lib/images/AlignLogo.png";
 
 
     import { useForm, Hint, HintGroup, validators, required, minLength, email } from "svelte-use-form";
@@ -80,12 +79,7 @@
 <Header />
 
 <main>
-    <div class="logo">
-        <img src="{agileProLogo}" alt="logo" draggable="false">
-        <h2 class="not-selectable">AgileAce</h2>
-    </div>
     <div class="registerPanel">
-        <h2 class="not-selectable">Регистрация</h2>
         <form use:form>
             <HintGroup for="email">
                 <Hint on="required">{requiredMessage}</Hint>
@@ -124,6 +118,7 @@
 <style lang="scss">
   :root{
     background-color: #F8F8F8;
+      overflow: hidden;
   }
 
   .clickable{
@@ -131,11 +126,12 @@
   }
 
   main {
-    height: 80vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
   }
 
   .logo {
@@ -166,6 +162,8 @@
     font-family: sans-serif;
     font-weight: lighter;
     box-shadow: 0px 0px 1px 1px #BBBBBB;
+      height: 400px;
+      transform: translateY(-50px);
 
       h3{
           margin-bottom: 1vh;
@@ -185,7 +183,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 20px 20px;
+    padding: 50px 20px 20px;
     font-weight: lighter;
 
     input {
