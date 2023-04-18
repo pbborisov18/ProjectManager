@@ -10,7 +10,7 @@
     import editIcon from "$lib/images/edit.png";
     import inviteToCompanyIcon from "$lib/images/invitation.png";
 
-    let value;
+
 
     let leavePopup = false;
     let deletePopup = false;
@@ -20,6 +20,7 @@
     export let onDestroy;
     export let BURole;
 
+    let BUEditName = BURole.businessUnit.name;
 
     function leaveBU(){
         fetch('http://localhost:8080/leaveCompany', {
@@ -98,12 +99,12 @@
     }
 
     function editBU(){
-        if(!value){
+        if(!BUEditName){
             alert("Полето не може да е празно!");
         }else {
             let updatedBURole = {
                 ...BURole.businessUnit,
-                name: value
+                name: BUEditName
             };
             fetch('http://localhost:8080/updateCompany', {
                 method: 'PUT',
@@ -193,26 +194,33 @@
         <!--the manager stuff here-->
 
         <span on:click={redirectToProjects}>{BURole.businessUnit.name}</span>
+
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
         <div class="imageDivs">
             <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" on:click={redirectToWhiteboard}>
         </div>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
         <div class="imageDivs">
             <img class="clickable not-selectable" src="{editIcon}" alt="" draggable="false" on:click={() => editPopup = true}>
         </div>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
         <div class="imageDivs">
             <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" on:click={() => leavePopup = true}>
         </div>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
         <div class="imageDivs">
-            <img class="clickable not-selectable" src="{deleteIcon}" alt="" draggable="false" on:click={() => deletePopup = true}>
+            <img class="clickable not-selectable xImage" src="{deleteIcon}" alt="" draggable="false" on:click={() => deletePopup = true}>
         </div>
     {:else if BURole.role.name === "EMPLOYEE"}
         <!--the employee stuff here-->
         <span on:click={redirectToProjects}>{BURole.businessUnit.name}</span>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
         <div class="imageDivs">
         <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" on:click={redirectToWhiteboard}>
         </div>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
         <div class="imageDivs">
-            <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" on:click={() => leavePopup = true}>
+            <img class="clickable not-selectable xImage" src="{leaveIcon}" alt="" draggable="false" on:click={() => leavePopup = true}>
         </div>
     {/if}
 </div>
@@ -235,18 +243,21 @@
     </div>
 </Modal>
 
-<Modal title="Редактрине на компанията" bind:open={editPopup} size="XL" autoclose>
-    <div class="grid gap-6 mb-6 md:grid-cols-1">
+<Modal title="Редактиране на компанията" bind:open={editPopup} size="XL" autoclose>
+        <div class="bodyPopup">
         <div>
             <Label for="companyName" class="mb-2">Име на компанията</Label>
             <Input type="text" id="companyName" required >
-                <input type="text" placeholder="{BURole.businessUnit.name}" bind:value required/>
+                <input class="text-black inputName" type="text" bind:value={BUEditName} required/>
             </Input>
-            <div>
-                <img class="clickable not-selectable" src="{inviteToCompanyIcon}" alt="" draggable="false" on:click={() => inviteToCompanyPopup = true}>
-            </div>
+            <!--            <div>-->
+            <!--                <img class="clickable not-selectable" src="{inviteToCompanyIcon}" alt="" draggable="false" on:click={() => inviteToCompanyPopup = true}>-->
+            <!--            </div>-->
         </div>
-        <Button type="submit" on:click={editBU}>Редактиране</Button>
+        <div>
+            <Button class="buttonDiv" on:click={() => inviteToCompanyPopup = true}>Покани</Button>
+            <Button type="submit" on:click={editBU}>Редактиране</Button>
+        </div>
     </div>
 </Modal>
 
@@ -271,15 +282,16 @@
 
 
   .BUwindow {
-      background-color: rgba(104, 153, 168, 0.99);
-      margin-top: 1vh;
+      //background-color: rgba(104, 153, 168, 0.99);
+      background-color: #e7e7e7;
+
       width: 97vw;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       align-items: center; /* align items vertically */
-      border: 0 solid #5A4A42;
-      box-shadow: 0px 0px 1px 1px rgba(139, 224, 250, 0.99);
+      border: 1px solid #BBBBBB;
+      min-height: 8vh;
 
 
       span {
@@ -289,9 +301,12 @@
           overflow: hidden; /* hide overflow */
           text-overflow: ellipsis; /* show ellipsis for truncated text */
           font-family: Bahnschrift, monospace;
-          //background-color: red;
           height: 100%;
+          font-size: 35px;
+          display: inline-flex;
+          align-items: center;
           vertical-align: middle;
+          padding-left: 1.5vw;
       }
 
       .imageDivs {
@@ -299,16 +314,26 @@
           flex-grow: 0;
           max-width: 20%;
           min-width: 5%;
+          //max-height: 100%;
           height: 100%;
           display: flex;
           justify-content: center;
           align-items: center;
+          //background-color: #e7e7e7;
+          //background-color: red;
+          //border: 1px solid black;
       }
 
       img {
-          max-width: 50px;
-          max-height: 50px;
+          max-width: 40px;
+          max-height: 40px;
       }
+
+      .xImage{
+          max-width: 35px;
+          max-height: 35px;
+      }
+
   }
 
   .clickable {
@@ -322,12 +347,18 @@
     user-select: none; /* Standard syntax */
   }
 
-  //.addBU{
-  //    display: flex;
-  //    flex-direction: row;
-  //    justify-content: flex-end;
-  //    margin-right: 1.5vw;
-  //    margin-top: 1vh;
-  //}
+  .bodyPopup{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+  }
+
+  .inputName{
+      margin-bottom: 3vh;
+  }
+
+  .buttonDiv{
+      margin-right: 5vw;
+  }
 
 </style>
