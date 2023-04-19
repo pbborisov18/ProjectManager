@@ -16,6 +16,7 @@ import com.company.projectManager.repositories.UserRepository;
 import com.company.projectManager.repositories.UsersBusinessUnitsRolesRepository;
 import com.company.projectManager.utils.InviteState;
 import com.company.projectManager.utils.RoleName;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -42,6 +43,7 @@ public abstract class InviteService {
     UsersBusinessUnitsRolesRepository userBURoleRepository;
 
 
+    @Transactional
     public void saveInvite(InviteDTOWithoutPassword inviteDTOWithoutPassword) throws InvalidInvitationException, FailedToSaveException {
         try {
             if(inviteDTOWithoutPassword.sender().equals(inviteDTOWithoutPassword.receiver())){
@@ -70,6 +72,7 @@ public abstract class InviteService {
         }
     }
 
+    @Transactional
     public void updateInviteByAuthenticatedUser(InviteDTOWithoutPassword inviteDTOWithoutPassword) throws InvalidInvitationException, UserNotAuthorizedException, FailedToUpdateException, FailedToSelectException, UserUnauthenticatedException {
         try {
             Optional<User> loggedInUser = userRepository.findUserByEmail(
@@ -124,6 +127,7 @@ public abstract class InviteService {
         }
     }
 
+    @Transactional
     public void deleteInvite(InviteDTOWithoutPassword inviteDTOWithoutPassword) throws FailedToSelectException, FailedToDeleteException {
         try{
             Optional<Invite> existingInvite = inviteRepository.findById(inviteDTOWithoutPassword.id());
@@ -139,6 +143,7 @@ public abstract class InviteService {
         }
     }
 
+    @Transactional
     public InviteDTOWithoutPassword findInviteById(Long id) throws FailedToSelectException {
         try {
             Optional<Invite> existingInvite = inviteRepository.findById(id);
@@ -154,6 +159,7 @@ public abstract class InviteService {
         }
     }
 
+    @Transactional
     public List<InviteDTOWithoutPassword> findInvitesByReceiverId(Long id) throws FailedToSelectException, EntityNotFoundException {
         try {
             List<Invite> existingInvites = inviteRepository.findByReceiverIdAndStateNotIn(id);
@@ -169,6 +175,7 @@ public abstract class InviteService {
         }
     }
 
+    @Transactional
     public List<InviteDTOWithoutPassword> findInvitesByAuthenticatedReceiverId() throws FailedToSelectException, UserUnauthenticatedException, EntityNotFoundException {
         try {
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -184,6 +191,7 @@ public abstract class InviteService {
         }
     }
 
+    @Transactional
     public void createInviteByAuthenticatedUser(BusinessUnitDTO businessUnitDTO, UserWithoutPasswordDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, InvalidInvitationException, FailedToSaveException {
         try {
             Optional<User> sender = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -215,6 +223,7 @@ public abstract class InviteService {
         }
     }
 
+    @Transactional
     public void deleteAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToDeleteException {
         try {
             List<Invite> invites = inviteRepository.findAllByBusinessUnitId(businessUnitDTO.id());
@@ -229,6 +238,7 @@ public abstract class InviteService {
         }
     }
 
+    @Transactional
     public List<InviteDTOWithoutPassword> findAllInvites() throws FailedToSelectException {
         try {
             List<Invite> existingInvites = (List<Invite>) inviteRepository.findAll();

@@ -249,6 +249,7 @@ public abstract class ColumnService {
 //        }
 //    }
 
+    @Transactional
     public void initializeDefaultColumns(Whiteboard whiteboard) throws FailedToSaveException {
         try {
             Column column1 = new Column(null, "To do", whiteboard, 1);
