@@ -8,7 +8,7 @@
     import leaveIcon from "$lib/images/leave.png";
     import deleteIcon from "$lib/images/delete.png";
     import editIcon from "$lib/images/edit.png";
-    import inviteToCompanyIcon from "$lib/images/invitation.png";
+    import inviteToCompanyIcon from "$lib/images/invite.png";
 
 
 
@@ -245,17 +245,19 @@
 
 <Modal title="Редактиране на компанията" bind:open={editPopup} size="XL" autoclose>
         <div class="bodyPopup">
-        <div>
-            <Label for="companyName" class="mb-2">Име на компанията</Label>
-            <Input type="text" id="companyName" required >
-                <input class="text-black inputName" type="text" bind:value={BUEditName} required/>
-            </Input>
-            <!--            <div>-->
-            <!--                <img class="clickable not-selectable" src="{inviteToCompanyIcon}" alt="" draggable="false" on:click={() => inviteToCompanyPopup = true}>-->
-            <!--            </div>-->
+
+        <div class="editDiv">
+            <div class="companyNameLabel">
+                <Label for="companyName" class="mb-2">Име на компанията</Label>
+                <Input type="text" id="companyName" required >
+                    <input class="text-black inputName" type="text" bind:value={BUEditName} required/>
+                </Input>
+            </div>
+
+            <img class="inviteImg clickable not-selectable" src="{inviteToCompanyIcon}" alt="" draggable="false" on:click={() => inviteToCompanyPopup = true}>
+
         </div>
         <div>
-            <Button class="buttonDiv" on:click={() => inviteToCompanyPopup = true}>Покани</Button>
             <Button type="submit" on:click={editBU}>Редактиране</Button>
         </div>
     </div>
@@ -357,8 +359,21 @@
       margin-bottom: 3vh;
   }
 
-  .buttonDiv{
-      margin-right: 5vw;
+  .editDiv{
+      display: flex;
+      flex-direction: row;
+  }
+
+  .inviteImg{
+      height: 40px;
+      width: 40px;
+      margin-left: 1.5vw;
+      margin-top: 3vh;
+  }
+
+  .companyNameLabel{
+      display: flex;
+        flex-direction: column
   }
 
 </style>

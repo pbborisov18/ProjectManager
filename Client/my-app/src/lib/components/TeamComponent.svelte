@@ -184,16 +184,33 @@
         <!--the manager stuff here-->
 
         <span on:click={redirectToWhiteboard}>{BURole.businessUnit.name}</span>
-        <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" on:click={redirectToWhiteboard}>
-        <img class="clickable not-selectable" src="{editIcon}" alt="" draggable="false" on:click={() => editPopup = true}>
-        <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" on:click={() => leavePopup = true}>
-        <img class="clickable not-selectable" src="{deleteIcon}" alt="" draggable="false" on:click={() => deletePopup = true}>
-
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+        <div class="imageDivs">
+            <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" on:click={redirectToWhiteboard}>
+        </div>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+        <div class="imageDivs">
+            <img class="clickable not-selectable" src="{editIcon}" alt="" draggable="false" on:click={() => editPopup = true}>
+        </div>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+        <div class="imageDivs">
+            <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" on:click={() => leavePopup = true}>
+        </div>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+        <div class="imageDivs">
+            <img class="clickable not-selectable xImage" src="{deleteIcon}" alt="" draggable="false" on:click={() => deletePopup = true}>
+        </div>
     {:else if BURole.role.name === "EMPLOYEE"}
         <!--the employee stuff here-->
         <span>{BURole.businessUnit.name}</span>
-        <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" on:click={redirectToWhiteboard}>
-        <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" on:click={() => leavePopup = true}>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+        <div class="imageDivs">
+            <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" on:click={redirectToWhiteboard}>
+        </div>
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+        <div class="imageDivs">
+            <img class="clickable not-selectable xImage" src="{leaveIcon}" alt="" draggable="false" on:click={() => leavePopup = true}>
+        </div>
     {/if}
 </div>
 
@@ -244,27 +261,65 @@
     </form>
 </Modal>
 
-
 <style lang="scss">
     :root{
         background-color: #F8F8F8;
     }
 
-    .BUwindow{
-        background-color: orange;
+
+    .BUwindow {
+        //background-color: rgba(104, 153, 168, 0.99);
+        background-color: #e7e7e7;
+
         width: 97vw;
         display: flex;
         flex-direction: row;
-    }
+        justify-content: space-between;
+        align-items: center; /* align items vertically */
+        border: 1px solid #BBBBBB;
+        min-height: 8vh;
 
-    img {
-        width: 50px;
-    }
 
-    span {
-        text-transform: capitalize;
-        font-family: Bahnschrift, monospace;
-        background-color: red;
+        span {
+            flex-basis: 65%;
+            flex-grow: 1;
+            white-space: nowrap; /* prevent text from wrapping */
+            overflow: hidden; /* hide overflow */
+            text-overflow: ellipsis; /* show ellipsis for truncated text */
+            font-family: Bahnschrift, monospace;
+            height: 100%;
+            font-size: 35px;
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+            padding-left: 1.5vw;
+        }
+
+        .imageDivs {
+            flex-basis: calc((100% - 65%) / 4);
+            flex-grow: 0;
+            max-width: 20%;
+            min-width: 5%;
+            //max-height: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            //background-color: #e7e7e7;
+            //background-color: red;
+            //border: 1px solid black;
+        }
+
+        img {
+            max-width: 40px;
+            max-height: 40px;
+        }
+
+        .xImage{
+            max-width: 35px;
+            max-height: 35px;
+        }
+
     }
 
     .clickable {
@@ -278,12 +333,74 @@
         user-select: none; /* Standard syntax */
     }
 
-    .addBU{
+    .bodyPopup{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .inputName{
+        margin-bottom: 3vh;
+    }
+
+    .editDiv{
         display: flex;
         flex-direction: row;
-        justify-content: flex-end;
-        margin-right: 1.5vw;
-        margin-top: 1vh;
+    }
+
+    .inviteImg{
+        height: 40px;
+        width: 40px;
+        margin-left: 1.5vw;
+        margin-top: 3vh;
+    }
+
+    .projectNameLabel{
+        display: flex;
+        flex-direction: column
     }
 
 </style>
+
+<!--<style lang="scss">-->
+<!--    :root{-->
+<!--        background-color: #F8F8F8;-->
+<!--    }-->
+
+<!--    .BUwindow{-->
+<!--        background-color: orange;-->
+<!--        width: 97vw;-->
+<!--        display: flex;-->
+<!--        flex-direction: row;-->
+<!--    }-->
+
+<!--    img {-->
+<!--        width: 50px;-->
+<!--    }-->
+
+<!--    span {-->
+<!--        text-transform: capitalize;-->
+<!--        font-family: Bahnschrift, monospace;-->
+<!--        background-color: red;-->
+<!--    }-->
+
+<!--    .clickable {-->
+<!--        cursor: pointer;-->
+<!--    }-->
+
+<!--    .not-selectable {-->
+<!--        -webkit-user-select: none; /* Chrome, Safari, Opera */-->
+<!--        -moz-user-select: none; /* Firefox */-->
+<!--        -ms-user-select: none; /* IE 10+ */-->
+<!--        user-select: none; /* Standard syntax */-->
+<!--    }-->
+
+<!--    .addBU{-->
+<!--        display: flex;-->
+<!--        flex-direction: row;-->
+<!--        justify-content: flex-end;-->
+<!--        margin-right: 1.5vw;-->
+<!--        margin-top: 1vh;-->
+<!--    }-->
+
+<!--</style>-->

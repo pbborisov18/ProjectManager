@@ -43,30 +43,37 @@
 
 <style>
     .board {
-        height: 85vh;
+        /*height: 90vh;
         width: 100%;
+        padding: 0.5em;*/
+
+
+        height: 85vh;
+        width: 90%;
 
         padding: 0.5em;
-        margin-left: 2.5vw;
+        margin-left: 5vw;
 
         display: flex;
-        flex-wrap: wrap;
-        max-width: 95vw;
+        /*background-color: red;*/
 
-
-
-        background-color: red;
     }
     .column {
-        background-color: orange;
+        /*height: 100%;
+        width: 25%;
+        padding: 0.5em;
+        margin: 0.5em;
+        float: left;
+        border: 1px solid #333333;*/
+
         height: 100%;
         padding: 0.5em;
         margin: 10px;
 
-        flex-grow: 2;
+        flex-grow: 1;
 
         border: 1px solid #333333;
-        max-width: 25%;
+        max-width: 22%;
         overflow-x: hidden;
         justify-content: space-between;
     }

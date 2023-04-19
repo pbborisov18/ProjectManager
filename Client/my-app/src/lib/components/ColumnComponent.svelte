@@ -188,7 +188,7 @@
                     editPopup = true;
                  }}
                  on:mouseenter={handleHover(item)} on:mouseleave={handleHoverEnd}>
-                <Card tag="parent">
+                <Card>
                     <div class="parent">
                         <h5 class="card mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{item.name}</h5>
                         {#if hoveredItem === item}
@@ -244,7 +244,6 @@
         height: calc(100% - 2.5em);
         /* Notice that the scroll container needs to be the dndzone if you want dragging near the edge to trigger scrolling */
         overflow-y: auto;
-        background-color: blue;
     }
 
     .column-title {

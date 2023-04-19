@@ -349,13 +349,15 @@
 <style lang="scss">
 
     .lowerMenuDiv{
-        //display: flex;
-        //flex-direction: row;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 1vh;
+        margin-left: 1vw;
     }
 
     .noteAdd{
         position: relative;
-        //background-color:orange;
         margin-left: 0.45vw;
     }
 

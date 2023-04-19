@@ -119,7 +119,7 @@
                 <BreadcrumbItem href="/company/projects">{projectObj.businessUnit.name}</BreadcrumbItem>
             </Breadcrumb>
             {#if projectObj.role.name === "MANAGER"}
-                <div class="addProject">
+                <div class="addTeam">
                     <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
                 </div>
             {/if}
@@ -147,7 +147,7 @@
                 <BreadcrumbItem href="/company/projects">{projectObj.businessUnit.name}</BreadcrumbItem>
             </Breadcrumb>
             {#if projectObj.role.name === "MANAGER"}
-                <div class="addProject">
+                <div class="addTeam">
                     <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
                 </div>
             {/if}
@@ -169,7 +169,7 @@
                 <BreadcrumbItem href="/company/projects">{projectObj.businessUnit.name}</BreadcrumbItem>
             </Breadcrumb>
             {#if projectObj.role.name === "MANAGER"}
-                <div class="addProject">
+                <div class="addTeam">
                     <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
                 </div>
             {/if}
@@ -220,6 +220,13 @@
     .lowerMenuDiv{
         display: flex;
         flex-direction: row;
+        justify-content: space-between;
+        margin-top: 1vh;
+        margin-left: 1.5vw;
+
+        .addTeam{
+            margin-right: 1.5vw;
+        }
     }
 
     img{
@@ -237,9 +244,4 @@
         user-select: none; /* Standard syntax */
     }
 
-    .addProject{
-        justify-content: flex-end;
-        margin-right: 1.5vw;
-        margin-top: 1vh;
-    }
 </style>

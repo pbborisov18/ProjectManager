@@ -220,6 +220,14 @@
     .lowerMenuDiv{
         display: flex;
         flex-direction: row;
+        justify-content: space-between;
+        margin-top: 1vh;
+        margin-left: 1.5vw;
+        .addProject{
+
+            margin-right: 1.5vw;
+        }
+
     }
 
     img{
@@ -237,9 +245,6 @@
         user-select: none; /* Standard syntax */
     }
 
-    .addProject{
-        justify-content: flex-end;
-        margin-right: 1.5vw;
-        margin-top: 1vh;
-    }
+
+
 </style>
