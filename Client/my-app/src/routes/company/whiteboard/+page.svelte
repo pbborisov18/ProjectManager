@@ -262,6 +262,8 @@
         ];
 
         createNoteRequest(newNote);
+        noteName = "";
+        noteDescription = "";
     }
 
     function createNoteRequest(note){
@@ -319,12 +321,15 @@
         <Breadcrumb >
             <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
         </Breadcrumb>
-        <div class="addNote clickable" on:click={() => createPopup = true}>
-            <img class="clickable not-selectable noteAdd" src="{plusIcon}" alt="" draggable="false" />
-        </div>
     </div>
+
     {#if items}
+        <div class="row">
+            <div class="addNote clickable" on:click={() => createPopup = true}>
+                <img class="clickable not-selectable noteAdd" src="{plusIcon}" alt="" draggable="false" />
+            </div>
         <BoardComponent columns="{items}" onFinalUpdate={handleBoardUpdated}/>
+        </div>
     {/if}
 {/await}
 
@@ -357,24 +362,38 @@
     }
 
     .noteAdd{
-        position: relative;
-        margin-left: 0.45vw;
+
+        //margin-left: 0.45vw;
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
     }
 
     .addNote{
-        //background-color: #dcdcdc;
-        height: 60vh;
-        width: 50px;
-        position: absolute;
-        z-index: 2;
-        margin-top: 2vh;
-        margin-left: 0.2vw;
-        top: 50%;
-        //left: 50%;
-        transform: translate(0%, -50%);
-        display: inline-flex;
+        //background-color: green;
+        //margin-left: 2vw;
+        //margin-top: 2vh;
+        margin: 20px 5vh 0px 2vh;
+        max-height: 85vh;
+        width: 3vw;
+        display: flex;
+        justify-content: center;
         align-items: center;
-        vertical-align: center;
+        //background-color: #dcdcdc;
+        //height: 60vh;
+        //width: 50px;
+        //position: absolute;
+        //z-index: 2;
+        //margin-top: 2vh;
+        //margin-left: 0.2vw;
+        //top: 50%;
+        //left: 50%;
+        //transform: translate(0%, -50%);
+        //display: inline-flex;
+        //align-items: center;
+        //vertical-align: center;
         border: 2px solid #BBBBBB;
     }
 
@@ -389,11 +408,11 @@
         user-select: none; /* Standard syntax */
     }
 
-    .addProject{
-        justify-content: flex-end;
-        margin-right: 1.5vw;
-        margin-top: 1vh;
-    }
+    //.noteAdd{
+    //    justify-content: flex-end;
+    //    margin-right: 1.5vw;
+    //    margin-top: 1vh;
+    //}
 
 
     img{

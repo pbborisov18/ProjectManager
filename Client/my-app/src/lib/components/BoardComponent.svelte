@@ -52,7 +52,7 @@
         width: 90%;
 
         padding: 0.5em;
-        margin-left: 5vw;
+        /*margin-left: 5vw;*/
 
         display: flex;
         /*background-color: red;*/
