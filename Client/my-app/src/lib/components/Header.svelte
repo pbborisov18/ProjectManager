@@ -4,8 +4,7 @@
     import {
         Dropdown,
         DropdownItem,
-        NavLi,
-        Chevron
+        NavLi
     } from 'flowbite-svelte'
     import AgileAceLogo from "$lib/images/AlignLogo.png";
     import inviteIcon from "$lib/images/invite.png";
@@ -74,12 +73,13 @@
                 Register
             </a>
         </div>
+    {/if}
 
-    {:else if $loggedIn}
+    {#if $loggedIn === "true"}
         <div class="logged-in-section">
             <img class="clickable" src="{inviteIcon}" alt="invite button" draggable="false" on:click={redirectToInvitesPage}>
 
-            <NavLi class="cursor-pointer"><Chevron aligned>{$userEmail}</Chevron></NavLi>
+            <NavLi class="cursor-pointer">{$userEmail}</NavLi>
             <Dropdown >
                 <DropdownItem on:click={logout}>Logout</DropdownItem>
             </Dropdown>
