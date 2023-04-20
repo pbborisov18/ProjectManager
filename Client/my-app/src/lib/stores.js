@@ -1,7 +1,9 @@
 import {writable} from "svelte/store";
 
 let initialEmailValue = '';
-let initialLogin = "";
+//this doesn't work for some weird reason lol
+//null as default. stupid js
+let initialLogin = "false";
 let initialCompany = "";
 let initialProject = "";
 let initialTeam = "";
