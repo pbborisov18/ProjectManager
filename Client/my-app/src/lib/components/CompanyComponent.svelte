@@ -114,7 +114,9 @@
                 body: JSON.stringify(updatedBURole),
                 credentials: "include"
             }).then(response=>{
-                if (response.status === 201) {
+                if(response.ok){
+                    onDestroy();
+                } else if (response.status === 201) {
                     onDestroy();
                 } else if(response.status === 400){
                     response.text().then(text => {
