@@ -328,7 +328,7 @@
             <div class="addNote clickable" on:click={() => createPopup = true}>
                 <img class="clickable not-selectable noteAdd" src="{plusIcon}" alt="" draggable="false" />
             </div>
-        <BoardComponent columns="{items}" onFinalUpdate={handleBoardUpdated}/>
+            <BoardComponent columns="{items}" onFinalUpdate={handleBoardUpdated}/>
         </div>
     {/if}
 {/await}
@@ -372,28 +372,12 @@
     }
 
     .addNote{
-        //background-color: green;
-        //margin-left: 2vw;
-        //margin-top: 2vh;
         margin: 20px 5vh 0px 2vh;
         max-height: 85vh;
         width: 3vw;
         display: flex;
         justify-content: center;
         align-items: center;
-        //background-color: #dcdcdc;
-        //height: 60vh;
-        //width: 50px;
-        //position: absolute;
-        //z-index: 2;
-        //margin-top: 2vh;
-        //margin-left: 0.2vw;
-        //top: 50%;
-        //left: 50%;
-        //transform: translate(0%, -50%);
-        //display: inline-flex;
-        //align-items: center;
-        //vertical-align: center;
         border: 2px solid #BBBBBB;
     }
 

@@ -324,12 +324,14 @@
             <BreadcrumbItem href="/company/projects">{projectObj.businessUnit.name}</BreadcrumbItem>
             <BreadcrumbItem href="/company/project/teams">{teamObj.businessUnit.name}</BreadcrumbItem>
         </Breadcrumb>
-        <div class="addNote">
-            <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
-        </div>
     </div>
     {#if items}
-        <BoardComponent columns="{items}" onFinalUpdate={handleBoardUpdated}/>
+        <div class="row">
+            <div class="addNote clickable" on:click={() => createPopup = true}>
+                <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" />
+            </div>
+            <BoardComponent columns="{items}" onFinalUpdate={handleBoardUpdated}/>
+        </div>
     {/if}
 {/await}
 
@@ -356,7 +358,11 @@
     .lowerMenuDiv{
         display: flex;
         flex-direction: row;
+        justify-content: space-between;
+        margin-top: 1vh;
+        margin-left: 1vw;
     }
+
     .clickable {
         cursor: pointer;
     }
@@ -372,6 +378,21 @@
         justify-content: flex-end;
         margin-right: 1.5vw;
         margin-top: 1vh;
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .addNote{
+        margin: 20px 5vh 0px 2vh;
+        max-height: 85vh;
+        width: 3vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid #BBBBBB;
     }
 
     img{
