@@ -6,7 +6,7 @@
     import deleteIcon from "$lib/images/delete.png";
     import {company, project, team} from "$lib/stores.js";
     import {goto} from "$app/navigation";
-    import inviteToCompanyIcon from "$lib/images/invitation.png";
+    import inviteToCompanyIcon from "$lib/images/invite.png";
     import {Button, Input, Label, Modal} from "flowbite-svelte";
 
     let buName;
@@ -59,6 +59,7 @@
             console.error(error);
         });
     }
+
     function deleteBU(){
         fetch('http://localhost:8080/company/project/deleteTeam', {
             method: 'DELETE',
@@ -96,6 +97,7 @@
             console.error(error);
         });
     }
+
     function editBU(){
         if(!buName){
             alert("Полето не може да е празно!");
@@ -137,6 +139,7 @@
                 alert(error);
             });}
     }
+
     function invitePersonToTeam(){
         fetch('http://localhost:8080/company/project/team/invite', {
             method: 'POST',
@@ -233,14 +236,17 @@
 </Modal>
 
 <Modal title="Редактрине на екипа" bind:open={editPopup} size="XL" autoclose>
-    <div class="grid gap-6 mb-6 md:grid-cols-1">
-        <div>
-            <Label for="teamName" class="mb-2">Име на екипа</Label>
-            <Input type="text" id="teamName" required >
-                <input type="text" placeholder="{BURole.businessUnit.name}" bind:value={buName} required/>
-            </Input>
+    <div class="bodyPopup">
+
+        <div class="editDiv">
+            <div class="teamNameLabel">
+                <Label for="teamName" class="mb-2">Име на екипа</Label>
+                <Input type="text" id="teamName" required >
+                    <input class="text-black inputName" type="text" placeholder="{BURole.businessUnit.name}" bind:value={buName} required/>
+                </Input>
+            </div>
             <div>
-                <img class="clickable not-selectable" src="{inviteToCompanyIcon}" alt="" draggable="false" on:click={() => inviteToTeamPopup = true}>
+                <img class="clickable not-selectable inviteImg" src="{inviteToCompanyIcon}" alt="" draggable="false" on:click={() => inviteToTeamPopup = true}>
             </div>
         </div>
         <Button type="submit" on:click={editBU}>Редактиране</Button>
@@ -355,7 +361,7 @@
         margin-top: 3vh;
     }
 
-    .projectNameLabel{
+    .teamNameLabel{
         display: flex;
         flex-direction: column
     }
