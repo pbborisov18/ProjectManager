@@ -195,31 +195,31 @@
 
         <span on:click={redirectToTeams}>{BURole.businessUnit.name}</span>
         <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs">
-            <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" on:click={redirectToWhiteboard}>
+        <div class="imageDivs" on:click={redirectToWhiteboard}>
+            <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" >
         </div>
         <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs">
-            <img class="clickable not-selectable" src="{editIcon}" alt="" draggable="false" on:click={() => editPopup = true}>
+        <div class="imageDivs" on:click={() => editPopup = true}>
+            <img class="clickable not-selectable" src="{editIcon}" alt="" draggable="false" >
         </div>
         <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs">
-            <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" on:click={() => leavePopup = true}>
+        <div class="imageDivs" on:click={() => leavePopup = true}>
+            <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" >
         </div>
         <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs">
-            <img class="clickable not-selectable xImage" src="{deleteIcon}" alt="" draggable="false" on:click={() => deletePopup = true}>
+        <div class="imageDivs"  on:click={() => deletePopup = true}>
+            <img class="clickable not-selectable xImage" src="{deleteIcon}" alt="" draggable="false">
         </div>
     {:else if BURole.role.name === "EMPLOYEE"}
         <!--the employee stuff here-->
         <span on:click={redirectToTeams}>{BURole.businessUnit.name}</span>
         <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs">
-            <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" on:click={redirectToWhiteboard}>
+        <div class="imageDivs" on:click={redirectToWhiteboard}>
+            <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" >
         </div>
         <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs">
-            <img class="clickable not-selectable xImage" src="{leaveIcon}" alt="" draggable="false" on:click={() => leavePopup = true}>
+        <div class="imageDivs"  on:click={() => leavePopup = true}>
+            <img class="clickable not-selectable xImage" src="{leaveIcon}" alt="" draggable="false">
         </div>
     {/if}
 </div>
