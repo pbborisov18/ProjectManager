@@ -58,6 +58,27 @@ public class InviteController {
         }
     }
 
+    @PostMapping("/businessUnit/invites")
+    public ResponseEntity<Object> getInvitesByBusinessUnit(@RequestBody BusinessUnitDTO businessUnitDTO){
+        try {
+            List<InviteDTOWithoutPassword> invites = inviteService.findAllInvitesByBusinessUnit(businessUnitDTO);
+
+            return new ResponseEntity<>(invites, HttpStatus.OK);
+        } catch (FailedToSelectException e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (UserNotAuthorizedException | UserNotInBusinessUnitException e) {
+            //Returns 403 which means unauthorized (no permission)
+            //Reason being someone created this 30 yrs ago and stuff changes
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (UserUnauthenticatedException e) {
+            //Returns 401 which means unauthenticated (not logged in)
+            //Reason being someone created this 30 yrs ago and stuff changes
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+    }
+
     @PostMapping("/company/invite")
     public ResponseEntity<Object> createInviteForCompany(@RequestBody HashMap<String, Object> requestBody/*@RequestBody CompanyDTO companyDTO, @RequestBody UserWithoutPasswordDTO receiver*/){
         try {
@@ -92,8 +113,7 @@ public class InviteController {
         }
     }
 
-    //Have to fix that
-        @PostMapping("/company/project/team/invite")
+    @PostMapping("/company/project/team/invite")
     public ResponseEntity<Object> createInviteForTeam(@RequestBody HashMap<String, Object> requestBody/*@RequestBody TeamDTO teamDTO, @RequestBody UserWithoutPasswordDTO receiver*/){
             try {
                 ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -108,7 +128,6 @@ public class InviteController {
                 throw new RuntimeException(e);
             }
     }
-
 
     public ResponseEntity<Object> createInviteForBusinessUnit(BusinessUnitDTO businessUnitDTO, UserWithoutPasswordDTO receiver){
         try {
@@ -129,4 +148,6 @@ public class InviteController {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 }

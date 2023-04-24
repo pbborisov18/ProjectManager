@@ -3,7 +3,7 @@
     import editIcon from "$lib/images/edit.png";
     import leaveIcon from "$lib/images/leave.png";
     import deleteIcon from "$lib/images/delete.png";
-    import {Button, Input, Label, Modal} from "flowbite-svelte";
+    import {Button, Input, Label, Listgroup, Modal} from "flowbite-svelte";
     import {company, project, team} from "$lib/stores.js";
     import {goto} from "$app/navigation";
     import inviteToCompanyIcon from "$lib/images/invite.png";
@@ -14,6 +14,7 @@
     let deletePopup = false;
     let editPopup = false;
     let inviteToProjectPopup = false;
+    let alreadyInvited = [];
 
     let inviteeEmail;
 
@@ -176,6 +177,42 @@
         });
     }
 
+    function getAllInvitesByProject(){
+
+        fetch('http://localhost:8080/businessUnit/invites', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(BURole.businessUnit),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 200) {
+                response.json().then(data => {
+                    alreadyInvited = data.filter(obj => obj.state === 'PENDING')
+                });
+            } else if(response.status === 400){
+                response.text().then(text => {
+                    throw new Error(text);
+                })
+            } else if(response.status === 401){
+                response.text().then(text => {
+                    throw new Error(text);
+                });
+                goto("/login");
+            } else if(response.status === 403){
+                response.text().then(text => {
+                    throw new Error(text);
+                });
+            } else if(response.status === 500){
+                response.text().then(text => {
+                    throw new Error(text);
+                });
+            }
+        }).catch(error => {
+            console.error(error);
+        });
+    }
 
     function redirectToTeams(){
         project.set(JSON.stringify(BURole));
@@ -252,9 +289,13 @@
                     <input class="text-black inputName" type="text" placeholder="{BURole.businessUnit.name}" bind:value={buName} required/>
                 </Input>
             </div>
-            <div>
-                <img class="clickable not-selectable inviteImg" src="{inviteToCompanyIcon}" alt="" draggable="false" on:click={() => inviteToProjectPopup = true}>
-            </div>
+
+                <img class="clickable not-selectable inviteImg" src="{inviteToCompanyIcon}" alt="" draggable="false"
+                     on:click={() => {
+                    getAllInvitesByProject();
+                    inviteToProjectPopup = true;
+                 }}>
+
         </div>
         <Button type="submit" on:click={editBU}>Редактиране</Button>
     </div>
@@ -263,6 +304,23 @@
 <Modal title="Покани хора в {BURole.businessUnit.name}" bind:open={inviteToProjectPopup} size="XL" autoclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
+            {#if alreadyInvited.length > 0}
+                <div class="invited text-black">
+                    <span>Поканени хора</span>
+                    <Listgroup items="{alreadyInvited}" let:item class="w-48">
+                        <div class="parent text-black">
+                            <div class="text">
+                                {item.receiver.email}
+                            </div>
+                            <!--                            <CloseButton class="close-Button"-->
+                            <!--                            on:click={ () => {-->
+                            <!--                                alreadyInvited-->
+                            <!--                            }}/>-->
+                        </div>
+                    </Listgroup>
+                </div>
+            {/if}
+
             <div>
                 <Label for="projectName" class="mb-2">Имейл на човека</Label>
                 <Input type="text" id="projectName" required>
@@ -373,48 +431,22 @@
         flex-direction: column
     }
 
+    .parent{
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        //background-color: red;
+        align-items: center;
+        justify-content: center; /* Align child elements horizontally */
+    }
+
+    .invited{
+        max-height: 40vh;
+        overflow-y: auto;
+    }
+
+    .text{
+        text-align: center;
+    }
+
 </style>
-
-<!--<style lang="scss">-->
-<!--    :root{-->
-<!--        background-color: #F8F8F8;-->
-<!--    }-->
-
-<!--    .BUwindow{-->
-<!--        background-color: orange;-->
-<!--        width: 97vw;-->
-<!--        display: flex;-->
-<!--        flex-direction: row;-->
-<!--    }-->
-
-<!--    img {-->
-<!--        width: 50px;-->
-<!--    }-->
-
-<!--    span {-->
-<!--        text-transform: capitalize;-->
-<!--        font-family: Bahnschrift, monospace;-->
-<!--        background-color: red;-->
-<!--        margin-right: 50vw;-->
-<!--    }-->
-
-<!--    .clickable {-->
-<!--        cursor: pointer;-->
-<!--    }-->
-
-<!--    .not-selectable {-->
-<!--        -webkit-user-select: none; /* Chrome, Safari, Opera */-->
-<!--        -moz-user-select: none; /* Firefox */-->
-<!--        -ms-user-select: none; /* IE 10+ */-->
-<!--        user-select: none; /* Standard syntax */-->
-<!--    }-->
-
-<!--    .addBU{-->
-<!--        display: flex;-->
-<!--        flex-direction: row;-->
-<!--        justify-content: flex-end;-->
-<!--        margin-right: 1.5vw;-->
-<!--        margin-top: 1vh;-->
-<!--    }-->
-
-<!--</style>-->

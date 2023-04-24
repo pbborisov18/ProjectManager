@@ -13,7 +13,7 @@ import java.io.IOException;
 public class BusinessUnitDTODeserializer extends JsonDeserializer<BusinessUnitDTO> {
 
     @Override
-    public BusinessUnitDTO deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+    public BusinessUnitDTO deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         ObjectCodec codec = jsonParser.getCodec();
         JsonNode tree = codec.readTree(jsonParser);
 
@@ -36,8 +36,8 @@ public class BusinessUnitDTODeserializer extends JsonDeserializer<BusinessUnitDT
                 businessUnitDTO = new TeamDTO(id, name, typeDTO, companyDTO1, projectDTO, whiteboardDTO);
             }
             default -> {
+                // handle unexpected case
             }
-            // handle unexpected case
         }
 
         return businessUnitDTO;
