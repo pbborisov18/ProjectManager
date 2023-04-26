@@ -57,7 +57,7 @@
 </script>
 
 <header>
-    <img class="not-selectable clickable" src="{AgileAceLogo}" alt="logo" on:click={redirectToHomepage} draggable="false">
+    <img class="not-selectable clickable logo" src="{AgileAceLogo}" alt="logo" on:click={redirectToHomepage} draggable="false">
     <span class="not-selectable clickable" on:click={redirectToHomepage}>AgileAce</span>
 
     {#if homePage}
@@ -121,6 +121,11 @@
 
     .clickable {
         cursor: pointer;
+    }
+
+    .logo{
+      margin-left: 1vw;
+      margin-right: 1vw;
     }
 
     .landingPage-section{

@@ -128,7 +128,6 @@
     {:else if data.error === 401}
         <!--wait for the page to load and then it will redirect-->
     {:else if BURoles.length === 0}
-        <h1>akita</h1>
         <Header />
         <div class="addCompany">
             <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>

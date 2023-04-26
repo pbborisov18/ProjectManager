@@ -1,8 +1,11 @@
 <script>
   import "../app.postcss";
-
+    let title = "AgileAce";
 </script>
 
+<head>
+    <title>{title}</title>
+</head>
 
 <slot />
 
