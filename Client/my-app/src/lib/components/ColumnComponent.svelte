@@ -258,6 +258,8 @@
         overflow: hidden;
         overflow-y: auto;
         overflow-wrap: anywhere;
+        max-height: 20vh;
+        line-height: normal;
     }
 
     img{
