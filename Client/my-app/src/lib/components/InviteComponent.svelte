@@ -7,7 +7,6 @@
     export let onDestroy;
 
     function declineInvite(){
-        //pitai kiril kak the fuck da updatenesh lainata tui che usera da znai che vsichko e top
         let updatedInvite = {
             ...invite,
             state: "DECLINED"
@@ -70,8 +69,14 @@
 
 <div class="block">
     <span>Поканени сте в {invite.businessUnit.name} от {invite.sender.email}</span>
-    <img class="clickable" src="{checkIcon}" alt="" draggable="false" on:click={acceptInvite}>
-    <img class="clickable" src="{deleteIcon}" alt="" draggable="false" on:click={declineInvite}>
+    <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+    <div class="imageDivs">
+        <img class="clickable" src="{checkIcon}" alt="" draggable="false" on:click={acceptInvite}>
+    </div>
+    <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+    <div class="imageDivs">
+        <img class="clickable xImage" src="{deleteIcon}" alt="" draggable="false" on:click={declineInvite}>
+    </div>
 </div>
 
 <style lang="scss">
@@ -83,11 +88,56 @@
         cursor: pointer;
     }
 
-    div{
-        background-color: orange;
-        width: 97vw;
+    .block{
+      width: 97vw;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center; /* align items vertically */
+      border: 1px solid #BBBBBB;
+      min-height: 8vh;
+      background-color: #e7e7e7;
+
+      span {
+        flex-basis: 65%;
+        flex-grow: 1;
+        white-space: nowrap; /* prevent text from wrapping */
+        overflow: hidden; /* hide overflow */
+        text-overflow: ellipsis; /* show ellipsis for truncated text */
+        font-family: Bahnschrift, monospace;
+        height: 100%;
+        font-size: 35px;
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+        padding-left: 1.5vw;
+      }
+
+      .imageDivs {
+        flex-basis: calc((100% - 65%) / 4);
+        flex-grow: 0;
+        max-width: 20%;
+        min-width: 5%;
+        //max-height: 100%;
+        height: 100%;
         display: flex;
-        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        //background-color: #e7e7e7;
+        //background-color: red;
+        //border: 1px solid black;
+      }
+
+      img {
+        max-width: 40px;
+        max-height: 40px;
+      }
+
+      .xImage{
+        max-width: 35px;
+        max-height: 35px;
+      }
+
     }
 
 </style>
