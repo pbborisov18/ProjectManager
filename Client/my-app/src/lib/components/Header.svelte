@@ -79,7 +79,9 @@
         <div class="logged-in-section">
             <img class="clickable" src="{inviteIcon}" alt="invite button" draggable="false" on:click={redirectToInvitesPage}>
 
-            <NavLi class="cursor-pointer">{$userEmail}</NavLi>
+            <div class="test clickable not-selectable" >
+                <span>{$userEmail}</span>
+            </div>
             <Dropdown >
                 <DropdownItem on:click={logout}>Logout</DropdownItem>
             </Dropdown>
@@ -91,20 +93,18 @@
 
 
     header {
-        padding: 5px 20px;
+        //padding: 5px 20px;
         font-family: sans-serif;
         display: flex;
         align-items: center;
         box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 1px;
         //box-shadow: 0px 0px 10px 1px #eae9ea;
         background-color: #eae9ea;
-
-
     }
 
     img {
         width: 50px;
-        margin-right: 10px;
+        //margin-right: 10px;
     }
 
 
@@ -135,23 +135,42 @@
     }
 
     .logged-in-section {
-        display: flex;
-        align-items: center;
-        margin-left: auto;
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      height: 7vh;
+        //background-color: red;
 
-        img {
-             width: 30px;
-    height: 30px;
-    margin-right: 3vw;
-    }
+      img {
+        width: 30px;
+        height: 30px;
+        margin-right: 3vw;
+      }
 
-    span {
+      span {
         font-size: 14px;
         font-weight: bold;
         color: #333333;
         margin-right: 30px;
         font-family: Bahnschrift, monospace;
+        //background-color: orange;
+        //height: 100%;
+        flex: 1;
+        text-align: center;
+      }
+
+      .test{
+        //position: relative;
+        //background-color: green;
+        height: 7vh;
+        margin-right: 3vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
     }
-    }
+
+
 
 </style>
