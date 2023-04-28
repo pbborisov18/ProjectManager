@@ -70,12 +70,12 @@
 <div class="block">
     <span>Поканени сте в {invite.businessUnit.name} от {invite.sender.email}</span>
     <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-    <div class="imageDivs">
-        <img class="clickable" src="{checkIcon}" alt="" draggable="false" on:click={acceptInvite}>
+    <div class="imageDivs clickable" on:click={acceptInvite}>
+        <img src="{checkIcon}" alt="" draggable="false" >
     </div>
     <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-    <div class="imageDivs">
-        <img class="clickable xImage" src="{deleteIcon}" alt="" draggable="false" on:click={declineInvite}>
+    <div class="imageDivs clickable" on:click={declineInvite}>
+        <img class="xImage" src="{deleteIcon}" alt="" draggable="false" >
     </div>
 </div>
 
