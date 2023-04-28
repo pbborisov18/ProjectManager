@@ -60,7 +60,7 @@
     <img class="not-selectable clickable logo" src="{AgileAceLogo}" alt="logo" on:click={redirectToHomepage} draggable="false">
     <span class="not-selectable clickable" on:click={redirectToHomepage}>AgileAce</span>
 
-    {#if homePage}
+    {#if homePage && $loggedIn !== "true"}
         <div class="landingPage-section">
             <a on:click={redirectToLogin}
                class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blue-700 active:bg-blue-800 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"
