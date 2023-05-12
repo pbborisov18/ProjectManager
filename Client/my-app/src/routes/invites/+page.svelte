@@ -70,5 +70,7 @@
         box-shadow: 0px 0px 1px 1px #BBBBBB;
         display: flex;
         flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 </style>

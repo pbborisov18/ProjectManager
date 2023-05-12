@@ -5,6 +5,7 @@
     import {Button, Input, Label, Modal} from "flowbite-svelte";
     import loadingGif from "$lib/images/loading.gif";
     import plusIcon from "$lib/images/plus.png";
+    import { Toast } from 'flowbite-svelte';
 
     export let data;
     export let error;
@@ -30,6 +31,25 @@
         }
     })
 
+    let notifications = [];
+
+    function addNotification(message) {
+
+        const newNotification = {
+            message
+        };
+
+        notifications = [...notifications, newNotification];
+
+        setTimeout(() => {
+            removeNotification(newNotification);
+        }, 5000); // 5000 milliseconds = 5 seconds
+    }
+
+    function removeNotification(notification) {
+        notifications = notifications.filter(n => n !== notification);
+    }
+
     let createPopup = false;
     let value;
 
@@ -40,7 +60,10 @@
                 id: 1,
                 name:"COMPANY"
             },
-            whiteboard: null};
+            whiteboard: null
+        };
+
+        value = "";
 
         fetch('http://localhost:8080/createCompany', {
             method: 'POST',
@@ -56,6 +79,7 @@
                 response.text().then(text => {
                     throw new Error(text);
                 })
+                addNotification("Something went wrong!");
             } else if(response.status === 401){
                 response.text().then(text => {
                     throw new Error(text);
@@ -65,6 +89,7 @@
                 response.text().then(text => {
                     throw new Error(text);
                 });
+                addNotification("Something went wrong!");
             }
         }).catch(error => {
             console.error(error);
@@ -88,7 +113,8 @@
             } else if(response.status === 400){
                 response.text().then(text => {
                     throw new Error(text);
-                })
+                });
+                addNotification("Something went wrong!");
             } else if(response.status === 401){
                 response.text().then(text => {
                     throw new Error(text);
@@ -98,6 +124,7 @@
                 response.text().then(text => {
                     throw new Error(text);
                 });
+                addNotification("Something went wrong!");
             }
         }).catch(error => {
             console.error(error);
@@ -111,6 +138,14 @@
 {#await data.userBURoles}
     <img src="{loadingGif}" alt="">
 {:then userBURoles}
+
+    {#each notifications as notification}
+        <div class="notificationDiv">
+            <Toast simple position="bottom-right">
+                {notification.message}
+            </Toast>
+        </div>
+    {/each}
 
     {#if data.error === 204}
         <Header/>
@@ -182,7 +217,8 @@
         font-family: sans-serif;
         font-weight: lighter;
         box-shadow: 0px 0px 1px 1px #BBBBBB;
-
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     img{
@@ -207,4 +243,11 @@
         margin-right: 1.5vw;
         margin-top: 1vh;
     }
+
+    .notificationDiv{
+        position: absolute;
+        height: 100vh;
+        width: 100vw;
+    }
+
 </style>

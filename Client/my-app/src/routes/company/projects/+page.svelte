@@ -35,6 +35,8 @@
             whiteboard:null
         }
 
+        projectName = "";
+
         fetch('http://localhost:8080/company/createProject', {
             method: 'POST',
             headers: {
@@ -215,6 +217,8 @@
         font-family: sans-serif;
         font-weight: lighter;
         box-shadow: 0px 0px 1px 1px #BBBBBB;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .lowerMenuDiv{
