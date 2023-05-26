@@ -1,10 +1,14 @@
 ## Contents
 * [General Information](#general-information)
+* [Demo](#demo)
 * [Launch](#launch)
 * [Features](#features)
 
 # General Information
 The aim of the project is to organize and manage teams. You can create companies, projects and teams. Invite employees. Interact with notes and whiteboards. Created for a school project.
+
+## Demo
+**Coming soon!**
 
 ## Launch
 1. [Install Java](https://www.oracle.com/cis/java/technologies/downloads/#java17)
