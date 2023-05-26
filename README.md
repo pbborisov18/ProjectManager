@@ -17,7 +17,7 @@ The aim of the project is to organize and manage teams. You can create companies
    - Username: sa
    - Password: 123
 8. Open your preferred IDE and run the backend with maven build `mvn spring-boot:run` (this will install all the dependencies if they are missing)
-9. Open a terminal and navigate to `*/2223-dzi-java-pbborisov18/Client/my-app/`
+9. Open a terminal and navigate to `*/ProjectManager/Client/my-app/`
 10. Install the dependencies for the frontend with `npm install`
 11. Run the frontend with `npm run dev`
 
