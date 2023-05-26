@@ -1,11 +1,14 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/0_e-P-yD)
 ## Contents
 * [General Information](#general-information)
+* [Demo](#demo)
 * [Launch](#launch)
 * [Features](#features)
 
 # General Information
 The aim of the project is to organize and manage teams. You can create companies, projects and teams. Invite employees. Interact with notes and whiteboards. Created for a school project.
+
+## Demo
+**Coming soon!**
 
 ## Launch
 1. [Install Java](https://www.oracle.com/cis/java/technologies/downloads/#java17)
@@ -18,7 +21,7 @@ The aim of the project is to organize and manage teams. You can create companies
    - Username: sa
    - Password: 123
 8. Open your preferred IDE and run the backend with maven build `mvn spring-boot:run` (this will install all the dependencies if they are missing)
-9. Open a terminal and navigate to `*/2223-dzi-java-pbborisov18/Client/my-app/`
+9. Open a terminal and navigate to `*/ProjectManager/Client/my-app/`
 10. Install the dependencies for the frontend with `npm install`
 11. Run the frontend with `npm run dev`
 
