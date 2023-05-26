@@ -2,8 +2,6 @@
     import { flip } from 'svelte/animate';
     import { dndzone } from 'svelte-dnd-action';
     import {Button, Card, Input, Label, Modal, Textarea, CloseButton} from "flowbite-svelte";
-    import inviteToCompanyIcon from "$lib/images/invitation.png";
-    import deleteIcon from "$lib/images/delete.png"
     import {company, project, team} from "$lib/stores.js";
     import {goto} from "$app/navigation";
 
@@ -208,26 +206,26 @@
     </div>
 </div>
 
-<Modal title="Редактрине на бележка" bind:open={editPopup} size="XL" autoclose>
+<Modal title="Edit note" bind:open={editPopup} size="XL" autoclose>
     <div class="grid gap-6 mb-6 md:grid-cols-1">
         <div>
-            <Label for="noteName" class="mb-2">Име</Label>
+            <Label for="noteName" class="mb-2">Name</Label>
             <Input type="text" id="noteName" required>
                 <input type="text" bind:value={noteName}/>
             </Input>
-            <Label for="noteDescription" class="mb-2">Съдържание</Label>
+            <Label for="noteDescription" class="mb-2">Description</Label>
             <Textarea id="noteDescription" rows="3" bind:value={noteDescription}/>
         </div>
-        <Button type="submit" on:click={editNote}>Редактиране</Button>
+        <Button type="submit" on:click={editNote}>Edit</Button>
     </div>
 </Modal>
 
 <Modal bind:open={deletePopup} size="xs" autoclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Сигурни ли сте, че искате да изтриете бележката?
-        <Button color="red" class="mr-2" on:click={deleteNote}>Да</Button>
-        <Button color='alternative'>Не</Button>
+        Are you sure you want to delete the note?
+        <Button color="red" class="mr-2" on:click={deleteNote}>Yes</Button>
+        <Button color='alternative'>No</Button>
     </div>
 </Modal>
 
@@ -236,13 +234,11 @@
     .wrapper {
         height: 100%;
         width: 100%;
-        /*Notice we make sure this container doesn't scroll so that the title stays on top and the dndzone inside is scrollable*/
         overflow-y: hidden;
     }
 
     .column-content {
         height: calc(100% - 2.5em);
-        /* Notice that the scroll container needs to be the dndzone if you want dragging near the edge to trigger scrolling */
         overflow-y: auto;
     }
 

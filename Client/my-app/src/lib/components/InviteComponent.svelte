@@ -68,7 +68,7 @@
 </script>
 
 <div class="block">
-    <span>Поканени сте в {invite.businessUnit.name} от {invite.sender.email}</span>
+    <span>You are invited in {invite.businessUnit.name} by {invite.sender.email}</span>
     <div style="border-left:1px solid #BBBBBB;height:80%"></div>
     <div class="imageDivs clickable" on:click={acceptInvite}>
         <img src="{checkIcon}" alt="" draggable="false" >
@@ -118,14 +118,10 @@
         flex-grow: 0;
         max-width: 20%;
         min-width: 5%;
-        //max-height: 100%;
         height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
-        //background-color: #e7e7e7;
-        //background-color: red;
-        //border: 1px solid black;
       }
 
       img {

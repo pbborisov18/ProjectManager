@@ -335,18 +335,18 @@
 
 
 
-<Modal title="Създаване на бележка" bind:open={createPopup} size="xl" autoclose>
+<Modal title="Create note" bind:open={createPopup} size="xl" autoclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             <div>
-                <Label for="noteName" class="mb-2">Име</Label>
+                <Label for="noteName" class="mb-2">Name</Label>
                 <Input type="text" id="noteName" required>
                     <input type="text" bind:value={noteName} />
                 </Input>
-                <Label for="noteDescription" class="mb-2">Съдържание</Label>
+                <Label for="noteDescription" class="mb-2">Description</Label>
                 <Textarea id="noteDescription" rows="3" bind:value={noteDescription}/>
             </div>
-            <Button type="submit" on:click={createNote}>Създаване</Button>
+            <Button type="submit" on:click={createNote}>Create</Button>
         </div>
     </form>
 </Modal>
@@ -361,10 +361,6 @@
         margin-left: 1vw;
     }
 
-    .noteAdd{
-
-        //margin-left: 0.45vw;
-    }
 
     .row {
         display: flex;
@@ -391,13 +387,6 @@
         -ms-user-select: none; /* IE 10+ */
         user-select: none; /* Standard syntax */
     }
-
-    //.noteAdd{
-    //    justify-content: flex-end;
-    //    margin-right: 1.5vw;
-    //    margin-top: 1vh;
-    //}
-
 
     img{
         width: 30px;

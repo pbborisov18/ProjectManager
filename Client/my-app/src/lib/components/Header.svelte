@@ -3,8 +3,7 @@
     import {userEmail, loggedIn} from "$lib/stores.js";
     import {
         Dropdown,
-        DropdownItem,
-        NavLi
+        DropdownItem
     } from 'flowbite-svelte'
     import AgileAceLogo from "$lib/images/AlignLogo.png";
     import inviteIcon from "$lib/images/invite.png";
@@ -37,7 +36,7 @@
                     loggedIn.set("");
                     goto("/login");
                 } else {
-                    throw Error("Неуспешно излизане");
+                    throw Error("Logout failed");
                 }
             }).catch(error => {
                 alert(error);
@@ -93,18 +92,15 @@
 
 
     header {
-        //padding: 5px 20px;
         font-family: sans-serif;
         display: flex;
         align-items: center;
         box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 1px;
-        //box-shadow: 0px 0px 10px 1px #eae9ea;
         background-color: #eae9ea;
     }
 
     img {
         width: 50px;
-        //margin-right: 10px;
     }
 
 
@@ -144,7 +140,6 @@
       align-items: center;
       margin-left: auto;
       height: 7vh;
-        //background-color: red;
 
       img {
         width: 30px;
@@ -158,15 +153,11 @@
         color: #333333;
         margin-right: 30px;
         font-family: Bahnschrift, monospace;
-        //background-color: orange;
-        //height: 100%;
         flex: 1;
         text-align: center;
       }
 
       .test{
-        //position: relative;
-        //background-color: green;
         height: 7vh;
         margin-right: 3vw;
         display: flex;

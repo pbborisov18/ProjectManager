@@ -6,7 +6,7 @@
         Input,
         Label,
         Modal,
-        Listgroup
+        Listgroup, Toast
     } from 'flowbite-svelte'
     import "../../tailwind.css";
     import { company } from "$lib/stores.js";
@@ -28,6 +28,25 @@
 
     let BUEditName = BURole.businessUnit.name;
 
+    let notifications = [];
+
+    function addNotification(message) {
+
+        const newNotification = {
+            message
+        };
+
+        notifications = [...notifications, newNotification];
+
+        setTimeout(() => {
+            removeNotification(newNotification);
+        }, 5000); // 5000 milliseconds = 5 seconds
+    }
+
+    function removeNotification(notification) {
+        notifications = notifications.filter(n => n !== notification);
+    }
+
     function leaveBU(){
         fetch('http://localhost:8080/leaveCompany', {
             method: 'PUT',
@@ -42,11 +61,12 @@
         } else if(response.status === 204){
             response.text().then(text => {
                 onDestroy();
-            })
+            });
         }else if(response.status === 400){
             response.text().then(text => {
                 throw new Error(text);
-            })
+            });
+            addNotification("Something went wrong!");
         } else if(response.status === 401){
             response.text().then(text => {
                 throw new Error(text);
@@ -56,10 +76,12 @@
             response.text().then(text => {
                 throw new Error(text);
             });
+            addNotification("Something went wrong!");
         } else if(response.status === 500){
             response.text().then(text => {
                 throw new Error(text);
             });
+            addNotification("Something went wrong!");
         }
     }).catch(error => {
         console.error(error);
@@ -106,7 +128,7 @@
 
     function editBU(){
         if(!BUEditName){
-            alert("Полето не може да е празно!");
+            alert("The field can't be empty!");
         }else {
             let updatedBURole = {
                 ...BURole.businessUnit,
@@ -234,6 +256,14 @@
 
 </script>
 
+{#each notifications as notification}
+    <div class="notificationDiv">
+        <Toast simple position="bottom-right">
+            {notification.message}
+        </Toast>
+    </div>
+{/each}
+
 <div class="clickable not-selectable BUwindow">
     {#if BURole.role.name === "MANAGER"}
         <!--the manager stuff here-->
@@ -273,27 +303,27 @@
 <Modal bind:open={leavePopup} size="xs" autoclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Сигурни ли сте, че искате да напуснете компанията?
-        <Button color="red" class="mr-2" on:click={leaveBU}>Да</Button>
-        <Button color='alternative'>Не</Button>
+        Are you sure you want to leave the company?
+        <Button color="red" class="mr-2" on:click={leaveBU}>Yes</Button>
+        <Button color='alternative'>No</Button>
     </div>
 </Modal>
 
 <Modal bind:open={deletePopup} size="xs" autoclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Сигурни ли сте, че искате да изтриете компанията?
-        <Button color="red" class="mr-2" on:click={deleteBU}>Да</Button>
-        <Button color='alternative'>Не</Button>
+        Are you sure you want to delete the company?
+        <Button color="red" class="mr-2" on:click={deleteBU}>Yes</Button>
+        <Button color='alternative'>No</Button>
     </div>
 </Modal>
 
-<Modal title="Редактиране на компанията" bind:open={editPopup} size="XL" autoclose>
+<Modal title="Edit a company" bind:open={editPopup} size="XL" autoclose>
         <div class="bodyPopup">
 
         <div class="editDiv">
             <div class="companyNameLabel">
-                <Label for="companyName" class="mb-2">Име на компанията</Label>
+                <Label for="companyName" class="mb-2">Name of the company</Label>
                 <Input type="text" id="companyName" required >
                     <input class="text-black inputName" type="text" bind:value={BUEditName} required/>
                 </Input>
@@ -307,40 +337,36 @@
 
         </div>
         <div>
-            <Button type="submit" on:click={editBU}>Редактиране</Button>
+            <Button type="submit" on:click={editBU}>Edit</Button>
 
         </div>
     </div>
 </Modal>
 
-<Modal title="Покани хора в {BURole.businessUnit.name}" bind:open={inviteToCompanyPopup} size="XL" autoclose>
+<Modal title="Invite people in {BURole.businessUnit.name}" bind:open={inviteToCompanyPopup} size="XL" autoclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             {#if alreadyInvited.length > 0}
                 <div class="invited text-black">
-                    <span>Поканени хора</span>
+                    <span>Invited people</span>
                     <Listgroup items="{alreadyInvited}" let:item class="w-48">
                         <div class="parent text-black">
                             <div class="text">
                                 {item.receiver.email}
                             </div>
-<!--                            <CloseButton class="close-Button"-->
-<!--                            on:click={ () => {-->
-<!--                                alreadyInvited-->
-<!--                            }}/>-->
                         </div>
                     </Listgroup>
                 </div>
             {/if}
             <div>
-                <Label for="projectName" class="mb-2">Имейл на човека</Label>
+                <Label for="projectName" class="mb-2">Email invite to</Label>
                 <Input type="text" id="projectName" required>
                     <input type="text" bind:value={inviteeEmail} />
                 </Input>
             </div>
 
 
-            <Button type="submit" on:click={invitePersonToCompany}>Изпращане</Button>
+            <Button type="submit" on:click={invitePersonToCompany}>Send</Button>
         </div>
     </form>
 </Modal>
@@ -352,7 +378,6 @@
 
 
   .BUwindow {
-      //background-color: rgba(104, 153, 168, 0.99);
       background-color: #e7e7e7;
 
       width: 97vw;
@@ -384,14 +409,10 @@
           flex-grow: 0;
           max-width: 20%;
           min-width: 5%;
-          //max-height: 100%;
           height: 100%;
           display: flex;
           justify-content: center;
           align-items: center;
-          //background-color: #e7e7e7;
-          //background-color: red;
-          //border: 1px solid black;
       }
 
       img {
@@ -455,7 +476,6 @@
       position: relative;
       display: flex;
       flex-direction: row;
-      //background-color: red;
       align-items: center;
       justify-content: center; /* Align child elements horizontally */
   }
@@ -467,6 +487,13 @@
 
   .text{
       text-align: center;
+  }
+
+  .notificationDiv{
+      background-color: red;
+      position: absolute;
+      height: 80vh;
+      width: 100vw;
   }
 
 </style>

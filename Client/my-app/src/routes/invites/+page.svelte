@@ -29,8 +29,6 @@
     <img src="{loadingGif}" alt="">
 {:then invites}
 
-<!--fix that so it keeps what was last set to it-->
-
     {#if data.error === 204}
         <Header />
         <NoInviteComponent />

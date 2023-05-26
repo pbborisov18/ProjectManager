@@ -69,17 +69,17 @@
         <form use:form>
             <HintGroup for="email">
                 <Hint on="required">{requiredMessage}</Hint>
-                    <Hint on="email" hideWhenRequired>Трябва да е валиден имейл</Hint>
+                    <Hint on="email" hideWhenRequired>Has to be a valid email</Hint>
             </HintGroup>
             <label>
-                <input type="text" name="email" placeholder="Имейл" use:validators={[required, email]}/>
+                <input type="text" name="email" placeholder="Email" use:validators={[required, email]}/>
             </label>
             <label>
-                <input type="password" name="password" placeholder="Влизане" />
+                <input type="password" name="password" placeholder="Login" />
             </label>
-            <button disabled={!$form.valid} on:click|preventDefault={login}>Влизане</button>
+            <button disabled={!$form.valid} on:click|preventDefault={login}>Login</button>
         </form>
-            <h3 class="not-selectable clickable" on:click={goToRegisterPage}>Нямате акаунт?</h3>
+            <h3 class="not-selectable clickable" on:click={goToRegisterPage}>No account?</h3>
     </div>
 </main>
 

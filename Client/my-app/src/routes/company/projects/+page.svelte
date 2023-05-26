@@ -128,11 +128,11 @@
             {/if}
         </div>
         <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>Не си част от никой проект на компанията.</h1>
+            <h1>You aren't part of any projects in this company.</h1>
             {#if companyObj.role.name === "MANAGER"}
-                <h1>Изчакай да те поканят или направи като натиснеш тук.</h1>
+                <h1>Wait to be invited or make yourself one by clicking here.</h1>
             {:else if companyObj.role.name === "EMPLOYEE"}
-                <h1>Изчакай да те поканят.</h1>
+                <h1>Wait to be invited.</h1>
             {/if}
         </div>
     {:else if data.error === 500}
@@ -155,15 +155,14 @@
             {/if}
         </div>
         <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>Не си част от никой проект на компанията.</h1>
+            <h1>You aren't part of any projects in this company.</h1>
             {#if companyObj.role.name === "MANAGER"}
-                <h1>Изчакай да те поканят или направи като натиснеш тук.</h1>
+                <h1>Wait to be invited or make yourself one by clicking here.</h1>
             {:else if companyObj.role.name === "EMPLOYEE"}
-                <h1>Изчакай да те поканят.</h1>
+                <h1>Wait to be invited.</h1>
             {/if}
         </div>
     {:else}
-        <!--tva e usual stranicata (trq sa uprai)-->
         <Header/>
         <div class="lowerMenuDiv">
             <Breadcrumb >
@@ -186,16 +185,16 @@
 
 {/await}
 
-<Modal title="Създаване на проект" bind:open={createPopup} size="XL" autoclose>
+<Modal title="Create project" bind:open={createPopup} size="XL" autoclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             <div>
-                <Label for="projectName" class="mb-2">Име на проекта</Label>
+                <Label for="projectName" class="mb-2">Project name</Label>
                 <Input type="text" id="projectName" required>
                     <input type="text" bind:value={projectName} />
                 </Input>
             </div>
-            <Button type="submit" on:click={createProject}>Създаване</Button>
+            <Button type="submit" on:click={createProject}>Create</Button>
         </div>
     </form>
 </Modal>

@@ -101,7 +101,7 @@
 
     function editBU(){
         if(!buName){
-            alert("Полето не може да е празно!");
+            alert("The field can't be empty!");
         }else {
             let updatedBURole = {
                 ...BURole.businessUnit,
@@ -258,27 +258,27 @@
 <Modal bind:open={leavePopup} size="xs" autoclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Сигурни ли сте, че искате да напуснете екипа?
-        <Button color="red" class="mr-2" on:click={leaveBU}>Да</Button>
-        <Button color='alternative'>Не</Button>
+        Are you sure you want to leave the team?
+        <Button color="red" class="mr-2" on:click={leaveBU}>Yes</Button>
+        <Button color='alternative'>No</Button>
     </div>
 </Modal>
 
 <Modal bind:open={deletePopup} size="xs" autoclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Сигурни ли сте, че искате да изтриете екипа?
-        <Button color="red" class="mr-2" on:click={deleteBU}>Да</Button>
-        <Button color='alternative'>Не</Button>
+        Are you sure you want to leave the team?
+        <Button color="red" class="mr-2" on:click={deleteBU}>Yes</Button>
+        <Button color='alternative'>No</Button>
     </div>
 </Modal>
 
-<Modal title="Редактрине на екипа" bind:open={editPopup} size="XL" autoclose>
+<Modal title="Edit team" bind:open={editPopup} size="XL" autoclose>
     <div class="bodyPopup">
 
         <div class="editDiv">
             <div class="teamNameLabel">
-                <Label for="teamName" class="mb-2">Име на екипа</Label>
+                <Label for="teamName" class="mb-2">Team name</Label>
                 <Input type="text" id="teamName" required >
                     <input class="text-black inputName" type="text" placeholder="{BURole.businessUnit.name}" bind:value={buName} required/>
                 </Input>
@@ -291,37 +291,33 @@
                  }}>
 
         </div>
-        <Button type="submit" on:click={editBU}>Редактиране</Button>
+        <Button type="submit" on:click={editBU}>Edit</Button>
     </div>
 </Modal>
 
-<Modal title="Покани хора в {BURole.businessUnit.name}" bind:open={inviteToTeamPopup} size="XL" autoclose>
+<Modal title="Invite people in {BURole.businessUnit.name}" bind:open={inviteToTeamPopup} size="XL" autoclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             {#if alreadyInvited.length > 0}
                 <div class="invited text-black">
-                    <span>Поканени хора</span>
+                    <span>Invited people</span>
                     <Listgroup items="{alreadyInvited}" let:item class="w-48">
                         <div class="parent text-black">
                             <div class="text">
                                 {item.receiver.email}
                             </div>
-                            <!--                            <CloseButton class="close-Button"-->
-                            <!--                            on:click={ () => {-->
-                            <!--                                alreadyInvited-->
-                            <!--                            }}/>-->
                         </div>
                     </Listgroup>
                 </div>
             {/if}
 
             <div>
-                <Label for="teamName" class="mb-2">Имейл на човека</Label>
+                <Label for="teamName" class="mb-2">Email invite to</Label>
                 <Input type="text" id="teamName" required>
                     <input type="text" bind:value={inviteeEmail} />
                 </Input>
             </div>
-            <Button type="submit" on:click={invitePersonToTeam}>Изпращане</Button>
+            <Button type="submit" on:click={invitePersonToTeam}>Send</Button>
         </div>
     </form>
 </Modal>
@@ -365,14 +361,10 @@
             flex-grow: 0;
             max-width: 20%;
             min-width: 5%;
-            //max-height: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            //background-color: #e7e7e7;
-            //background-color: red;
-            //border: 1px solid black;
         }
 
         img {
@@ -435,7 +427,6 @@
         position: relative;
         display: flex;
         flex-direction: row;
-        //background-color: red;
         align-items: center;
         justify-content: center; /* Align child elements horizontally */
     }

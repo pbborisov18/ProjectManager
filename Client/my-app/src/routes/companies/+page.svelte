@@ -153,11 +153,10 @@
             <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
         </div>
         <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>Не си част от никакви компании.</h1>
-            <h1>Изчакай да те поканят или си направи своя като натиснеш тук.</h1>
+            <h1>You aren't part of any companies.</h1>
+            <h1>Wait to be invited or make yourself one by clicking here.</h1>
         </div>
     {:else if data.error === 500}
-        <!--nikva ideq tuka-->
         <Header />
         <p>Internal server error!</p>
     {:else if data.error === 401}
@@ -168,11 +167,10 @@
             <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
         </div>
         <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>Не си част от никакви компании.</h1>
-            <h1>Изчакай да те поканят или си направи своя като натиснеш тук.</h1>
+            <h1>You aren't part of any companies.</h1>
+            <h1>Wait to be invited or make yourself one by clicking here.</h1>
         </div>
     {:else}
-        <!--tva e usual stranicata (trq sa uprai)-->
         <Header/>
         <div class="addCompany">
             <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
@@ -187,16 +185,16 @@
 
 {/await}
 
-<Modal title="Създаване на компания " bind:open={createPopup} size="XL" autoclose>
+<Modal title="Create a company" bind:open={createPopup} size="XL" autoclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             <div>
-                <Label for="companyName" class="mb-2">Име на компанията</Label>
+                <Label for="companyName" class="mb-2">Company name</Label>
                 <Input type="text" id="companyName" required>
                     <input type="text" bind:value />
                 </Input>
             </div>
-            <Button type="stu" on:click={createCompany}>Създаване</Button>
+            <Button type="stu" on:click={createCompany}>Create</Button>
         </div>
     </form>
 </Modal>

@@ -26,7 +26,7 @@
           <a on:click={redirectToLogin}
             class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-red-400 active:bg-red-500 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"
           >
-            Опитай днес
+            Try today
           </a>
         </div>
       </div>

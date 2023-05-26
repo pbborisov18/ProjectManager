@@ -127,11 +127,11 @@
             {/if}
         </div>
         <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>Не си част от никой екип на проекта.</h1>
+            <h1>You aren't part of any teams in this project.</h1>
             {#if projectObj.role.name === "MANAGER"}
-                <h1>Изчакай да те поканят или направи като натиснеш тук.</h1>
+                <h1>Wait to be invited or make yourself one by clicking here.</h1>
             {:else if projectObj.role.name === "EMPLOYEE"}
-                <h1>Изчакай да те поканят.</h1>
+                <h1>Wait to be invited.</h1>
             {/if}
         </div>
     {:else if data.error === 500}
@@ -155,15 +155,14 @@
             {/if}
         </div>
         <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>Не си част от никой проект на компанията.</h1>
+            <h1>You aren't part of any teams of this project.</h1>
             {#if projectObj.role.name === "MANAGER"}
-                <h1>Изчакай да те поканят или направи като натиснеш тук.</h1>
+                <h1>Wait to be invited or make yourself one by clicking here.</h1>
             {:else if projectObj.role.name === "EMPLOYEE"}
-                <h1>Изчакай да те поканят.</h1>
+                <h1>Wait to be invited.</h1>
             {/if}
         </div>
     {:else}
-        <!--tva e usual stranicata (trq sa uprai)-->
         <Header/>
         <div class="lowerMenuDiv">
             <Breadcrumb >
@@ -187,16 +186,16 @@
 
 {/await}
 
-<Modal title="Създаване на отбор" bind:open={createPopup} size="XL" autoclose>
+<Modal title="Create team" bind:open={createPopup} size="XL" autoclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             <div>
-                <Label for="teamName" class="mb-2">Име на отбора</Label>
+                <Label for="teamName" class="mb-2">Team name</Label>
                 <Input type="text" id="teamName" required>
                     <input type="text" bind:value={teamName} />
                 </Input>
             </div>
-            <Button type="submit" on:click={createTeam}>Създаване</Button>
+            <Button type="submit" on:click={createTeam}>Create</Button>
         </div>
     </form>
 </Modal>

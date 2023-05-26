@@ -37,7 +37,7 @@
         })
             .catch(error => {
                 console.error(error);
-                alert('Неуспешна регистрацията ! ' + error);
+                alert('Failed to register! ' + error);
             });
     }
 
@@ -83,35 +83,35 @@
         <form use:form>
             <HintGroup for="email">
                 <Hint on="required">{requiredMessage}</Hint>
-                <Hint on="email" hideWhenRequired>Трябва да е валиден имейл</Hint>
+                <Hint on="email" hideWhenRequired>Has to be a valid email!</Hint>
             </HintGroup>
             <label>
-                <input type="text" name="email" placeholder="Имейл" use:validators={[required, email]}/>
+                <input type="text" name="email" placeholder="Email" use:validators={[required, email]}/>
             </label>
 
             <HintGroup for="password">
                 <Hint on="required">{requiredMessage}</Hint>
-                <Hint on="minLength" hideWhenRequired let:value>Трябва да има поне {value} символа.</Hint>
+                <Hint on="minLength" hideWhenRequired let:value>Password too short (minimum{value}).</Hint>
                 <Hint on="containNumbers" hideWhen="minLength" let:value>
-                    Трябва да има поне {value} числа.
+                    Has to have at least {value} numbers.
                 </Hint>
             </HintGroup>
             <label>
-                <input type="password" name="password" placeholder="Парола" use:validators={[required, minLength(5), containNumbers(2)]}/>
+                <input type="password" name="password" placeholder="Password" use:validators={[required, minLength(5), containNumbers(2)]}/>
             </label>
 
             <HintGroup for="confirmPassword">
                 <Hint on="required">{requiredMessage}</Hint>
-                <Hint on="passwordMatch" hideWhenRequired>Паролите не са еднакви</Hint>
+                <Hint on="passwordMatch" hideWhenRequired>Passwords aren't the same!</Hint>
             </HintGroup><br />
             <label>
-                <input type="password" name="confirmPassword" placeholder="Потвърди паролата" use:validators={[required, passwordMatch]} />
+                <input type="password" name="confirmPassword" placeholder="Confirm password" use:validators={[required, passwordMatch]} />
             </label>
 
 
-            <button disabled={!$form.valid} on:click|preventDefault={register}>Регистриране</button>
+            <button disabled={!$form.valid} on:click|preventDefault={register}>Register</button>
         </form>
-        <h3 class="not-selectable clickable" on:click={goToLoginPage}>Вече имате акаунт?</h3>
+        <h3 class="not-selectable clickable" on:click={goToLoginPage}>Already have an account?</h3>
     </div>
 </main>
 

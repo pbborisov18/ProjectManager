@@ -1,6 +1,6 @@
 <script>
 import Header from "$lib/components/Header.svelte";
-import {Label, Input, Button, Select, Textarea, Breadcrumb, BreadcrumbItem} from 'flowbite-svelte';
+import {Label, Input, Button, Breadcrumb, BreadcrumbItem} from 'flowbite-svelte';
 import {company, project, team} from "$lib/stores.js";
 import {goto} from "$app/navigation";
 
@@ -97,15 +97,15 @@ function redirectToLastPage(){
     </Breadcrumb>
 </div>
 <div class="mainDiv">
-    <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Добави дъска</h2>
+    <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Create whiteboard</h2>
     <form on:submit={handleSubmit}>
         <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
             <div class="sm:col-span-2">
-                <Label for="name" class="mb-2">Име</Label>
-                <Input type="text" id="name" placeholder="Име на дъската" bind:value={whiteboardName} required />
+                <Label for="name" class="mb-2">Name</Label>
+                <Input type="text" id="name" placeholder="Whiteboard name" bind:value={whiteboardName} required />
             </div>
-            <Button on:click={redirectToLastPage}>Отказ</Button>
-            <Button type="submit" class="w-32">Направи</Button>
+            <Button on:click={redirectToLastPage}>Cancel</Button>
+            <Button type="submit" class="w-32">Create</Button>
 
         </div>
     </form>
@@ -125,7 +125,7 @@ function redirectToLastPage(){
         align-items: center;
         font-family: sans-serif;
         font-weight: lighter;
-        box-shadow: 0px 0px 1px 1px #BBBBBB;
+        box-shadow: 0 0 1px 1px #BBBBBB;
     }
     .lowerMenuDiv{
         display: flex;

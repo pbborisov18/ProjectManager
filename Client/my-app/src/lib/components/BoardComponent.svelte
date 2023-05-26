@@ -7,7 +7,7 @@
     //Gets columns from parent (together with the notes inside)
     export let columns;
 
-    //updates the parent so he know when an update happens
+    //updates the parent so it know when an update happens
     export let onFinalUpdate;
 
     //For moving the columns around
@@ -43,29 +43,13 @@
 
 <style>
     .board {
-        /*height: 90vh;
-        width: 100%;
-        padding: 0.5em;*/
-
-
         height: 85vh;
         width: 90%;
-
         padding: 0.5em;
-        /*margin-left: 5vw;*/
-
         display: flex;
-        /*background-color: red;*/
 
     }
     .column {
-        /*height: 100%;
-        width: 25%;
-        padding: 0.5em;
-        margin: 0.5em;
-        float: left;
-        border: 1px solid #333333;*/
-
         height: 100%;
         padding: 0.5em;
         margin: 10px;
