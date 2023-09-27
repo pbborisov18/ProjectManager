@@ -16,9 +16,12 @@ import java.util.Objects;
 
 
 @Entity
+@Getter
 @Setter
 @NoArgsConstructor
 @Table(name = "BusinessUnits")
+//Could've used @Inheritance() but I'm basically doing it manually
+//And I'm doing a combination of JOINED and SINGLE_TABLE (which could've been made just SINGLE_TABLE but I didn't think of it then)
 public class BusinessUnit {
 
         @Id
@@ -45,7 +48,7 @@ public class BusinessUnit {
         private BusinessUnit project;
 
         @Nullable
-        @ManyToOne(fetch = FetchType.LAZY)
+        @ManyToOne
         @JoinColumn(name = "WhiteboardsId", referencedColumnName = "Id")
         @Cascade(CascadeType.MERGE)
         private Whiteboard whiteboard;
