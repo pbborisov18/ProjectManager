@@ -56,10 +56,7 @@
     function createCompany(){
         let company = {id: null,
             name: value,
-            type: {
-                id: 1,
-                name:"COMPANY"
-            },
+            type: "COMPANY",
             whiteboard: null
         };
 

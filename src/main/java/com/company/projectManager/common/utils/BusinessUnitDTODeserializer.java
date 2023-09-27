@@ -20,21 +20,21 @@ public class BusinessUnitDTODeserializer extends JsonDeserializer<BusinessUnitDT
 
         Long id = tree.get("id").asLong();
         String name = tree.get("name").asText();
-        TypeDTO typeDTO = codec.treeToValue(tree.get("type"), TypeDTO.class);
+        TypeName type = codec.treeToValue(tree.get("type"), TypeName.class);
         WhiteboardDTO whiteboardDTO = codec.treeToValue(tree.get("whiteboard"), WhiteboardDTO.class);
 
         BusinessUnitDTO businessUnitDTO = null;
 
-        switch (typeDTO.name()) {
-            case COMPANY -> businessUnitDTO = new CompanyDTO(id, name, typeDTO, whiteboardDTO);
+        switch (type) {
+            case COMPANY -> businessUnitDTO = new CompanyDTO(id, name, type, whiteboardDTO);
             case PROJECT -> {
                 CompanyDTO companyDTO = codec.treeToValue(tree.get("company"), CompanyDTO.class);
-                businessUnitDTO = new ProjectDTO(id, name, typeDTO, companyDTO, whiteboardDTO);
+                businessUnitDTO = new ProjectDTO(id, name, type, companyDTO, whiteboardDTO);
             }
             case TEAM -> {
                 CompanyDTO companyDTO1 = codec.treeToValue(tree.get("company"), CompanyDTO.class);
                 ProjectDTO projectDTO = codec.treeToValue(tree.get("project"), ProjectDTO.class);
-                businessUnitDTO = new TeamDTO(id, name, typeDTO, companyDTO1, projectDTO, whiteboardDTO);
+                businessUnitDTO = new TeamDTO(id, name, type, companyDTO1, projectDTO, whiteboardDTO);
             }
             default -> {
                 // handle unexpected case

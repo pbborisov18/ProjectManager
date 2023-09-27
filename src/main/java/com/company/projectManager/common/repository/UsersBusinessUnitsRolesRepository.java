@@ -12,11 +12,11 @@ public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBu
 
     List<UserBusinessUnitRole> findAllByUserId(Long userId);
 
-    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitTypeName(Long userId, TypeName typeName);
+    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitType(Long userId, TypeName typeName);
 
-    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitTypeNameAndBusinessUnitCompanyId(Long userId, TypeName typeName, Long companyId);
+    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitTypeAndBusinessUnitCompanyId(Long userId, TypeName typeName, Long companyId);
 
-    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitTypeNameAndBusinessUnitProjectId(Long userId, TypeName typeName, Long projectId);
+    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitTypeAndBusinessUnitProjectId(Long userId, TypeName typeName, Long projectId);
 
     List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitCompanyId(Long userId, Long companyId);
 

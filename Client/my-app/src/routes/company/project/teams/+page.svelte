@@ -33,10 +33,7 @@
     function createTeam(){
         let team = {id: null,
             name: teamName,
-            type:{
-                id: 3,
-                name: "TEAM"
-            },
+            type: "TEAM",
             company: companyObj.businessUnit,
             project: projectObj.businessUnit,
             whiteboard:null

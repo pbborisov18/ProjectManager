@@ -27,10 +27,7 @@
     function createProject(){
         let project = {id: null,
             name: projectName,
-            type:{
-                id: 2,
-                name: "PROJECT"
-            },
+            type: "PROJECT",
             company: companyObj.businessUnit,
             whiteboard:null
         }

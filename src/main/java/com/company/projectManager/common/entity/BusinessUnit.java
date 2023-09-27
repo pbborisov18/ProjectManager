@@ -1,11 +1,13 @@
 package com.company.projectManager.common.entity;
 
+import com.company.projectManager.common.utils.TypeName;
 import com.company.projectManager.whiteboard.whiteboards.entity.Whiteboard;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
@@ -32,10 +34,8 @@ public class BusinessUnit {
         @NotBlank
         private String name;
 
-        @ManyToOne
-        @JoinColumn(name = "TypesId", referencedColumnName = "Id")
         @NotNull
-        private Type type;
+        private TypeName type;
 
         @Nullable
         @ManyToOne
@@ -53,7 +53,7 @@ public class BusinessUnit {
         @Cascade(CascadeType.MERGE)
         private Whiteboard whiteboard;
 
-        public BusinessUnit(Long id, String name, Type type, @Nullable BusinessUnit company, @Nullable BusinessUnit project, @Nullable Whiteboard whiteboard) {
+        public BusinessUnit(Long id, String name, TypeName type, @Nullable BusinessUnit company, @Nullable BusinessUnit project, @Nullable Whiteboard whiteboard) {
             this.id = id;
             this.name = name;
             this.type = type;
@@ -73,34 +73,6 @@ public class BusinessUnit {
         @Override
         public int hashCode() {
             return getClass().hashCode();
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public Type getType() {
-            setType((Type) Hibernate.unproxy(this.type));
-            return type;
-        }
-
-        @Nullable
-        public BusinessUnit getCompany() {
-            return company;
-        }
-
-        @Nullable
-        public BusinessUnit getProject() {
-            return project;
-        }
-
-        public Whiteboard getWhiteboard() {
-            setWhiteboard((Whiteboard) Hibernate.unproxy(this.whiteboard));
-            return whiteboard;
         }
 
 }

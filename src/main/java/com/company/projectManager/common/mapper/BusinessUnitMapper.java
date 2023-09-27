@@ -15,13 +15,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring", uses = {WhiteboardMapper.class, TypeMapper.class}, collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
+@Mapper(componentModel = "spring", uses = {WhiteboardMapper.class}, collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
 @Validated
 public interface BusinessUnitMapper {
 
     @Named("toBusinessUnitDTO")
     default BusinessUnitDTO toBusinessUnitDTO(@Valid BusinessUnit businessUnit) {
-        return switch (businessUnit.getType().getName()) {
+        return switch (businessUnit.getType()) {
             case COMPANY -> toCompanyDTO(businessUnit);
             case PROJECT -> toProjectDTO(businessUnit);
             case TEAM -> toTeamDTO(businessUnit);
@@ -52,7 +52,7 @@ public interface BusinessUnitMapper {
 
     @Named("toBusinessUnitEntity")
     default BusinessUnit toBusinessUnitEntity(@Valid BusinessUnitDTO businessUnitDTO) {
-        return switch (businessUnitDTO.type().name()) {
+        return switch (businessUnitDTO.type()) {
             case COMPANY -> toEntityFromCompanyDTO((CompanyDTO) businessUnitDTO);
             case PROJECT -> toEntityFromProjectDTO((ProjectDTO) businessUnitDTO);
             case TEAM -> toEntityFromTeamDTO((TeamDTO) businessUnitDTO);

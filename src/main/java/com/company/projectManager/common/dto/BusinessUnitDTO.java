@@ -1,6 +1,7 @@
 package com.company.projectManager.common.dto;
 
 import com.company.projectManager.common.utils.BusinessUnitDTODeserializer;
+import com.company.projectManager.common.utils.TypeName;
 import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -11,7 +12,7 @@ public interface BusinessUnitDTO {
 
     String name();
 
-    TypeDTO type();
+    TypeName type();
 
     CompanyDTO company();
 
