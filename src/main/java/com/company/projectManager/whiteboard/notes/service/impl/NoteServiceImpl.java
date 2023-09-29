@@ -140,7 +140,6 @@ public class NoteServiceImpl implements NoteService {
         }
     }
 
-    @Transactional
     public void deleteNote(NoteDTO noteDTO) throws FailedToSelectException, UserNotInBusinessUnitException, UserUnauthenticatedException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
