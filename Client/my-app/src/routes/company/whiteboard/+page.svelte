@@ -36,8 +36,6 @@
     }
 
     function getColumns(whiteboard) {
-
-
         let fetchUrl;
 
         if(currentUrl === "/company/whiteboard"){
@@ -91,8 +89,38 @@
 
     }
 
-    function getNotes(column) {
+    function makeColumns(){
+        const promises = [];
 
+        columns.forEach(function (column){
+            const promise = getNotes(column);
+            promises.push(promise);
+        })
+
+        Promise.all(promises)
+            .then((allNotesData) => {
+                //creates the array
+                items = columns.map((column, index) => ({
+                    id: column.id,
+                    name: column.name,
+                    position: column.position,
+                    whiteboardDTO: column.whiteboardDTO,
+                    items: allNotesData[index] || [],
+                }));
+                //sorts the array by positions and returns it
+                items.sort((a, b) => a.position - b.position);
+
+                // Sort the inner arrays individually based on the position of the first item in each inner array
+                items.forEach(item => {
+                    item.items.sort((a, b) => a.position - b.position);
+                });
+
+                return items;
+            });
+
+    }
+
+    function getNotes(column) {
         let fetchUrl;
 
         if(currentUrl === "/company/whiteboard"){
@@ -142,35 +170,6 @@
 
     }
 
-    function makeColumns(){
-        const promises = [];
-
-        columns.forEach(function (column){
-            const promise = getNotes(column);
-            promises.push(promise);
-        })
-
-        const promises2 = columns.map(column => {
-            const promise = getNotes(column);
-            return promise || []; // Replace undefined with empty array
-        });
-
-        Promise.all(promises)
-            .then((notesData) => {
-                //creates the array
-                items = columns.map((column, index) => ({
-                    id: column.id,
-                    name: column.name,
-                    position: column.position,
-                    whiteboardDTO: column.whiteboardDTO,
-                    items: notesData[index] || [],
-                }));
-                //sorts the array by positions and returns it
-                return items.sort((a, b) => a.position - b.position);
-            });
-
-    }
-
     //I know this makes more than necessary requests but ehhh
     //no time to optimize now
     function handleBoardUpdated(newItems){
@@ -184,10 +183,14 @@
             const newItem = newItems[i];
             for (let j = 0; j < newItem.items.length; j++) {
                 const note = newItem.items[j];
-                note.columnDTO = {id: newItem.id,
-                                    name: newItem.name,
-                                    whiteboardDTO: newItem.whiteboardDTO,
-                                    position: newItem.position};
+                note.columnDTO = {
+                    id: newItem.id,
+                    name: newItem.name,
+                    whiteboardDTO: newItem.whiteboardDTO,
+                    position: newItem.position
+                };
+                note.position = j;
+
                 updatedNotes.push(note);
             }
         }
@@ -197,26 +200,21 @@
 
     function updateNotes(updatedNotes){
         let fetchUrl;
-        let bu;
 
         if(currentUrl === "/company/whiteboard"){
-            fetchUrl = "http://localhost:8080/company/whiteboard/updateNote"
-            bu = companyObj;
+            fetchUrl = "http://localhost:8080/company/whiteboard/updateNotes"
         } else if(currentUrl === "/company/project/whiteboard"){
-            fetchUrl = "http://localhost:8080/company/project/whiteboard/updateNote"
-            bu = projectObj;
+            fetchUrl = "http://localhost:8080/company/project/whiteboard/updateNotes"
         } else if(currentUrl === "/company/project/team/whiteboard"){
-            fetchUrl = "http://localhost:8080/company/project/team/whiteboard/updateNote"
-            bu = teamObj;
+            fetchUrl = "http://localhost:8080/company/project/team/whiteboard/updateNotes"
         }
 
-        updatedNotes.forEach((note) => fetch(fetchUrl, {
+        fetch(fetchUrl, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({noteDTO: note,
-                                businessUnitDTO: bu.businessUnit}),
+            body: JSON.stringify(updatedNotes),
             credentials: "include"
         }).then(response=>{
             if (response.status === 200) {
@@ -237,14 +235,15 @@
             }
         }).catch(error => {
             console.error(error);
-        }));
+        });
     }
 
     let noteName;
     let noteDescription;
 
     function createNote(){
-        const newNote = {id: null,
+        const newNote = {
+            id: null,
             name: noteName,
             description: noteDescription,
             columnDTO: {
@@ -252,7 +251,10 @@
                 name: items[0].name,
                 whiteboardDTO: items[0].whiteboardDTO,
                 position: items[0].position
-            }};
+            },
+            position: (items[0].items.length > 0) ? items[0].items.length : 0
+        };
+
         items = [{
             id: items[0].id,
             name: items[0].name,
@@ -268,17 +270,13 @@
 
     function createNoteRequest(note){
         let fetchUrl;
-        let bu;
 
         if(currentUrl === "/company/whiteboard"){
             fetchUrl = "http://localhost:8080/company/whiteboard/createNote"
-            bu = companyObj;
         } else if(currentUrl === "/company/project/whiteboard"){
             fetchUrl = "http://localhost:8080/company/project/whiteboard/createNote"
-            bu = projectObj;
         } else if(currentUrl === "/company/project/team/whiteboard"){
             fetchUrl = "http://localhost:8080/company/project/team/whiteboard/createNote"
-            bu = teamObj;
         }
 
         fetch(fetchUrl, {
@@ -286,8 +284,7 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({noteDTO: note,
-                businessUnitDTO: bu.businessUnit}),
+            body: JSON.stringify(note),
             credentials: "include"
         }).then(response=>{
             if (response.status === 201) {

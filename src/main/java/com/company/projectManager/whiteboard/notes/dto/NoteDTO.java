@@ -17,6 +17,9 @@ public record NoteDTO(
         String description,
 
         @NotNull
-        ColumnDTO columnDTO
+        ColumnDTO columnDTO,
+
+        @NotNull
+        Long position
 ) {
 }

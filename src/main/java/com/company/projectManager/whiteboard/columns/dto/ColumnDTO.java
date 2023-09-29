@@ -14,7 +14,7 @@ public record ColumnDTO(
         WhiteboardDTO whiteboardDTO,
 
         @NotNull
-        int position
+        Long position
 ) {
 
 }

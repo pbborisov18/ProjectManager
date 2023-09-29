@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.CascadeType;
+import jakarta.persistence.CascadeType;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Cascade;
@@ -26,16 +26,19 @@ public class Column {
     @NotNull
     private String name;
 
-    @ManyToOne
+    @NotNull
+    //If I merge the Note I want the column to be merged too
+    //You'd wonder why I can't use PERSIST here together with merge? Well JPA considers persist first and
+    //throws an exception before it can try merge (so the transaction is rolled back)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "WhiteboardsId")
-    @Cascade(CascadeType.MERGE)
+    @Cascade({org.hibernate.annotations.CascadeType.MERGE, org.hibernate.annotations.CascadeType.SAVE_UPDATE}) //This isn't substitute (hibernate documentation)
     private Whiteboard whiteboard;
 
-
     @NotNull
-    private int position;
+    private Long position;
 
-    public Column(Long id, String name, Whiteboard whiteboard, int position) {
+    public Column(Long id, String name, Whiteboard whiteboard, Long position) {
         this.id = id;
         this.name = name;
         this.whiteboard = whiteboard;
@@ -68,7 +71,7 @@ public class Column {
         return whiteboard;
     }
 
-    public int getPosition() {
+    public Long getPosition() {
         return position;
     }
 }

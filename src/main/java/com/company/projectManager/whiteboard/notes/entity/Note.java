@@ -2,6 +2,7 @@ package com.company.projectManager.whiteboard.notes.entity;
 
 import com.company.projectManager.whiteboard.columns.entity.Column;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,14 +10,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
-import org.hibernate.annotations.CascadeType;
 
 import java.util.Objects;
 
 @Entity
 @Setter
 @NoArgsConstructor
-@Table(name = "Notes")
+@Table(name = "Notes", uniqueConstraints = {@UniqueConstraint(columnNames = {"ColumnsId", "Position"})})
 public class Note {
 
     @Id
@@ -32,17 +32,23 @@ public class Note {
     private String description;
 
     @NotNull
-    @ManyToOne
+    //If I merge the Note I want the column to be merged too
+    //You'd wonder why I can't use PERSIST here together with merge? Well JPA considers persist first and
+    //throws an exception before it can try merge (so the transaction is rolled back)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "ColumnsId")
-    @Cascade(CascadeType.MERGE)
+    @Cascade({org.hibernate.annotations.CascadeType.MERGE, org.hibernate.annotations.CascadeType.SAVE_UPDATE}) //This isn't substitute (hibernate documentation)
     private Column column;
 
+    @NotNull
+    private Long position;
 
-    public Note(Long id, String name, String description, Column column) {
+    public Note(Long id, String name, String description, Column column, Long position) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.column = column;
+        this.position = position;
     }
 
     @Override
@@ -73,5 +79,9 @@ public class Note {
     public Column getColumn() {
         setColumn((Column) Hibernate.unproxy(this.column));
         return column;
+    }
+
+    public Long getPosition() {
+        return position;
     }
 }

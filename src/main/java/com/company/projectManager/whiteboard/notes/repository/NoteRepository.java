@@ -5,8 +5,11 @@ import org.springframework.stereotype.Repository;
 
 import com.company.projectManager.whiteboard.notes.entity.Note;
 
+import java.util.List;
+
 @Repository
 public interface NoteRepository extends CrudRepository<Note, Long> {
 
-    Iterable<Note> findAllByColumnId(Long id);
+    List<Note> findAllByColumnId(Long id);
+
 }

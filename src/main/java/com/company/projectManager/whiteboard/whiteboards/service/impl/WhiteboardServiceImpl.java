@@ -190,9 +190,11 @@ public class WhiteboardServiceImpl implements WhiteboardService {
                     usersBusinessUnitsRolesRepository.save(userBusinessUnitRole.get());
 
                     //Delete Notes
-                    for (ColumnDTO columnDTO : columnService.findAllColumnsByWhiteboardId(whiteboardDTO.id())) {
-                        noteService.deleteNote(noteService.findAllNotesByColumnId(columnDTO));
-                    }
+                    //Do that shit with cascading not like this
+                    //Probably breaks functionality. Will fix in the future
+//                    for (ColumnDTO columnDTO : columnService.findAllColumnsByWhiteboardId(whiteboardDTO.id())) {
+//                        noteService.deleteNote(noteService.findAllNotesByColumnId(columnDTO));
+//                    }
 
                     //Delete Columns
                     columnService.deleteColumn(columnService.findAllColumnsByWhiteboardId(whiteboardDTO.id()));

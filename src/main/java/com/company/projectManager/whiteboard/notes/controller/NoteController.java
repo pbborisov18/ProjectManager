@@ -8,8 +8,8 @@ import com.company.projectManager.whiteboard.notes.service.NoteService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.company.projectManager.common.exception.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,16 +20,22 @@ import java.util.Map;
 @RestController
 public class NoteController {
 
-    @Autowired
-    NoteService noteService;
+    private final NoteService noteService;
 
+    public NoteController(NoteService noteService) {
+        this.noteService = noteService;
+    }
+
+    //Why is this Post? Cuz something something GET requests with bodies is bad (and spring doesn't read it),
+    //something something, expose the data in the url (no)
+    //I'm either breaking one standard or the other. This one is worse to break but easier to implement. (You might say I'm a total idiot for doing this and I'd agree with you)
     @PostMapping(value = {"/company/whiteboard/notes", "/company/project/whiteboard/notes", "/company/project/team/whiteboard/notes"})
-    public ResponseEntity<Object> getAllNotesOfColumn(@RequestBody ColumnDTO columnDTO){
+    public ResponseEntity<Object> getAllNotesOfColumn(@RequestBody @Valid ColumnDTO columnDTO){
         try {
-            List<NoteDTO> notes = noteService.findAllNotesByColumnIdByAuthenticatedUser(columnDTO, columnDTO.whiteboardDTO());
+            List<NoteDTO> notes = noteService.findAllNotesByColumn(columnDTO);
 
             return new ResponseEntity<>(notes, HttpStatus.OK);
-        } catch (FailedToSelectException e) {
+        } catch (FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (UserUnauthenticatedException e) {
             //Returns 401 which means unauthenticated (not logged in)
@@ -41,23 +47,15 @@ public class NoteController {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (ClassCastException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (com.company.projectManager.common.exception.EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
     @PostMapping(value = {"/company/whiteboard/createNote", "/company/project/whiteboard/createNote", "/company/project/team/whiteboard/createNote"})
-    public ResponseEntity<Object> createNote(@RequestBody Map<String, Object> requestBody /*Waiting for these 2 objects - NoteDTO noteDTO, BusinessUnitDTO*/) {
+    public ResponseEntity<Object> createNote(@RequestBody @Valid NoteDTO noteDTO) {
         try {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String noteJSON = ow.writeValueAsString(requestBody.get("noteDTO"));
-            String businessUnitJSON = ow.writeValueAsString(requestBody.get("businessUnitDTO"));
-
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            noteService.createNoteByAuthenticatedUser(
-                    objectMapper.readValue(noteJSON, NoteDTO.class),
-                    objectMapper.readValue(businessUnitJSON, BusinessUnitDTO.class));
+            noteService.createNote(noteDTO);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (FailedToSelectException | FailedToSaveException e) {
@@ -70,23 +68,13 @@ public class NoteController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (ClassCastException | JsonProcessingException e) {
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping(value = {"/company/whiteboard/updateNote", "/company/project/whiteboard/updateNote", "/company/project/team/whiteboard/updateNote"})
-    public ResponseEntity<Object> updateNote(@RequestBody Map<String, Object> requestBody /*Waiting for these 2 objects - NoteDTO noteDTO, BusinessUnitDTO*/){
+    public ResponseEntity<Object> updateNote(@RequestBody @Valid NoteDTO noteDTO){
         try {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String noteJSON = ow.writeValueAsString(requestBody.get("noteDTO"));
-            String businessUnitJSON = ow.writeValueAsString(requestBody.get("businessUnitDTO"));
-
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            noteService.updateNoteByAuthenticatedUser(
-                    objectMapper.readValue(noteJSON, NoteDTO.class),
-                    objectMapper.readValue(businessUnitJSON, BusinessUnitDTO.class));
+            noteService.updateNote(noteDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (UserUnauthenticatedException e) {
@@ -97,28 +85,34 @@ public class NoteController {
             //Returns 403 which means unauthorized (no permission)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (FailedToSelectException | FailedToUpdateException e) {
+        } catch (FailedToUpdateException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (ClassCastException | JsonProcessingException e){
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (com.company.projectManager.common.exception.EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
-    //fix that
-    @DeleteMapping(value = {"/company/whiteboard/deleteNote", "/company/project/whiteboard/deleteNote", "/company/project/team/whiteboard/deleteNote"})
-    public ResponseEntity<Object> deleteNote(@RequestBody Map<String, Object> requestBody /*Waiting for these 2 objects - NoteDTO noteDTO, BusinessUnitDTO*/){
+    @PutMapping(value = {"/company/whiteboard/updateNotes", "/company/project/whiteboard/updateNotes", "/company/project/team/whiteboard/updateNotes"})
+    public ResponseEntity<Object> updateNotes(@RequestBody List<NoteDTO> notes){
         try {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String noteJSON = ow.writeValueAsString(requestBody.get("noteDTO"));
-            String businessUnitJSON = ow.writeValueAsString(requestBody.get("businessUnitDTO"));
+            noteService.updateNotes(notes);
 
-            ObjectMapper objectMapper = new ObjectMapper();
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (UserUnauthenticatedException e) {
+            //Returns 401 which means unauthenticated (not logged in)
+            //Reason being someone created this 30 yrs ago and stuff changes
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (UserNotInBusinessUnitException e) {
+            //Returns 403 which means unauthorized (no permission)
+            //Reason being someone created this 30 yrs ago and stuff changes
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (FailedToUpdateException e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-            noteService.deleteNoteByAuthenticatedUser(
-                    objectMapper.readValue(noteJSON, NoteDTO.class),
-                    objectMapper.readValue(businessUnitJSON, BusinessUnitDTO.class));
+    @DeleteMapping(value = {"/company/whiteboard/deleteNote", "/company/project/whiteboard/deleteNote", "/company/project/team/whiteboard/deleteNote"})
+    public ResponseEntity<Object> deleteNote(@RequestBody @Valid NoteDTO noteDTO){
+        try {
+            noteService.deleteNote(noteDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (UserUnauthenticatedException e) {
@@ -131,10 +125,6 @@ public class NoteController {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToSelectException | FailedToDeleteException | EntityNotFoundException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (ClassCastException | JsonProcessingException e){
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (com.company.projectManager.common.exception.EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
     }

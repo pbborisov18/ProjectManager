@@ -41,212 +41,123 @@ public class NoteServiceImpl implements NoteService {
         this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
     }
 
-    @Transactional
-    public void saveNote(NoteDTO noteDTO) throws FailedToSaveException {
+    public List<NoteDTO> findAllNotesByColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, EntityNotFoundException, FailedToSaveException {
         try {
-            Note note = noteMapper.toEntity(noteDTO);
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
+            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
-            noteRepository.save(note);
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void updateNote(NoteDTO noteDTO) throws FailedToUpdateException, EntityNotFoundException {
-        try {
-            Optional<Note> existingNote = noteRepository.findById(noteDTO.id());
-
-            if(existingNote.isEmpty()) {
-                throw new EntityNotFoundException("Note was not found!");
+            if (user.isEmpty()) {
+                throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Note note = noteMapper.toEntity(noteDTO);
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
 
-            noteRepository.save(note);
-
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToUpdateException("Unsuccessful update!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void deleteNote(NoteDTO noteDTO) throws FailedToDeleteException, EntityNotFoundException {
-        try {
-            Optional<Note> note = noteRepository.findById(noteDTO.id());
-
-            if(note.isEmpty()) {
-                throw new EntityNotFoundException("Note was not found!");
+            if (userBusinessUnitRole.isEmpty()) {
+                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
             }
+            //-----------------
 
-            noteRepository.delete(note.get());
+            List<Note> notes = noteRepository.findAllByColumnId(columnDTO.id());
 
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToDeleteException("Unsuccessful delete!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void deleteNote(List<NoteDTO> noteDTOs) throws FailedToDeleteException, EntityNotFoundException {
-        try {
-            List<Note> notesToDelete = new ArrayList<>();
-
-            for(NoteDTO noteDTO : noteDTOs) {
-                Optional<Note> note = noteRepository.findById(noteDTO.id());
-
-                if (note.isEmpty()) {
-                    throw new EntityNotFoundException("Note was not found!");
-                }
-
-                notesToDelete.add(note.get());
-            }
-
-            noteRepository.deleteAll(notesToDelete);
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToDeleteException("Unsuccessful delete!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public NoteDTO findNoteById(Long id) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            Optional<Note> note = noteRepository.findById(id);
-
-            if(note.isEmpty()) {
-                throw new EntityNotFoundException("Note was not found!");
-            }
-
-            return noteMapper.toDTO(note.get());
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public List<NoteDTO> findAllNotes() throws FailedToSelectException, EntityNotFoundException {
-        try {
-            List<Note> notes = (List<Note>) noteRepository.findAll();
-
-            if(notes.size() == 0) {
-                throw new EntityNotFoundException("No notes were found!");
+            if(notes.isEmpty()) {
+                throw new EntityNotFoundException("Notes not found!");
             }
 
             return noteMapper.toDTO(notes);
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
+            throw new FailedToSaveException("Unsuccessful select!" + e.getMessage());
         }
     }
 
-    @Transactional
-    public List<NoteDTO> findAllNotesByColumnId(ColumnDTO columnDTO) throws FailedToSelectException, EntityNotFoundException {
+    public void createNote(NoteDTO noteDTO) throws UserNotInBusinessUnitException, UserUnauthenticatedException, FailedToSaveException {
         try {
-            List<Note> note = (List<Note>) noteRepository.findAllByColumnId(columnDTO.id());
-
-            if(note.isEmpty()) {
-                throw new EntityNotFoundException("Notes not found!");
-            }
-
-            return noteMapper.toDTO(note);
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public List<NoteDTO> findAllNotesByColumnIdByAuthenticatedUser(ColumnDTO columnDTO, WhiteboardDTO whiteboardDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, EntityNotFoundException {
-        try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-
-            if (user.isEmpty()) {
-                throw new UserUnauthenticatedException("User isn't authenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), whiteboardDTO.id());
-
-                if (userBusinessUnitRole.isEmpty()) {
-                    throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-                }
-
-                List<Note> note = (List<Note>) noteRepository.findAllByColumnId(columnDTO.id());
-
-                if(note.isEmpty()) {
-                    throw new EntityNotFoundException("Notes not found!");
-                }
-
-                return noteMapper.toDTO(note);
-
-            }
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void createNoteByAuthenticatedUser(NoteDTO noteDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserNotInBusinessUnitException, UserUnauthenticatedException, FailedToSaveException {
-        try {
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
             if (user.isEmpty()) {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
 
             if (userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
             }
+            //-----------------
 
-            saveNote(noteDTO);
-
+            noteRepository.save(noteMapper.toEntity(noteDTO));
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
+            throw new FailedToSaveException("Unsuccessful select!" + e.getMessage());
         }
     }
 
-    @Transactional
-    public void updateNoteByAuthenticatedUser(NoteDTO noteDTO, BusinessUnitDTO businessUnitDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToSelectException, FailedToUpdateException, EntityNotFoundException {
+    public void updateNote(NoteDTO noteDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToUpdateException {
         try {
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
             if (user.isEmpty()) {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
 
             if (userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
             }
+            //-----------------
 
-            updateNote(noteDTO);
+            noteRepository.save(noteMapper.toEntity(noteDTO));
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
+            throw new FailedToUpdateException("Unsuccessful select!" + e.getMessage());
         }
     }
 
-    @Transactional
-    public void deleteNoteByAuthenticatedUser(NoteDTO noteDTO, BusinessUnitDTO businessUnitDTO) throws FailedToDeleteException, FailedToSelectException, UserNotInBusinessUnitException, UserUnauthenticatedException, EntityNotFoundException {
+    //Probably can optimize this in some way but this is for future me
+    public void updateNotes(List<NoteDTO> notes) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToUpdateException {
         try {
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
             if (user.isEmpty()) {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), notes.get(0).columnDTO().whiteboardDTO().id());
 
             if (userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
             }
+            //-----------------
 
-            deleteNote(noteDTO);
+            noteRepository.saveAll(noteMapper.toEntity(notes));
+
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToUpdateException("Unsuccessful select!" + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public void deleteNote(NoteDTO noteDTO) throws FailedToSelectException, UserNotInBusinessUnitException, UserUnauthenticatedException {
+        try {
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
+            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+
+            if (user.isEmpty()) {
+                throw new UserUnauthenticatedException("User isn't authenticated!");
+            }
+
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
+
+            if (userBusinessUnitRole.isEmpty()) {
+                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
+            }
+            //-----------------
+
+            noteRepository.delete(noteMapper.toEntity(noteDTO));
 
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
