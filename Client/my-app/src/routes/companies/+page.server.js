@@ -3,7 +3,7 @@ export async function load({ fetch, cookies }) {
         method: 'GET',
         headers: {
             'Content-Type': "application/json",
-            'JSESSION': cookies.get('token')
+            credentials: "include"
         }}).catch(error =>{
             return {
                 error : 500
@@ -25,7 +25,7 @@ export async function load({ fetch, cookies }) {
             method: 'GET',
             headers: {
                 'Content-Type': "application/json",
-                'JSESSION': cookies.get('token')
+                credentials: "include"
             }})
 
         if(userResult.status === 204){
