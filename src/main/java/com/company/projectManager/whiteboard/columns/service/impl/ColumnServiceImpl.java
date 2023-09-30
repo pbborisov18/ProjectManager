@@ -1,6 +1,5 @@
 package com.company.projectManager.whiteboard.columns.service.impl;
 
-import com.company.projectManager.common.dto.BusinessUnitDTO;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnitRole;
 import com.company.projectManager.common.exception.*;
@@ -12,14 +11,14 @@ import com.company.projectManager.whiteboard.columns.entity.Column;
 import com.company.projectManager.whiteboard.columns.mapper.ColumnMapper;
 import com.company.projectManager.whiteboard.columns.repository.ColumnRepository;
 import com.company.projectManager.whiteboard.columns.service.ColumnService;
+import com.company.projectManager.whiteboard.notes.repository.NoteRepository;
+import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
 import com.company.projectManager.whiteboard.whiteboards.entity.Whiteboard;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,230 +29,164 @@ public class ColumnServiceImpl implements ColumnService {
 
     private final ColumnRepository columnRepository;
 
+    private final NoteRepository noteRepository;
+
     private final UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository;
 
     private final UserRepository userRepository;
 
-    public ColumnServiceImpl(ColumnMapper columnMapper, ColumnRepository columnRepository, UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository, UserRepository userRepository) {
+    public ColumnServiceImpl(ColumnMapper columnMapper, ColumnRepository columnRepository, NoteRepository noteRepository, UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository, UserRepository userRepository) {
         this.columnMapper = columnMapper;
         this.columnRepository = columnRepository;
+        this.noteRepository = noteRepository;
         this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
         this.userRepository = userRepository;
     }
 
-    @Transactional
-    public void saveColumn(ColumnDTO columnDTO) throws FailedToSaveException {
+//    @Transactional
+    public List<ColumnDTO> findAllColumnsByWhiteboard(WhiteboardDTO whiteboard) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, EntityNotFoundException {
         try {
-            Column column = columnMapper.toEntity(columnDTO);
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
+            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
-            columnRepository.save(column);
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void updateColumn(ColumnDTO columnDTO) throws FailedToUpdateException, EntityNotFoundException {
-        try {
-            Optional<Column> existingColumn = columnRepository.findById(columnDTO.id());
-
-            if(existingColumn.isEmpty()){
-                throw new EntityNotFoundException("Column was not found!");
+            if (user.isEmpty()) {
+                throw new UserUnauthenticatedException("User isn't authenticated!");
             }
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), whiteboard.id());
 
-            columnRepository.save(columnMapper.toEntity(columnDTO));
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToUpdateException("Unsuccessful update!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void deleteColumn(ColumnDTO columnDTO) throws FailedToDeleteException, EntityNotFoundException {
-        try {
-            Optional<Column> existingColumn = columnRepository.findById(columnDTO.id());
-
-            if(existingColumn.isEmpty()){
-                throw new EntityNotFoundException("Column was not found!");
+            if (userBusinessUnitRole.isEmpty()) {
+                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
             }
+            //-----------------
 
-            columnRepository.delete(existingColumn.get());
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToDeleteException("Unsuccessful delete!" + e.getMessage());
-        }
-    }
+            List<Column> column = columnRepository.findAllByWhiteboardId(whiteboard.id());
 
-    @Transactional
-    public void deleteColumn(List<ColumnDTO> columnDTOs) throws FailedToDeleteException, EntityNotFoundException {
-        try {
-            List<Column> columnsToDelete = new ArrayList<>();
-
-            for(ColumnDTO columnDTO : columnDTOs){
-                Optional<Column> existingColumn = columnRepository.findById(columnDTO.id());
-
-                if(existingColumn.isEmpty()){
-                    throw new EntityNotFoundException("Column was not found!");
-                }
-
-                columnsToDelete.add(existingColumn.get());
-            }
-
-            columnRepository.deleteAll(columnsToDelete);
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToDeleteException("Unsuccessful delete!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public ColumnDTO findColumnById(Long id) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            Optional<Column> column = columnRepository.findById(id);
-
-            if(column.isEmpty()){
-                throw new EntityNotFoundException("Column was not found!");
-            }
-
-            return columnMapper.toDTO(column.get());
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public List<ColumnDTO> findAllColumns() throws FailedToSelectException, EntityNotFoundException {
-        try {
-            List<Column> column = (List<Column>) columnRepository.findAll();
-
-            if(column.isEmpty()){
-                throw new EntityNotFoundException("Column was not found!");
-            }
-
-            return columnMapper.toDTO(column);
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public List<ColumnDTO> findAllColumnsByWhiteboardId(Long id) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            List<Column> column = columnRepository.findAllByWhiteboardId(id);
-
-            if(column.isEmpty()){
+            if (column.isEmpty()) {
                 throw new EntityNotFoundException("Columns not found!");
             }
 
             return columnMapper.toDTO(column);
 
+
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
         }
     }
 
-    @Transactional
-    public List<ColumnDTO> findAllColumnsByWhiteboardIdByAuthenticatedUser(Long id) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, EntityNotFoundException {
+//    @Transactional
+    public void createColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToSaveException, UserNotAuthorizedException {
         try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-
-            if (user.isEmpty()) {
-                throw new UserUnauthenticatedException("User isn't authenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), id);
-
-                if (userBusinessUnitRole.isEmpty()) {
-                    throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-
-                } else {
-                    List<Column> column = columnRepository.findAllByWhiteboardId(id);
-
-                    if (column.isEmpty()) {
-                        throw new EntityNotFoundException("Columns not found!");
-                    }
-
-                    return columnMapper.toDTO(column);
-                }
-            }
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
-        }
-    }
-
-
-
-    @Transactional
-    public void createColumnByAuthenticatedUser(ColumnDTO columnDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToSaveException, UserNotAuthorizedException {
-        try {
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
             if(user.isEmpty()){
                 throw new UserUnauthenticatedException("User isn't authenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
-
-                if(userBusinessUnitRole.isEmpty()){
-                    throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-                }
-                if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-                    throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
-                }
-
-                columnRepository.save(columnMapper.toEntity(columnDTO));
-
             }
+
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
+
+            if(userBusinessUnitRole.isEmpty()){
+                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
+            }
+            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
+                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
+            }
+            //-----------------
+
+            columnRepository.save(columnMapper.toEntity(columnDTO));
+
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful select! " + e.getMessage());
+            throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
         }
     }
 
-    @Transactional
-    public void deleteColumnByAuthenticatedUser(ColumnDTO columnDTO, BusinessUnitDTO businessUnitDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToDeleteException, UserNotAuthorizedException {
+    //Currently not in use. Frontend needs to be updated. Perfect time for tests I'd say
+    public void updateColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToUpdateException {
         try {
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
             if(user.isEmpty()){
                 throw new UserUnauthenticatedException("User isn't authenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
-
-                if(userBusinessUnitRole.isEmpty()){
-                    throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-                }
-                if (userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-                    throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
-                }
-
-                columnRepository.delete(columnMapper.toEntity(columnDTO));
-
             }
+
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
+
+            if(userBusinessUnitRole.isEmpty()){
+                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
+            }
+            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
+                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
+            }
+            //-----------------
+
+            columnRepository.save(columnMapper.toEntity(columnDTO));
+
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToUpdateException("Unsuccessful select! " + e.getMessage());
+        }
+    }
+
+    //Currently not in use. Frontend needs to be updated. Perfect time for tests I'd say
+    public void updateColumns(List<ColumnDTO> columns)throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToUpdateException {
+        try {
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
+            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+
+            if(user.isEmpty()){
+                throw new UserUnauthenticatedException("User isn't authenticated!");
+            }
+
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columns.get(0).whiteboardDTO().id());
+
+            if(userBusinessUnitRole.isEmpty()){
+                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
+            }
+            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
+                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
+            }
+            //-----------------
+
+            columnRepository.saveAll(columnMapper.toEntity(columns));
+
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToUpdateException("Unsuccessful select! " + e.getMessage());
+        }
+    }
+
+    //Currently not in use. Frontend needs to be updated. Perfect time for tests I'd say
+//    @Transactional
+    public void deleteColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToDeleteException, UserNotAuthorizedException {
+        try {
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
+            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+
+            if(user.isEmpty()){
+                throw new UserUnauthenticatedException("User isn't authenticated!");
+            }
+
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
+
+            if(userBusinessUnitRole.isEmpty()){
+                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
+            }
+            if (userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
+                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
+            }
+            //-----------------
+
+            Column column = columnMapper.toEntity(columnDTO);
+            //Can't cascade from the child. Making the relationship bidirectional will open way more work at the end. So just manual deletion :(
+            noteRepository.deleteNotesByColumnId(column.getId());
+            columnRepository.delete(column);
+
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToDeleteException("Unsuccessful select! " + e.getMessage());
         }
     }
 
+    //Might have to be moved in the whiteboard service as it is only used there but it works with columns
 //    @Transactional
-//    public void createColumnByAuthenticatedUser(ColumnDTO columnDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException {
-//        try {
-//            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-//
-//            if(user.isEmpty()){
-//                throw new UserUnauthenticatedException("User isn't authenticated!");
-//            } else {
-//                Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
-//
-//                if (userBusinessUnitRole.isEmpty()) {
-//                    throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-//                } else {
-//
-//                }
-//            }
-//        } catch (ConstraintViolationException | DataAccessException e) {
-//            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-//        }
-//    }
-
-    @Transactional
     public void initializeDefaultColumns(Whiteboard whiteboard) throws FailedToSaveException {
         try {
             Column column1 = new Column(null, "To do", whiteboard, 1L);

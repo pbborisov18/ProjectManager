@@ -12,4 +12,6 @@ public interface NoteRepository extends CrudRepository<Note, Long> {
 
     List<Note> findAllByColumnId(Long id);
 
+    void deleteNotesByColumnId(Long id);
+
 }

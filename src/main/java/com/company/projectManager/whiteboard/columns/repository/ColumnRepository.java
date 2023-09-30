@@ -10,4 +10,6 @@ import java.util.List;
 public interface ColumnRepository extends CrudRepository<Column, Long> {
 
    List<Column> findAllByWhiteboardId(Long id);
+
+   void deleteAllByWhiteboardId(Long id);
 }
