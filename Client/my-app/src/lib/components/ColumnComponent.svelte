@@ -58,8 +58,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({noteDTO: clickedNote,
-                    businessUnitDTO: bu.businessUnit}),
+                body: JSON.stringify(clickedNote),
                 credentials: "include"
             }).then(response=>{
                 if (response.status === 200) {
@@ -91,28 +90,18 @@
             });
 
         }
-
-        //do the update fetch here
-        //then call onDrop with the updated shit
-        //or straight up update it
     }
 
     function deleteNote(){
         if(clickedNote) {
-            clickedNote = {...clickedNote, name: noteName, description: noteDescription};
-
             let fetchUrl;
-            let bu;
 
             if (currentUrl === "/company/whiteboard") {
                 fetchUrl = "http://localhost:8080/company/whiteboard/deleteNote"
-                bu = companyObj;
             } else if (currentUrl === "/company/project/whiteboard") {
                 fetchUrl = "http://localhost:8080/company/project/whiteboard/deleteNote"
-                bu = projectObj;
             } else if (currentUrl === "/company/project/team/whiteboard") {
                 fetchUrl = "http://localhost:8080/company/project/team/whiteboard/deleteNote"
-                bu = teamObj;
             }
 
             fetch(fetchUrl, {
@@ -120,8 +109,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({noteDTO: clickedNote,
-                    businessUnitDTO: bu.businessUnit}),
+                body: JSON.stringify(clickedNote),
                 credentials: "include"
             }).then(response=>{
                 if (response.status === 200) {
