@@ -13,7 +13,6 @@ import com.company.projectManager.whiteboard.columns.repository.ColumnRepository
 import com.company.projectManager.whiteboard.columns.service.ColumnService;
 import com.company.projectManager.whiteboard.notes.repository.NoteRepository;
 import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
-import com.company.projectManager.whiteboard.whiteboards.entity.Whiteboard;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -182,22 +181,6 @@ public class ColumnServiceImpl implements ColumnService {
 
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToDeleteException("Unsuccessful select! " + e.getMessage());
-        }
-    }
-
-    //Might have to be moved in the whiteboard service as it is only used there but it works with columns
-//    @Transactional
-    public void initializeDefaultColumns(Whiteboard whiteboard) throws FailedToSaveException {
-        try {
-            Column column1 = new Column(null, "To do", whiteboard, 1L);
-            Column column2 = new Column(null, "Doing", whiteboard, 2L);
-            Column column3 = new Column(null, "Testing", whiteboard, 3L);
-            Column column4 = new Column(null, "Done", whiteboard, 4L);
-
-            columnRepository.saveAll(List.of(column1, column2, column3, column4));
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
         }
     }
 }

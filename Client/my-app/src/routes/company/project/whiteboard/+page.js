@@ -1,7 +1,9 @@
 export async function load({fetch}) {
     let project = JSON.parse(sessionStorage.getItem("project")).businessUnit;
 
-    console.log(project);
+    if(project.whiteboard.id) {
+        return {whiteboard: project.whiteboard};
+    }
 
     const whiteboardResult = await fetch('http://localhost:8080/company/project/team/whiteboard', {
         method: 'POST',

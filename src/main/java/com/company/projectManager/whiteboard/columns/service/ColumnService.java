@@ -4,7 +4,6 @@ package com.company.projectManager.whiteboard.columns.service;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.whiteboard.columns.dto.ColumnDTO;
 import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
-import com.company.projectManager.whiteboard.whiteboards.entity.Whiteboard;
 
 import java.util.List;
 
@@ -20,7 +19,5 @@ public interface ColumnService {
     void updateColumns(List<ColumnDTO> columns)  throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToUpdateException;
 
     void deleteColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToDeleteException, UserNotAuthorizedException;
-
-    void initializeDefaultColumns(Whiteboard whiteboard) throws FailedToSaveException;
 
 }

@@ -3,12 +3,14 @@ package com.company.projectManager.whiteboard.whiteboards.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 
 import java.util.Objects;
 
+@Getter
 @Entity
 @Setter
 @NoArgsConstructor
@@ -39,14 +41,6 @@ public class Whiteboard {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
     }
 
 }
