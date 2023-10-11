@@ -6,9 +6,6 @@ import com.company.projectManager.common.utils.InviteState;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.CascadeType;
@@ -16,8 +13,6 @@ import org.hibernate.annotations.CascadeType;
 import java.util.Objects;
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor
 @Table(name = "Invites", uniqueConstraints = {@UniqueConstraint(columnNames = {"ReceiverId", "BusinessUnitsId"})})
 public class Invite {
 
@@ -32,11 +27,13 @@ public class Invite {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "SenderId")
+    @Cascade(CascadeType.MERGE)
     private User sender;
 
     @NotNull
     @ManyToOne
     @JoinColumn(name = "ReceiverId")
+    @Cascade(CascadeType.MERGE)
     private User receiver;
 
     @NotNull
@@ -44,6 +41,9 @@ public class Invite {
     @JoinColumn(name = "BusinessUnitsId")
     @Cascade(CascadeType.MERGE)
     private BusinessUnit businessUnit;
+
+    public Invite() {
+    }
 
     public Invite(Long id, InviteState state, User sender, User receiver, BusinessUnit businessUnit) {
         this.id = id;
@@ -64,5 +64,45 @@ public class Invite {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public InviteState getState() {
+        return state;
+    }
+
+    public void setState(InviteState state) {
+        this.state = state;
+    }
+
+    public User getSender() {
+        return sender;
+    }
+
+    public void setSender(User sender) {
+        this.sender = sender;
+    }
+
+    public User getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(User receiver) {
+        this.receiver = receiver;
+    }
+
+    public BusinessUnit getBusinessUnit() {
+        return businessUnit;
+    }
+
+    public void setBusinessUnit(BusinessUnit businessUnit) {
+        this.businessUnit = businessUnit;
     }
 }

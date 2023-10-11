@@ -4,17 +4,13 @@ import com.company.projectManager.whiteboard.whiteboards.entity.Whiteboard;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.Hibernate;
 import jakarta.persistence.CascadeType;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
 
 @Entity
-@Setter
-@NoArgsConstructor
 @Table(name = "Columns", uniqueConstraints = {@UniqueConstraint(columnNames = {"WhiteboardsId", "Position"})})
 public class Column {
 
@@ -32,11 +28,14 @@ public class Column {
     //throws an exception before it can try merge (so the transaction is rolled back)
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "WhiteboardsId")
-    @Cascade({org.hibernate.annotations.CascadeType.MERGE, org.hibernate.annotations.CascadeType.SAVE_UPDATE}) //This isn't substitute (hibernate documentation)
+    @Cascade({org.hibernate.annotations.CascadeType.MERGE}) //This isn't substitute (hibernate documentation)
     private Whiteboard whiteboard;
 
     @NotNull
     private Long position;
+
+    public Column() {
+    }
 
     public Column(Long id, String name, Whiteboard whiteboard, Long position) {
         this.id = id;
@@ -46,32 +45,51 @@ public class Column {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
         Column column = (Column) o;
-        return id != null && Objects.equals(id, column.id);
+        return getId() != null && Objects.equals(getId(), column.getId());
     }
 
     @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
 
     public Long getId() {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Whiteboard getWhiteboard() {
-        setWhiteboard((Whiteboard) Hibernate.unproxy(this.whiteboard));
         return whiteboard;
+    }
+
+    public void setWhiteboard(Whiteboard whiteboard) {
+        this.whiteboard = whiteboard;
     }
 
     public Long getPosition() {
         return position;
     }
+
+    public void setPosition(Long position) {
+        this.position = position;
+    }
+
 }
