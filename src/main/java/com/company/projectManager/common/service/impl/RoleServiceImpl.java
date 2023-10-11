@@ -10,6 +10,7 @@ import com.company.projectManager.common.utils.RoleName;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +86,12 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
+    @Override
     public RoleDTO findRoleByName(RoleName name) throws FailedToSelectException, EntityNotFoundException {
+        return null;
+    }
+
+    public RoleDTO findRoleByName(String name) throws FailedToSelectException, EntityNotFoundException {
         try {
             Optional<Role> role = roleRepository.findByName(name);
 
@@ -104,7 +110,7 @@ public class RoleServiceImpl implements RoleService {
         try {
             List<Role> roles = (List<Role>) roleRepository.findAll();
 
-            if(roles.size() == 0) {
+            if(roles.isEmpty()) {
                 throw new EntityNotFoundException("Role was not found");
             }
 
@@ -113,6 +119,23 @@ public class RoleServiceImpl implements RoleService {
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
         }
+    }
+
+    @Transactional
+    public List<RoleDTO> findAllRolesById(List<Long> ids) throws FailedToSelectException, EntityNotFoundException {
+        try {
+            List<Role> roles = (List<Role>) roleRepository.findAllById(ids);
+
+            if(roles.isEmpty()) {
+                throw new EntityNotFoundException("Role was not found");
+            }
+
+            return roleMapper.toDTO(roles);
+
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
+        }
+
     }
 
 

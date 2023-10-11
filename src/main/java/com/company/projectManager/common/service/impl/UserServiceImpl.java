@@ -9,12 +9,13 @@ import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.repository.RoleRepository;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
-import com.company.projectManager.common.security.SecurityRole;
+import com.company.projectManager.common.security.SecurityIds;
 import com.company.projectManager.common.security.SecurityUser;
 import com.company.projectManager.common.service.UserService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -167,8 +168,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.findUserByEmail(email).isPresent();
     }
 
-
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findUserByEmail(username);
@@ -179,7 +178,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             List<GrantedAuthority> roles = new ArrayList<>();
 
             for (UserBusinessUnitRole ubr : userBURole) {
-                SecurityRole securityRole = new SecurityRole(ubr.getRole(), ubr.getBusinessUnit());
+                SecurityIds securityRole = new SecurityIds(ubr.getId(), ubr.getUser().getId(), ubr.getBusinessUnit().getId(), ubr.getRole().getId());
                 roles.add(securityRole);
             }
 

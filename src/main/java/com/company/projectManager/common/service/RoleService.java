@@ -24,4 +24,6 @@ public interface RoleService {
     RoleDTO findRoleByName(RoleName name) throws FailedToSelectException, EntityNotFoundException;
 
     List<RoleDTO> findAllRoles() throws FailedToSelectException, EntityNotFoundException;
+
+    List<RoleDTO> findAllRolesById(List<Long> ids) throws FailedToSelectException, EntityNotFoundException;
 }
