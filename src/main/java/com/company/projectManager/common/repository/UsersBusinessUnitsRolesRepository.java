@@ -2,13 +2,12 @@ package com.company.projectManager.common.repository;
 
 import com.company.projectManager.common.entity.UserBusinessUnitRole;
 import com.company.projectManager.common.utils.TypeName;
-import com.company.projectManager.common.utils.UserBusinessUnitRoleId;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBusinessUnitRole, UserBusinessUnitRoleId> {
+public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBusinessUnitRole, Long> {
 
     List<UserBusinessUnitRole> findAllByUserId(Long userId);
 

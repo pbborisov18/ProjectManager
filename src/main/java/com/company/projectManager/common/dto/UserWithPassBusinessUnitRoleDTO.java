@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotNull;
 
 public record UserWithPassBusinessUnitRoleDTO(
 
+        Long id,
+
         @NotNull
         UserDTO user,
 
