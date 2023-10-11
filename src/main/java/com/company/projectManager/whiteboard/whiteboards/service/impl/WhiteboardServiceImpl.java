@@ -8,7 +8,6 @@ import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.repository.BusinessUnitRepository;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
-import com.company.projectManager.common.utils.RoleName;
 import com.company.projectManager.whiteboard.columns.dto.ColumnDTO;
 import com.company.projectManager.whiteboard.columns.entity.Column;
 import com.company.projectManager.whiteboard.columns.repository.ColumnRepository;
@@ -105,9 +104,9 @@ public class WhiteboardServiceImpl implements WhiteboardService {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
             }
 
-            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
-            }
+//            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
+//                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
+//            }
             //-----------------
 
             Optional<BusinessUnit> businessUnit = businessUnitRepository.findById(businessUnitDTO.id());
@@ -155,9 +154,9 @@ public class WhiteboardServiceImpl implements WhiteboardService {
             throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
         }
 
-        if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-            throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
-        }
+//        if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
+//            throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
+//        }
         //-----------------
 
         Optional<BusinessUnit> businessUnit = businessUnitRepository.findById(businessUnitDTO.id());
@@ -210,9 +209,9 @@ public class WhiteboardServiceImpl implements WhiteboardService {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
             }
 
-            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
-            }
+//            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
+//                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
+//            }
             //-----------------
 
             Optional<BusinessUnit> businessUnit = businessUnitRepository.findById(businessUnitDTO.id());

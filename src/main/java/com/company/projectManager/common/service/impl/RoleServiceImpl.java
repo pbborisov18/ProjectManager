@@ -6,7 +6,6 @@ import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.RoleMapper;
 import com.company.projectManager.common.repository.RoleRepository;
 import com.company.projectManager.common.service.RoleService;
-import com.company.projectManager.common.utils.RoleName;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -84,11 +83,6 @@ public class RoleServiceImpl implements RoleService {
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
         }
-    }
-
-    @Override
-    public RoleDTO findRoleByName(RoleName name) throws FailedToSelectException, EntityNotFoundException {
-        return null;
     }
 
     public RoleDTO findRoleByName(String name) throws FailedToSelectException, EntityNotFoundException {

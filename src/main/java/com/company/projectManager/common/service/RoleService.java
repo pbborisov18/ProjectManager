@@ -5,7 +5,6 @@ import com.company.projectManager.common.exception.FailedToDeleteException;
 import com.company.projectManager.common.exception.FailedToSaveException;
 import com.company.projectManager.common.exception.FailedToSelectException;
 import com.company.projectManager.common.exception.FailedToUpdateException;
-import com.company.projectManager.common.utils.RoleName;
 import com.company.projectManager.common.exception.EntityNotFoundException;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public interface RoleService {
 
     RoleDTO findRoleById(Long id) throws FailedToSelectException, EntityNotFoundException;
 
-    RoleDTO findRoleByName(RoleName name) throws FailedToSelectException, EntityNotFoundException;
+    RoleDTO findRoleByName(String name) throws FailedToSelectException, EntityNotFoundException;
 
     List<RoleDTO> findAllRoles() throws FailedToSelectException, EntityNotFoundException;
 
