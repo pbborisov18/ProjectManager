@@ -14,7 +14,13 @@ public interface InviteService {
 
     List<InviteDTOWithoutPassword> findAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException;
 
-    void createInviteByAuthenticatedUser(BusinessUnitDTO businessUnitDTO, UserWithoutPasswordDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, InvalidInvitationException, FailedToSaveException;
+    void acceptInvite(InviteDTOWithoutPassword inviteDTONoPass);
+
+    void cancelInvite(InviteDTOWithoutPassword inviteDTONoPass);
+
+    void declineInvite(InviteDTOWithoutPassword inviteDTONoPass);
+
+    void updateInviteByAuthenticatedUser(InviteDTOWithoutPassword inviteDTONoPass) throws InvalidInvitationException, UserNotAuthorizedException, FailedToUpdateException, FailedToSelectException, UserUnauthenticatedException;
 
     void createInviteByAuthenticatedUser(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, InvalidInvitationException, FailedToSaveException;
 

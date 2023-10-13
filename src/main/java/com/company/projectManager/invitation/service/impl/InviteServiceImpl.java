@@ -5,7 +5,7 @@ import com.company.projectManager.common.dto.UserNoPassDTO;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnitRole;
 import com.company.projectManager.common.exception.*;
-import com.company.projectManager.common.mapper.UserMapper;
+import com.company.projectManager.common.mapper.BusinessUnitMapper;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
 import com.company.projectManager.common.utils.InviteState;
@@ -16,7 +16,6 @@ import com.company.projectManager.invitation.repository.InviteRepository;
 import com.company.projectManager.invitation.service.InviteService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -33,46 +32,74 @@ public class InviteServiceImpl implements InviteService {
 
     private final UserRepository userRepository;
 
-    private final UserMapper userMapper;
+    private final BusinessUnitMapper businessUnitMapper;
 
-    UsersBusinessUnitsRolesRepository userBURoleRepository;
+    private final UsersBusinessUnitsRolesRepository userBURoleRepository;
 
-    public InviteServiceImpl(InviteRepository inviteRepository, InviteMapper inviteMapper, UserRepository userRepository, UserMapper userMapper, UsersBusinessUnitsRolesRepository userBURoleRepository) {
+    public InviteServiceImpl(InviteRepository inviteRepository, InviteMapper inviteMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, UsersBusinessUnitsRolesRepository userBURoleRepository) {
         this.inviteRepository = inviteRepository;
         this.inviteMapper = inviteMapper;
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
+        this.businessUnitMapper = businessUnitMapper;
         this.userBURoleRepository = userBURoleRepository;
     }
 
-    @Transactional
-    public void saveInvite(InviteDTOWithoutPassword inviteDTOWithoutPassword) throws InvalidInvitationException, FailedToSaveException {
+    public List<InviteDTOWithoutPassword> findInvitesByAuthenticatedReceiver(InviteState inviteState) throws FailedToSelectException {
         try {
-            if(inviteDTOWithoutPassword.sender().equals(inviteDTOWithoutPassword.receiver())){
-                throw new InvalidInvitationException("You can't send an invite to yourself!");
-            }
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            Optional<User> receiver = userRepository.findUserByEmail(inviteDTOWithoutPassword.receiver().email());
-            Optional<User> sender = userRepository.findUserByEmail(inviteDTOWithoutPassword.sender().email());
-
-            if(receiver.isPresent() && sender.isPresent()) {
-                InviteDTOWithPassword inviteDTOWithPassword = new InviteDTOWithPassword(
-                        inviteDTOWithoutPassword.id(),
-                        InviteState.PENDING,
-                        userMapper.toUserDTO(sender.get()),
-                        userMapper.toUserDTO(receiver.get()),
-                        inviteDTOWithoutPassword.businessUnit()
-                );
-
-                inviteRepository.save(inviteMapper.toEntity(inviteDTOWithPassword));
-            } else {
-                throw new InvalidInvitationException("Either sender or receiver doesn't exist!");
-            }
+            return inviteMapper.toDTO(
+                    inviteRepository.findByReceiver_EmailAndState(email, inviteState));
 
         } catch (ConstraintViolationException | DataAccessException e){
-            throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
+            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
         }
     }
+
+
+    public List<InviteDTOWithoutPassword> findAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
+            Optional<User> user = userRepository.findUserByEmail(email);
+
+            if(user.isEmpty()){
+                throw new UserUnauthenticatedException("User isn't authenticated!");
+            }
+
+            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+
+            if(userBURoleEntity.isEmpty()){
+                throw new UserNotInBusinessUnitException("User isn't part of the BusinessUnit");
+            }// else if(userBURoleEntity.get().getRole().getName() != RoleName.MANAGER){
+//                throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
+//            }
+            //-----------------
+
+            List<Invite> invites = inviteRepository.findAllByBusinessUnitId(businessUnitDTO.id());
+
+            if(invites.isEmpty()){
+                throw new EntityNotFoundException("No invites found!");
+            }
+
+            return inviteMapper.toDTO(invites);
+        } catch (ConstraintViolationException | DataAccessException e){
+            throw new FailedToSelectException("Failed select! " + e.getMessage());
+        }
+    }
+
+    public void acceptInvite(InviteDTOWithoutPassword inviteDTONoPass){
+
+    }
+
+    public void cancelInvite(InviteDTOWithoutPassword inviteDTONoPass){
+
+    }
+
+    public void declineInvite(InviteDTOWithoutPassword inviteDTONoPass){
+
+    }
+
 
     @Transactional
     public void updateInviteByAuthenticatedUser(InviteDTOWithoutPassword inviteDTONoPass) throws InvalidInvitationException, UserNotAuthorizedException, FailedToUpdateException, FailedToSelectException, UserUnauthenticatedException {
@@ -90,8 +117,6 @@ public class InviteServiceImpl implements InviteService {
                 throw new FailedToSelectException("Invite doesn't exist!");
             }
 
-            Optional<User> receiver = userRepository.findUserByEmail(inviteDTOWithoutPassword.receiver().email());
-            Optional<User> sender = userRepository.findUserByEmail(inviteDTOWithoutPassword.sender().email());
             Optional<User> receiver = userRepository.findUserByEmail(inviteDTONoPass.receiver().email());
             Optional<User> sender = userRepository.findUserByEmail(inviteDTONoPass.sender().email());
 
@@ -132,111 +157,13 @@ public class InviteServiceImpl implements InviteService {
         }
     }
 
-//    @Transactional
-//    public void deleteInvite(InviteDTOWithoutPassword inviteDTOWithoutPassword) throws FailedToSelectException, FailedToDeleteException {
-//        try{
-//            Optional<Invite> existingInvite = inviteRepository.findById(inviteDTOWithoutPassword.id());
-//
-//            if(existingInvite.isEmpty()){
-//                throw new FailedToSelectException("Invite doesn't exist!");
-//            }
-//
-//            inviteRepository.delete(existingInvite.get());
-//
-//        } catch (ConstraintViolationException | DataAccessException e){
-//            throw new FailedToDeleteException("Unsuccessful delete! " + e.getMessage());
-//        }
-//    }
-//
-//    @Transactional
-//    public InviteDTOWithoutPassword findInviteById(Long id) throws FailedToSelectException {
-//        try {
-//            Optional<Invite> existingInvite = inviteRepository.findById(id);
-//
-//            if(existingInvite.isEmpty()){
-//                throw new FailedToSelectException("Invite was not found");
-//            }
-//
-//            return inviteMapper.toDTO(existingInvite.get());
-//
-//        } catch (ConstraintViolationException | DataAccessException e){
-//            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-//        }
-//    }
-//
-//  out
-//    @Transactional
-//    public List<InviteDTOWithoutPassword> findInvitesByReceiverId(Long id) throws FailedToSelectException, EntityNotFoundException {
-//        try {
-//            List<Invite> existingInvites = inviteRepository.findByReceiverIdAndStatePending(id);
-//
-//            if(existingInvites.isEmpty()){
-//                throw new EntityNotFoundException("Invite was not found");
-//            }
-//
-//            return inviteMapper.toDTO(existingInvites);
-//
-//        } catch (ConstraintViolationException | DataAccessException e){
-//            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-//        }
-//    }
-
-    //Checked
-    @Transactional
-    public List<InviteDTOWithoutPassword> findInvitesByAuthenticatedReceiver() throws FailedToSelectException, UserUnauthenticatedException, EntityNotFoundException {
-        try {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            Optional<User> user = userRepository.findUserByEmail(email);
-
-            if(user.isEmpty()){
-                throw new UserUnauthenticatedException("User isn't authenticated!");
-            }
-
-            return inviteMapper.toDTO(
-                    inviteRepository.findByReceiverIdAndStatePending(user.get().getId()));
-
-        } catch (ConstraintViolationException | DataAccessException e){
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public List<InviteDTOWithoutPassword> findAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
-        try {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            Optional<User> user = userRepository.findUserByEmail(email);
-
-            if(user.isEmpty()){
-                throw new UserUnauthenticatedException("User isn't authenticated!");
-            }
-
-            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
-
-            if(userBURoleEntity.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't part of the BusinessUnit");
-            } else if(userBURoleEntity.get().getRole().getName() != RoleName.MANAGER){
-                throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-            }
-
-            List<Invite> invites = inviteRepository.findAllByBusinessUnitId(businessUnitDTO.id());
-
-            if(invites.isEmpty()){
-                throw new EntityNotFoundException("No invites found!");
-            }
-
-            return inviteMapper.toDTO(invites);
-        } catch (ConstraintViolationException | DataAccessException e){
-            throw new FailedToSelectException("Failed select! " + e.getMessage());
-        }
-    }
-
-
     //Checked
     //TODO: If an invite is sent to an already invited person isn't handled correctly (letting the db throw a unique key collision)
     @Transactional
     public void createInviteByAuthenticatedUser(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, InvalidInvitationException, FailedToSaveException {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(email);
 
             if(user.isEmpty()){
@@ -245,58 +172,27 @@ public class InviteServiceImpl implements InviteService {
 
             Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
-            if(userBURoleEntity.isEmpty()){
+            if(userBURoleEntity.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't part of the BusinessUnit");
-            } else if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
-                throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
+            }//            } else if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
+//                throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
+//            }
+            //-----------------
+
+            Optional<User> sender = userRepository.findUserByEmail(email);
+            Optional<User> receiverEntity = userRepository.findUserByEmail(receiver.email());
+
+            if(receiverEntity.isEmpty()){
+                throw new InvalidInvitationException("User doesn't exist");
             }
 
-            saveInvite( new InviteDTOWithoutPassword(
-                    null,
-                    InviteState.PENDING,
-                    userMapper.toUserWithoutPasswordDTO(user.get()),
-                    receiver,
-                    businessUnitDTO
-            ));
+            Invite invite = new Invite(null, InviteState.PENDING, sender.get() ,receiverEntity.get(), businessUnitMapper.toBusinessUnitEntity(businessUnitDTO));
+
+            inviteRepository.save(invite);
 
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
         }
     }
-
-    //I think this should be fixed with cascades ffs.
-    //TODO: Maybe fix with cascades
-    @Transactional
-    public void deleteAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToDeleteException {
-        try {
-
-            List<Invite> invites = inviteRepository.findAllByBusinessUnitId(businessUnitDTO.id());
-
-            if(invites.isEmpty()){
-                return;
-            }
-
-            inviteRepository.deleteAll(invites);
-        } catch (ConstraintViolationException | DataAccessException e){
-            throw new FailedToDeleteException("Unsuccessful delete! " + e.getMessage());
-        }
-    }
-
-
-//    @Transactional
-//    public List<InviteDTOWithoutPassword> findAllInvites() throws FailedToSelectException {
-//        try {
-//            List<Invite> existingInvites = (List<Invite>) inviteRepository.findAll();
-//
-//            if(existingInvites.isEmpty()){
-//                throw new FailedToSelectException("Invites were not found");
-//            }
-//
-//            return inviteMapper.toDTO(existingInvites);
-//
-//        } catch (ConstraintViolationException | DataAccessException e){
-//            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-//        }
-//    }
 
 }
