@@ -1,7 +1,7 @@
 package com.company.projectManager.invitation.mapper;
 
-import com.company.projectManager.invitation.dto.InviteDTOWithPassword;
-import com.company.projectManager.invitation.dto.InviteDTOWithoutPassword;
+import com.company.projectManager.invitation.dto.InviteDTO;
+import com.company.projectManager.invitation.dto.InviteDTONoPass;
 import com.company.projectManager.common.mapper.BusinessUnitMapper;
 import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.invitation.entity.Invite;
@@ -18,13 +18,13 @@ import java.util.List;
 public interface InviteMapper {
 
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitDTO"})
-    InviteDTOWithoutPassword toDTO(@Valid Invite invite);
+    InviteDTONoPass toDTO(@Valid Invite invite);
 
-    List<InviteDTOWithoutPassword> toDTO(@Valid Iterable<Invite> invites);
+    List<InviteDTONoPass> toDTO(@Valid Iterable<Invite> invites);
 
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitEntity"})
-    Invite toEntity(@Valid InviteDTOWithPassword invite);
+    Invite toEntity(@Valid InviteDTO invite);
 
-    List<Invite> toEntity(@Valid Iterable<InviteDTOWithPassword> invites);
+    List<Invite> toEntity(@Valid Iterable<InviteDTO> invites);
 
 }

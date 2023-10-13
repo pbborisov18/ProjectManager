@@ -3,7 +3,7 @@ package com.company.projectManager.invitation.controller;
 import com.company.projectManager.common.dto.*;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.utils.InviteState;
-import com.company.projectManager.invitation.dto.InviteDTOWithoutPassword;
+import com.company.projectManager.invitation.dto.InviteDTONoPass;
 import com.company.projectManager.invitation.service.InviteService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +31,7 @@ public class InviteController {
     @PostMapping("/invites")
     public ResponseEntity<Object> getInvites(@RequestBody InviteState inviteState){
         try {
-            List<InviteDTOWithoutPassword> invites = inviteService.findInvitesByAuthenticatedReceiver(inviteState);
+            List<InviteDTONoPass> invites = inviteService.findInvitesByAuthenticatedReceiver(inviteState);
 
             return new ResponseEntity<>(invites, HttpStatus.OK);
         } catch (FailedToSelectException e) {
@@ -73,7 +73,7 @@ public class InviteController {
     @PostMapping("/businessUnit/invites")
     public ResponseEntity<Object> getInvitesByBusinessUnit(@RequestBody BusinessUnitDTO businessUnitDTO){
         try {
-            List<InviteDTOWithoutPassword> invites = inviteService.findAllInvitesByBusinessUnit(businessUnitDTO);
+            List<InviteDTONoPass> invites = inviteService.findAllInvitesByBusinessUnit(businessUnitDTO);
 
             return new ResponseEntity<>(invites, HttpStatus.OK);
         } catch (FailedToSelectException e) {

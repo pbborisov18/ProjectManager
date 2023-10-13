@@ -9,7 +9,7 @@ import com.company.projectManager.common.mapper.BusinessUnitMapper;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
 import com.company.projectManager.common.utils.InviteState;
-import com.company.projectManager.invitation.dto.InviteDTOWithoutPassword;
+import com.company.projectManager.invitation.dto.InviteDTONoPass;
 import com.company.projectManager.invitation.entity.Invite;
 import com.company.projectManager.invitation.mapper.InviteMapper;
 import com.company.projectManager.invitation.repository.InviteRepository;
@@ -44,7 +44,7 @@ public class InviteServiceImpl implements InviteService {
         this.userBURoleRepository = userBURoleRepository;
     }
 
-    public List<InviteDTOWithoutPassword> findInvitesByAuthenticatedReceiver(InviteState inviteState) throws FailedToSelectException {
+    public List<InviteDTONoPass> findInvitesByAuthenticatedReceiver(InviteState inviteState) throws FailedToSelectException {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -57,7 +57,7 @@ public class InviteServiceImpl implements InviteService {
     }
 
 
-    public List<InviteDTOWithoutPassword> findAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
+    public List<InviteDTONoPass> findAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
@@ -88,21 +88,21 @@ public class InviteServiceImpl implements InviteService {
         }
     }
 
-    public void acceptInvite(InviteDTOWithoutPassword inviteDTONoPass){
+    public void acceptInvite(InviteDTONoPass inviteDTONoPass){
 
     }
 
-    public void cancelInvite(InviteDTOWithoutPassword inviteDTONoPass){
+    public void cancelInvite(InviteDTONoPass inviteDTONoPass){
 
     }
 
-    public void declineInvite(InviteDTOWithoutPassword inviteDTONoPass){
+    public void declineInvite(InviteDTONoPass inviteDTONoPass){
 
     }
 
 
     @Transactional
-    public void updateInviteByAuthenticatedUser(InviteDTOWithoutPassword inviteDTONoPass) throws InvalidInvitationException, UserNotAuthorizedException, FailedToUpdateException, FailedToSelectException, UserUnauthenticatedException {
+    public void updateInviteByAuthenticatedUser(InviteDTONoPass inviteDTONoPass) throws InvalidInvitationException, UserNotAuthorizedException, FailedToUpdateException, FailedToSelectException, UserUnauthenticatedException {
         try {
             Optional<User> loggedInUser = userRepository.findUserByEmail(
                     SecurityContextHolder.getContext().getAuthentication().getName());
