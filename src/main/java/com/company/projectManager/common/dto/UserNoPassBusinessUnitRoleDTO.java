@@ -2,12 +2,12 @@ package com.company.projectManager.common.dto;
 
 import jakarta.validation.constraints.NotNull;
 
-public record UserWithPassBusinessUnitRoleDTO(
+public record UserNoPassBusinessUnitRoleDTO(
 
         Long id,
 
         @NotNull
-        UserDTO user,
+        UserNoPassDTO user,
 
         @NotNull
         BusinessUnitDTO businessUnit,

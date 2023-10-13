@@ -1,7 +1,7 @@
 package com.company.projectManager.common.controller;
 
 import com.company.projectManager.common.dto.CompanyDTO;
-import com.company.projectManager.common.dto.UserBusinessUnitRoleDTO;
+import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class CompanyController {
     @GetMapping("/companies")
     public ResponseEntity<Object> getAllCompaniesTheUserIsPartOf(){
         try {
-            List<UserBusinessUnitRoleDTO> userBusinessUnitRoleDTOs = userBusinessUnitRoleService.findCompaniesByAuthenticatedUser();
+            List<UserNoPassBusinessUnitRoleDTO> userBusinessUnitRoleDTOs = userBusinessUnitRoleService.findCompaniesByAuthenticatedUser();
 
 
             if(userBusinessUnitRoleDTOs.isEmpty()){

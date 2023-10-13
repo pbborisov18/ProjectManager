@@ -3,7 +3,7 @@ package com.company.projectManager.common.controller;
 
 import com.company.projectManager.common.dto.CompanyDTO;
 import com.company.projectManager.common.dto.ProjectDTO;
-import com.company.projectManager.common.dto.UserBusinessUnitRoleDTO;
+import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class ProjectController {
     @PostMapping("/company/projects")
     public ResponseEntity<Object> getAllProjectsOfCompany(@RequestBody CompanyDTO companyDTO){
         try {
-            List<UserBusinessUnitRoleDTO> userBusinessUnitRoleDTOs = userBusinessUnitRoleService.findAllProjectsByAuthenticatedUserAndCompany(companyDTO);
+            List<UserNoPassBusinessUnitRoleDTO> userBusinessUnitRoleDTOs = userBusinessUnitRoleService.findAllProjectsByAuthenticatedUserAndCompany(companyDTO);
 
             if(userBusinessUnitRoleDTOs.isEmpty()){
                 return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.NO_CONTENT);

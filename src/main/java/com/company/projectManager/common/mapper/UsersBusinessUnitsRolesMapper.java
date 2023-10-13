@@ -1,7 +1,7 @@
 package com.company.projectManager.common.mapper;
 
+import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
 import com.company.projectManager.common.dto.UserBusinessUnitRoleDTO;
-import com.company.projectManager.common.dto.UserWithPassBusinessUnitRoleDTO;
 import com.company.projectManager.common.entity.UserBusinessUnitRole;
 import jakarta.validation.Valid;
 import org.mapstruct.CollectionMappingStrategy;
@@ -18,15 +18,15 @@ public interface UsersBusinessUnitsRolesMapper {
     @Mapping(target = "user", qualifiedByName = {"toUserWithoutPasswordDTO"})
     @Mapping(target = "role", qualifiedByName = {"toRoleDTO"})
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitDTO"})
-    UserBusinessUnitRoleDTO toDTO(@Valid UserBusinessUnitRole userBusinessUnitRole);
+    UserNoPassBusinessUnitRoleDTO toDTO(@Valid UserBusinessUnitRole userBusinessUnitRole);
 
-    List<UserBusinessUnitRoleDTO> toDTO(@Valid Iterable<UserBusinessUnitRole> usersBusinessUnitsRoles);
+    List<UserNoPassBusinessUnitRoleDTO> toDTO(@Valid Iterable<UserBusinessUnitRole> usersBusinessUnitsRoles);
 
     @Mapping(target = "user", qualifiedByName = {"toUserEntity"})
     @Mapping(target = "role", qualifiedByName = {"toRoleEntity"})
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitEntity"})
-    UserBusinessUnitRole toEntity(@Valid UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO);
+    UserBusinessUnitRole toEntity(@Valid UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO);
 
-    List<UserBusinessUnitRole> toEntity(@Valid Iterable<UserWithPassBusinessUnitRoleDTO> usersWithPassBusinessUnitsRolesDTOs);
+    List<UserBusinessUnitRole> toEntity(@Valid Iterable<UserBusinessUnitRoleDTO> usersWithPassBusinessUnitsRolesDTOs);
 
 }

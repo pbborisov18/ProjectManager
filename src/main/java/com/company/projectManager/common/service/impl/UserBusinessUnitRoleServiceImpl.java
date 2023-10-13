@@ -61,7 +61,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     }
 
     @Transactional
-    public void saveUserBURole(UserWithPassBusinessUnitRoleDTO userBURole) throws FailedToSaveException {
+    public void saveUserBURole(UserBusinessUnitRoleDTO userBURole) throws FailedToSaveException {
         try {
             userBURoleRepository.save(userBURoleMapper.toEntity(userBURole));
         } catch (ConstraintViolationException | DataAccessException e) {
@@ -70,7 +70,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     }
 
     @Transactional
-    public void deleteUserBURole(UserWithPassBusinessUnitRoleDTO userBuRole) throws FailedToDeleteException, EntityNotFoundException {
+    public void deleteUserBURole(UserBusinessUnitRoleDTO userBuRole) throws FailedToDeleteException, EntityNotFoundException {
         try{
 
             Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(userBuRole.user().id(), userBuRole.businessUnit().id());
@@ -89,7 +89,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 //////////////////////////////////////////////////////////////////////////////////////////
 
     @Transactional
-    public List<UserBusinessUnitRoleDTO> findAllCompaniesByUserId(Long userId) throws FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllCompaniesByUserId(Long userId) throws FailedToSelectException, EntityNotFoundException {
         try {
             List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByUserIdAndBusinessUnitType(userId, TypeName.COMPANY);
 
@@ -105,7 +105,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     }
 
     @Transactional
-    public List<UserBusinessUnitRoleDTO> findCompaniesByAuthenticatedUser() throws UserUnauthenticatedException, FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findCompaniesByAuthenticatedUser() throws UserUnauthenticatedException, FailedToSelectException, EntityNotFoundException {
         try {
             Optional<User> user = userRepository.findUserByEmail(
                     SecurityContextHolder.getContext().getAuthentication().getName());
@@ -133,7 +133,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                 UserDTO userDTO = userMapper.toUserDTO(user.get());
 
                 //TODO: This has to be reworked
-                UserWithPassBusinessUnitRoleDTO userBUrole = new UserWithPassBusinessUnitRoleDTO(
+                UserBusinessUnitRoleDTO userBUrole = new UserBusinessUnitRoleDTO(
                         null,
                         userDTO,
                         companyDTO,
@@ -163,7 +163,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 //                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
 //                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
 //                    } else {
-                        UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserWithPassBusinessUnitRoleDTO(
+                        UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserBusinessUnitRoleDTO(
                                 null,
                                 userMapper.toUserDTO(user.get()),
                                 companyDTO,
@@ -192,7 +192,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                 if(userBURoleEntity.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the company!");
                 } else {
-                    UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserWithPassBusinessUnitRoleDTO(
+                    UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserBusinessUnitRoleDTO(
                             null,
                             userMapper.toUserDTO(user.get()),
                             companyDTO,
@@ -266,7 +266,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     //////////////////////////////////////////////////////////////////////////////////////////
 
     @Transactional
-    public List<UserBusinessUnitRoleDTO> findAllProjectsByUserIdAndCompany(Long userId, CompanyDTO companyDTO) throws FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllProjectsByUserIdAndCompany(Long userId, CompanyDTO companyDTO) throws FailedToSelectException, EntityNotFoundException {
         try {
             List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByUserIdAndBusinessUnitTypeAndBusinessUnitCompanyId(userId, TypeName.PROJECT, companyDTO.id());
 
@@ -282,7 +282,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     }
 
     @Transactional
-    public List<UserBusinessUnitRoleDTO> findAllProjectsByAuthenticatedUserAndCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSelectException, UserNotInBusinessUnitException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllProjectsByAuthenticatedUserAndCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSelectException, UserNotInBusinessUnitException, EntityNotFoundException {
         try {
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -323,7 +323,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 //                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
 //                    } else {
                     //TODO: This has to be reworked
-                        UserWithPassBusinessUnitRoleDTO userBUrole = new UserWithPassBusinessUnitRoleDTO(
+                        UserBusinessUnitRoleDTO userBUrole = new UserBusinessUnitRoleDTO(
                                 null,
                                 userDTO,
                                 projectDTO,
@@ -360,7 +360,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                     throw new UserNotInBusinessUnitException("User isn't a part of the company!");
                 } else {
 
-                    UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserWithPassBusinessUnitRoleDTO(
+                    UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserBusinessUnitRoleDTO(
                             null,
                             userMapper.toUserDTO(user.get()),
                             projectDTO,
@@ -432,7 +432,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     //////////////////////////////////////////////////////////////////////////////////////////
 
     @Transactional
-    public List<UserBusinessUnitRoleDTO> findAllTeamsByUserIdAndProject(Long userId, ProjectDTO projectDTO) throws FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllTeamsByUserIdAndProject(Long userId, ProjectDTO projectDTO) throws FailedToSelectException, EntityNotFoundException {
         try {
             List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByUserIdAndBusinessUnitTypeAndBusinessUnitProjectId(userId, TypeName.TEAM, projectDTO.id());
 
@@ -448,7 +448,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     }
 
     @Transactional
-    public List<UserBusinessUnitRoleDTO> findAllTeamsByAuthenticatedUserAndProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, FailedToSelectException, UserNotInBusinessUnitException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllTeamsByAuthenticatedUserAndProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, FailedToSelectException, UserNotInBusinessUnitException, EntityNotFoundException {
         try {
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -489,7 +489,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 //                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
 //                    } else {
                     //TODO: This has to be reworked
-                        UserWithPassBusinessUnitRoleDTO userBUrole = new UserWithPassBusinessUnitRoleDTO(
+                        UserBusinessUnitRoleDTO userBUrole = new UserBusinessUnitRoleDTO(
                                 null,
                                 userDTO,
                                 teamDTO,
@@ -527,7 +527,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                     throw new UserNotInBusinessUnitException("User isn't a part of the team!");
                 } else {
 
-                    UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserWithPassBusinessUnitRoleDTO(
+                    UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserBusinessUnitRoleDTO(
                             null,
                             userMapper.toUserDTO(user.get()),
                             teamDTO,
@@ -582,7 +582,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     //?? No idea why this isn't used
     //TODO: fix
     @Transactional
-    public UserBusinessUnitRoleDTO findById(Long userId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
+    public UserNoPassBusinessUnitRoleDTO findById(Long userId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
         try {
             Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(userId);
 
@@ -599,7 +599,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     //Useless cuz in no page will they all be displayed
     @Transactional
-    public List<UserBusinessUnitRoleDTO> findAllByUserId(Long userId) throws FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllByUserId(Long userId) throws FailedToSelectException, EntityNotFoundException {
         try {
             List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByUserId(userId);
 
@@ -616,7 +616,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     //I'm directly calling the repository where it's needed lol
     @Transactional
-    public List<UserBusinessUnitRoleDTO> findAllByBusinessUnitId(Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllByBusinessUnitId(Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
         try {
             List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByBusinessUnitId(businessUnitId);
 
@@ -633,7 +633,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     //I guess useless filter
     @Transactional
-    public List<UserBusinessUnitRoleDTO> findAllByRoleIdAndBusinessUnitId(Long roleId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllByRoleIdAndBusinessUnitId(Long roleId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
         try {
             List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByRoleIdAndBusinessUnitId(roleId, businessUnitId);
 
@@ -650,7 +650,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     //I'm directly calling the repository where it's needed lol
     @Transactional
-    public UserBusinessUnitRoleDTO findByUserIdAndBusinessUnitId(Long userId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
+    public UserNoPassBusinessUnitRoleDTO findByUserIdAndBusinessUnitId(Long userId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
         try {
             Optional<UserBusinessUnitRole> userBURole = userBURoleRepository.findByUserIdAndBusinessUnitId(userId, businessUnitId);
 

@@ -2,7 +2,7 @@ package com.company.projectManager.common.controller;
 
 import com.company.projectManager.common.dto.ProjectDTO;
 import com.company.projectManager.common.dto.TeamDTO;
-import com.company.projectManager.common.dto.UserBusinessUnitRoleDTO;
+import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class TeamController {
     @PostMapping("/company/project/teams")
     public ResponseEntity<Object> getAllTeamsOfProject(@RequestBody ProjectDTO projectDTO){
         try {
-            List<UserBusinessUnitRoleDTO> userBusinessUnitRoleDTOs =
+            List<UserNoPassBusinessUnitRoleDTO> userBusinessUnitRoleDTOs =
                     userBusinessUnitRoleService.findAllTeamsByAuthenticatedUserAndProject(projectDTO);
 
             if(userBusinessUnitRoleDTOs.isEmpty()){
