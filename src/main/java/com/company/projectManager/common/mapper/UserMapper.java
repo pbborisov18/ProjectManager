@@ -1,7 +1,7 @@
 package com.company.projectManager.common.mapper;
 
 import com.company.projectManager.common.dto.UserDTO;
-import com.company.projectManager.common.dto.UserWithoutPasswordDTO;
+import com.company.projectManager.common.dto.UserNoPassDTO;
 import com.company.projectManager.common.entity.User;
 import jakarta.validation.Valid;
 import org.mapstruct.*;
@@ -17,9 +17,9 @@ public interface UserMapper {
     UserDTO toUserDTO(@Valid User user);
 
     @Named("toUserWithoutPasswordDTO")
-    UserWithoutPasswordDTO toUserWithoutPasswordDTO(@Valid User user);
+    UserNoPassDTO toUserWithoutPasswordDTO(@Valid User user);
 
-    List<UserWithoutPasswordDTO> toUserWithoutPasswordDTO(@Valid Iterable<User> users);
+    List<UserNoPassDTO> toUserWithoutPasswordDTO(@Valid Iterable<User> users);
 
     @Named("toUserEntity")
     User toEntity(@Valid UserDTO userDTO);

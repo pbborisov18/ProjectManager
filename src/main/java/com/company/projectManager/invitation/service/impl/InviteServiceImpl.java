@@ -1,8 +1,7 @@
 package com.company.projectManager.invitation.service.impl;
 
 import com.company.projectManager.common.dto.BusinessUnitDTO;
-import com.company.projectManager.common.dto.UserWithoutPasswordDTO;
-import com.company.projectManager.common.entity.Role;
+import com.company.projectManager.common.dto.UserNoPassDTO;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnitRole;
 import com.company.projectManager.common.exception.*;
@@ -10,8 +9,6 @@ import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
 import com.company.projectManager.common.utils.InviteState;
-import com.company.projectManager.common.utils.RoleName;
-import com.company.projectManager.invitation.dto.InviteDTOWithPassword;
 import com.company.projectManager.invitation.dto.InviteDTOWithoutPassword;
 import com.company.projectManager.invitation.entity.Invite;
 import com.company.projectManager.invitation.mapper.InviteMapper;
@@ -78,7 +75,7 @@ public class InviteServiceImpl implements InviteService {
     }
 
     @Transactional
-    public void updateInviteByAuthenticatedUser(InviteDTOWithoutPassword inviteDTOWithoutPassword) throws InvalidInvitationException, UserNotAuthorizedException, FailedToUpdateException, FailedToSelectException, UserUnauthenticatedException {
+    public void updateInviteByAuthenticatedUser(InviteDTOWithoutPassword inviteDTONoPass) throws InvalidInvitationException, UserNotAuthorizedException, FailedToUpdateException, FailedToSelectException, UserUnauthenticatedException {
         try {
             Optional<User> loggedInUser = userRepository.findUserByEmail(
                     SecurityContextHolder.getContext().getAuthentication().getName());
@@ -87,7 +84,7 @@ public class InviteServiceImpl implements InviteService {
                 throw new UserUnauthenticatedException("User is unauthenticated");
             }
 
-            Optional<Invite> existingInvite = inviteRepository.findById(inviteDTOWithoutPassword.id());
+            Optional<Invite> existingInvite = inviteRepository.findById(inviteDTONoPass.id());
 
             if(existingInvite.isEmpty()){
                 throw new FailedToSelectException("Invite doesn't exist!");
@@ -95,6 +92,8 @@ public class InviteServiceImpl implements InviteService {
 
             Optional<User> receiver = userRepository.findUserByEmail(inviteDTOWithoutPassword.receiver().email());
             Optional<User> sender = userRepository.findUserByEmail(inviteDTOWithoutPassword.sender().email());
+            Optional<User> receiver = userRepository.findUserByEmail(inviteDTONoPass.receiver().email());
+            Optional<User> sender = userRepository.findUserByEmail(inviteDTONoPass.sender().email());
 
             if(receiver.isEmpty() || sender.isEmpty()){
                 //Means someone has deleted their profile
@@ -105,7 +104,7 @@ public class InviteServiceImpl implements InviteService {
             //Receiver can change the state to whatever
             if(loggedInUser.get().getEmail().equals(sender.get().getEmail())){
                 //authenticated sender
-                if(inviteDTOWithoutPassword.state() != InviteState.CANCELLED){
+                if(inviteDTONoPass.state() != InviteState.CANCELLED){
                     throw new UserNotAuthorizedException("You can only cancel the invite");
                 }
             } else if (loggedInUser.get().getEmail().equals(receiver.get().getEmail())){
@@ -115,15 +114,16 @@ public class InviteServiceImpl implements InviteService {
             }
 
             //Only update the state to avoid letting the users change stuff I don't want them to
-            existingInvite.get().setState(inviteDTOWithoutPassword.state());
+            existingInvite.get().setState(inviteDTONoPass.state());
 
             inviteRepository.save(existingInvite.get());
-
+            //TODO: This has to be reworked
             if(existingInvite.get().getState().equals(InviteState.ACCEPTED)){
                 userBURoleRepository.save(new UserBusinessUnitRole(
+                        null,
                         receiver.get(),
                         existingInvite.get().getBusinessUnit(),
-                        new Role(2L, RoleName.EMPLOYEE)
+                        null
                 ));
             }
 
@@ -233,9 +233,8 @@ public class InviteServiceImpl implements InviteService {
 
     //Checked
     //TODO: If an invite is sent to an already invited person isn't handled correctly (letting the db throw a unique key collision)
-    //TODO: Without and with password dtos
     @Transactional
-    public void createInviteByAuthenticatedUser(BusinessUnitDTO businessUnitDTO, UserWithoutPasswordDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, InvalidInvitationException, FailedToSaveException {
+    public void createInviteByAuthenticatedUser(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, InvalidInvitationException, FailedToSaveException {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             Optional<User> user = userRepository.findUserByEmail(email);

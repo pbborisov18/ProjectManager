@@ -1,7 +1,7 @@
 package com.company.projectManager.invitation.dto;
 
 import com.company.projectManager.common.dto.BusinessUnitDTO;
-import com.company.projectManager.common.dto.UserWithoutPasswordDTO;
+import com.company.projectManager.common.dto.UserNoPassDTO;
 import com.company.projectManager.common.utils.InviteState;
 import jakarta.validation.constraints.NotNull;
 
@@ -12,10 +12,10 @@ public record InviteDTOWithoutPassword(
         InviteState state,
 
         @NotNull
-        UserWithoutPasswordDTO sender,
+        UserNoPassDTO sender,
 
         @NotNull
-        UserWithoutPasswordDTO receiver,
+        UserNoPassDTO receiver,
 
         @NotNull
         BusinessUnitDTO businessUnit

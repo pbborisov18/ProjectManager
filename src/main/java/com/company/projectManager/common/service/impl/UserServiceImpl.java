@@ -1,12 +1,11 @@
 package com.company.projectManager.common.service.impl;
 
 import com.company.projectManager.common.dto.UserDTO;
-import com.company.projectManager.common.dto.UserWithoutPasswordDTO;
+import com.company.projectManager.common.dto.UserNoPassDTO;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnitRole;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.UserMapper;
-import com.company.projectManager.common.repository.RoleRepository;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
 import com.company.projectManager.common.security.SecurityIds;
@@ -15,7 +14,6 @@ import com.company.projectManager.common.service.UserService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,15 +34,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final RoleRepository roleRepository;
-
     private final UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, RoleRepository roleRepository, UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
         this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
     }
 
@@ -60,15 +55,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Transactional
-    public void updateUser(UserWithoutPasswordDTO userWithoutPasswordDTO) throws FailedToUpdateException, EntityNotFoundException {
+    public void updateUser(UserNoPassDTO userNoPassDTO) throws FailedToUpdateException, EntityNotFoundException {
         try {
-            Optional<User> existingUser = userRepository.findById(userWithoutPasswordDTO.id());
+            Optional<User> existingUser = userRepository.findById(userNoPassDTO.id());
 
             if(existingUser.isEmpty()) {
                 throw new EntityNotFoundException("User not found");
             }
 
-            existingUser.get().setEmail(userWithoutPasswordDTO.email());
+            existingUser.get().setEmail(userNoPassDTO.email());
 
             userRepository.save(existingUser.get());
 
@@ -77,7 +72,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
-    @Transactional
     public void updateUser(UserDTO userDTO) throws FailedToUpdateException, EntityNotFoundException {
         try {
             Optional<User> existingUser = userRepository.findById(userDTO.id());
@@ -97,7 +91,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
-    @Transactional
+    //TODO: Have (manual) cascade deleting all UserBusinessUnits and Invites that contain the user
     public void deleteUser(UserDTO userDTO) throws FailedToDeleteException, EntityNotFoundException {
         try {
             Optional<User> existingUser = userRepository.findById(userDTO.id());
@@ -113,9 +107,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
-
     @Transactional
-    public UserWithoutPasswordDTO findUserById(Long id) throws FailedToSelectException, EntityNotFoundException {
+    public UserNoPassDTO findUserById(Long id) throws FailedToSelectException, EntityNotFoundException {
         try {
             Optional<User> existingUser = userRepository.findById(id);
 
@@ -130,8 +123,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
-    @Transactional
-    public UserWithoutPasswordDTO findUserByEmail(String email) throws FailedToSelectException, EntityNotFoundException {
+    public UserNoPassDTO findUserByEmail(String email) throws FailedToSelectException, EntityNotFoundException {
         try {
             Optional<User> existingUser = userRepository.findUserByEmail(email);
 
@@ -145,8 +137,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
         }
     }
-
-
 
     @Transactional
     public void register(UserDTO userDTO) throws UserAlreadyExistsException, FailedToSaveException {

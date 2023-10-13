@@ -13,15 +13,15 @@ import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
 import com.company.projectManager.common.service.BusinessUnitService;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
-import com.company.projectManager.common.utils.RoleName;
 import com.company.projectManager.common.utils.TypeName;
-import com.company.projectManager.common.utils.UserBusinessUnitRoleId;
-import com.company.projectManager.invitation.service.InviteService;
+//import com.company.projectManager.common.utils.UserBusinessUnitRoleId;
+import com.company.projectManager.invitation.entity.Invite;
+import com.company.projectManager.invitation.repository.InviteRepository;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -46,9 +46,9 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     private final BusinessUnitRepository businessUnitRepository;
 
-    private final InviteService inviteService;
+    private final InviteRepository inviteRepository;
 
-    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRolesRepository userBURoleRepository, UsersBusinessUnitsRolesMapper userBURoleMapper, UserRepository userRepository, UserMapper userMapper, BusinessUnitMapper businessUnitMapper, RoleMapper roleMapper, BusinessUnitService businessUnitService, BusinessUnitRepository businessUnitRepository, InviteService inviteService) {
+    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRolesRepository userBURoleRepository, UsersBusinessUnitsRolesMapper userBURoleMapper, UserRepository userRepository, UserMapper userMapper, BusinessUnitMapper businessUnitMapper, RoleMapper roleMapper, BusinessUnitService businessUnitService, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository) {
         this.userBURoleRepository = userBURoleRepository;
         this.userBURoleMapper = userBURoleMapper;
         this.userRepository = userRepository;
@@ -57,7 +57,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
         this.roleMapper = roleMapper;
         this.businessUnitService = businessUnitService;
         this.businessUnitRepository = businessUnitRepository;
-        this.inviteService = inviteService;
+        this.inviteRepository = inviteRepository;
     }
 
     @Transactional
@@ -72,9 +72,8 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     @Transactional
     public void deleteUserBURole(UserWithPassBusinessUnitRoleDTO userBuRole) throws FailedToDeleteException, EntityNotFoundException {
         try{
-            UserBusinessUnitRoleId id = new UserBusinessUnitRoleId(userBuRole.user().id(), userBuRole.businessUnit().id());
 
-            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(id);
+            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(userBuRole.user().id(), userBuRole.businessUnit().id());
 
             if(userBURoleEntity.isEmpty()){
                 throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
@@ -133,10 +132,12 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             } else {
                 UserDTO userDTO = userMapper.toUserDTO(user.get());
 
+                //TODO: This has to be reworked
                 UserWithPassBusinessUnitRoleDTO userBUrole = new UserWithPassBusinessUnitRoleDTO(
+                        null,
                         userDTO,
                         companyDTO,
-                        new RoleDTO(3L, RoleName.MANAGER)
+                        null
                 );
 
                 saveUserBURole(userBUrole);
@@ -154,23 +155,23 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             if(user.isEmpty()) {
                 throw new UserUnauthenticatedException("User is unauthenticated!");
             } else {
-                UserBusinessUnitRoleId id = new UserBusinessUnitRoleId(user.get().getId(), companyDTO.id());
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(id);
+                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), companyDTO.id());
 
                 if(userBURoleEntity.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the company!");
                 } else {
-                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
-                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-                    } else {
+//                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
+//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
+//                    } else {
                         UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserWithPassBusinessUnitRoleDTO(
+                                null,
                                 userMapper.toUserDTO(user.get()),
                                 companyDTO,
                                 roleMapper.toDTO(userBURoleEntity.get().getRole())
                         );
 
                         saveUserBURole(userWithPassBusinessUnitRoleDTO);
-                    }
+//                    }
                 }
             }
         } catch (ConstraintViolationException | DataAccessException e) {
@@ -186,13 +187,13 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             if(user.isEmpty()) {
                 throw new UserUnauthenticatedException("User is unauthenticated!");
             } else {
-                UserBusinessUnitRoleId id = new UserBusinessUnitRoleId(user.get().getId(), companyDTO.id());
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(id);
+                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), companyDTO.id());
 
                 if(userBURoleEntity.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the company!");
                 } else {
                     UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserWithPassBusinessUnitRoleDTO(
+                            null,
                             userMapper.toUserDTO(user.get()),
                             companyDTO,
                             roleMapper.toDTO(userBURoleEntity.get().getRole())
@@ -217,25 +218,25 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             if(user.isEmpty()) {
                 throw new UserUnauthenticatedException("User is unauthenticated!");
             } else {
-                UserBusinessUnitRoleId id = new UserBusinessUnitRoleId(user.get().getId(), companyDTO.id());
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(id);
+                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), companyDTO.id());
 
                 if(userBURoleEntity.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the company!");
                 } else {
-                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
-                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-                    } else {
+                    //TODO: Fix with the custom authorization
+//                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
+//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
+//                    } else {
                         //Delete the relationship before the businessUnit
                         userBURoleRepository.deleteAll(userBURoleRepository.findAllByBusinessUnitId(companyDTO.id()));
 
                         //Delete all children invites
                         for (UserBusinessUnitRole BUDTO : userBURoleRepository.findAllByUserIdAndBusinessUnitCompanyId(user.get().getId(), companyDTO.id())) {
-                            inviteService.deleteAllInvitesByBusinessUnit(userBURoleMapper.toDTO(BUDTO).businessUnit());
+                            deleteAllInvitesByBusinessUnit(userBURoleMapper.toDTO(BUDTO).businessUnit());
                         }
 
                         //delete all invites for the company
-                        inviteService.deleteAllInvitesByBusinessUnit(companyDTO);
+                        deleteAllInvitesByBusinessUnit(companyDTO);
 
 
                         //Delete all relationships of the children projects and teams of the company
@@ -253,7 +254,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                         //Delete the company
                         businessUnitService.deleteBusinessUnit(companyDTO);
 
-                    }
+//                    }
                 }
             }
         } catch (ConstraintViolationException | DataAccessException e) {
@@ -312,22 +313,25 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             } else {
                 UserDTO userDTO = userMapper.toUserDTO(user.get());
 
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findById(new UserBusinessUnitRoleId(userDTO.id(), projectDTO.company().id()));
+                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), projectDTO.company().id());
 
                 if(userBusinessUnitRole.isEmpty()){
                     throw new UserNotInBusinessUnitException("User isn't a part of the company!");
                 } else {
-                    if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-                    } else {
+                    //TODO: Fix with the custom authorization
+//                    if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
+//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
+//                    } else {
+                    //TODO: This has to be reworked
                         UserWithPassBusinessUnitRoleDTO userBUrole = new UserWithPassBusinessUnitRoleDTO(
+                                null,
                                 userDTO,
                                 projectDTO,
-                                new RoleDTO(3L, RoleName.MANAGER)
+                                null
                         );
 
                         saveUserBURole(userBUrole);
-                    }
+//                    }
                 }
             }
         } catch (ConstraintViolationException | DataAccessException e) {
@@ -350,13 +354,14 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             } else {
                 UserDTO userDTO = userMapper.toUserDTO(user.get());
 
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findById(new UserBusinessUnitRoleId(userDTO.id(), projectDTO.company().id()));
+                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), projectDTO.company().id());
 
                 if(userBusinessUnitRole.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the company!");
                 } else {
 
                     UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserWithPassBusinessUnitRoleDTO(
+                            null,
                             userMapper.toUserDTO(user.get()),
                             projectDTO,
                             roleMapper.toDTO(userBusinessUnitRole.get().getRole())
@@ -381,26 +386,26 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             if(user.isEmpty()) {
                 throw new UserUnauthenticatedException("User is unauthenticated!");
             } else {
-                UserBusinessUnitRoleId id = new UserBusinessUnitRoleId(user.get().getId(), projectDTO.id());
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(id);
+                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), projectDTO.id());
 
                 if(userBURoleEntity.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the project!");
                 } else {
-                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
-                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-                    } else {
+                    //TODO: Fix with the custom authorization
+//                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
+//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
+//                    } else {
                         //Delete the relationship before the businessUnit
                         userBURoleRepository.deleteAll(
                                 userBURoleRepository.findAllByBusinessUnitId(projectDTO.id()));
 
                         //Delete all children invites
                         for (UserBusinessUnitRole BUDTO : userBURoleRepository.findAllByUserIdAndBusinessUnitProjectId(user.get().getId(), projectDTO.id())) {
-                            inviteService.deleteAllInvitesByBusinessUnit(userBURoleMapper.toDTO(BUDTO).businessUnit());
+                            deleteAllInvitesByBusinessUnit(userBURoleMapper.toDTO(BUDTO).businessUnit());
                         }
 
                         //delete all invites for the company
-                        inviteService.deleteAllInvitesByBusinessUnit(projectDTO);
+                        deleteAllInvitesByBusinessUnit(projectDTO);
 
                         //Delete all relationships of the children teams of the project
                         userBURoleRepository.deleteAll(
@@ -416,7 +421,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
                         //Delete the project
                         businessUnitService.deleteBusinessUnit(projectDTO);
-                    }
+//                    }
                 }
             }
         } catch (ConstraintViolationException | DataAccessException e) {
@@ -474,23 +479,26 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             } else {
                 UserDTO userDTO = userMapper.toUserDTO(user.get());
 
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findById(new UserBusinessUnitRoleId(userDTO.id(), teamDTO.project().id()));
+                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), teamDTO.project().id());
 
                 if(userBusinessUnitRole.isEmpty()){
                     throw new UserNotInBusinessUnitException("User isn't a part of the parent project!");
                 } else {
-                    if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-                    } else {
+                    //TODO: Fix with the custom authorization
+//                    if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
+//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
+//                    } else {
+                    //TODO: This has to be reworked
                         UserWithPassBusinessUnitRoleDTO userBUrole = new UserWithPassBusinessUnitRoleDTO(
+                                null,
                                 userDTO,
                                 teamDTO,
-                                new RoleDTO(3L, RoleName.MANAGER)
+                                null
                         );
 
                         saveUserBURole(userBUrole);
 
-                    }
+//                    }
                 }
             }
         } catch (ConstraintViolationException | DataAccessException e) {
@@ -513,13 +521,14 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             } else {
                 UserDTO userDTO = userMapper.toUserDTO(user.get());
 
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findById(new UserBusinessUnitRoleId(userDTO.id(), teamDTO.project().id()));
+                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), teamDTO.project().id());
 
                 if(userBusinessUnitRole.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the team!");
                 } else {
 
                     UserWithPassBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserWithPassBusinessUnitRoleDTO(
+                            null,
                             userMapper.toUserDTO(user.get()),
                             teamDTO,
                             roleMapper.toDTO(userBusinessUnitRole.get().getRole())
@@ -542,24 +551,24 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             if(user.isEmpty()) {
                 throw new UserUnauthenticatedException("User is unauthenticated!");
             } else {
-                UserBusinessUnitRoleId id = new UserBusinessUnitRoleId(user.get().getId(), teamDTO.id());
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(id);
+                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), teamDTO.id());
 
                 if(userBURoleEntity.isEmpty()) {
                     throw new UserNotInBusinessUnitException("User isn't a part of the team!");
                 } else {
-                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
-                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-                    } else {
+                    //TODO: Fix with the custom authorization
+//                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
+//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
+//                    } else {
                         //Delete the relationship before the businessUnit
                         userBURoleRepository.deleteAll(userBURoleRepository.findAllByBusinessUnitId(teamDTO.id()));
 
                         //Delete invites
-                        inviteService.deleteAllInvitesByBusinessUnit(teamDTO);
+                        deleteAllInvitesByBusinessUnit(teamDTO);
 
                         //Delete the project
                         businessUnitService.deleteBusinessUnit(teamDTO);
-                    }
+//                    }
                 }
             }
         } catch (ConstraintViolationException | DataAccessException e) {
@@ -571,11 +580,11 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
 
     //?? No idea why this isn't used
+    //TODO: fix
     @Transactional
     public UserBusinessUnitRoleDTO findById(Long userId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
         try {
-            UserBusinessUnitRoleId id = new UserBusinessUnitRoleId(userId, businessUnitId);
-            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(id);
+            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(userId);
 
             if(userBURoleEntity.isEmpty()){
                 throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
@@ -653,6 +662,21 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
+        }
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void deleteAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToDeleteException {
+        try {
+            List<Invite> invites = inviteRepository.findAllByBusinessUnitId(businessUnitDTO.id());
+
+            if(invites.isEmpty()){
+                return;
+            }
+
+            inviteRepository.deleteAll(invites);
+        } catch (ConstraintViolationException | DataAccessException e){
+            throw new FailedToDeleteException("Unsuccessful delete! " + e.getMessage());
         }
     }
 

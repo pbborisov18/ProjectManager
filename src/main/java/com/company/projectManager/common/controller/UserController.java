@@ -1,7 +1,7 @@
 package com.company.projectManager.common.controller;
 
 import com.company.projectManager.common.dto.UserDTO;
-import com.company.projectManager.common.dto.UserWithoutPasswordDTO;
+import com.company.projectManager.common.dto.UserNoPassDTO;
 import com.company.projectManager.common.exception.EntityNotFoundException;
 import com.company.projectManager.common.exception.FailedToSaveException;
 import com.company.projectManager.common.exception.FailedToSelectException;
@@ -21,17 +21,20 @@ import java.util.Map;
 @RestController
 public class UserController {
 
-    UserService userService;
+    private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
+    /*TODO:
+       Probably will delete this once I figure out how to make svelte (the frontend) work
+     */
     @GetMapping("/authenticatedUser")
     public ResponseEntity<Object> getAuthenticatedUser(){
         try {
-            UserWithoutPasswordDTO user = userService.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            UserNoPassDTO user = userService.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (FailedToSelectException e) {

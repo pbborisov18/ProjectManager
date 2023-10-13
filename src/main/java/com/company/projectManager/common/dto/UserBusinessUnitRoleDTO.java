@@ -7,7 +7,7 @@ public record UserBusinessUnitRoleDTO(
         Long id,
 
         @NotNull
-        UserWithoutPasswordDTO user,
+        UserNoPassDTO user,
 
         @NotNull
         BusinessUnitDTO businessUnit,
