@@ -14,12 +14,12 @@ import com.company.projectManager.common.service.UserService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
 
+
     private final UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository;
 
     public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository) {
@@ -43,18 +44,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
     }
 
-    @Transactional
-    public void saveUser(UserDTO userDTO) throws FailedToSaveException {
-        try {
-            User user = userMapper.toEntity(userDTO);
 
-            userRepository.save(user);
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
-        }
-    }
-
-    @Transactional
     public void updateUser(UserNoPassDTO userNoPassDTO) throws FailedToUpdateException, EntityNotFoundException {
         try {
             Optional<User> existingUser = userRepository.findById(userNoPassDTO.id());
@@ -68,7 +58,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             userRepository.save(existingUser.get());
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToUpdateException("Unsuccessful update! " + e.getMessage());
+            throw new FailedToUpdateException("Failed to update! " + e.getMessage());
         }
     }
 
@@ -87,14 +77,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             userRepository.save(existingUser.get());
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToUpdateException("Unsuccessful update! " + e.getMessage());
+            throw new FailedToUpdateException("Failed to update! " + e.getMessage());
         }
     }
 
-    //TODO: Have (manual) cascade deleting all UserBusinessUnits and Invites that contain the user
-    public void deleteUser(UserDTO userDTO) throws FailedToDeleteException, EntityNotFoundException {
+    //TODO: Add (manual) cascade deleting all UserBusinessUnits and Invites that contain the user
+    //TODO: Invalidate current session
+    //Only an authenticated user can delete their own account
+    public void deleteAuthenticatedUser() throws FailedToDeleteException, EntityNotFoundException {
         try {
-            Optional<User> existingUser = userRepository.findById(userDTO.id());
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Optional<User> existingUser = userRepository.findUserByEmail(email);
 
             if(existingUser.isEmpty()){
                 throw new EntityNotFoundException("User not found!");
@@ -103,23 +96,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             userRepository.delete(existingUser.get());
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToDeleteException("Unsuccessful delete! " + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public UserNoPassDTO findUserById(Long id) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            Optional<User> existingUser = userRepository.findById(id);
-
-            if(existingUser.isEmpty()) {
-                throw new EntityNotFoundException("User not found!");
-            }
-
-            return userMapper.toUserWithoutPasswordDTO(existingUser.get());
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
+            throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
         }
     }
 
@@ -138,20 +115,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
-    @Transactional
     public void register(UserDTO userDTO) throws UserAlreadyExistsException, FailedToSaveException {
+        try {
+            if(checkIfUserExists(userDTO.email())){
+                throw new UserAlreadyExistsException("User already exists with this email!");
+            }
 
-        if(checkIfUserExists(userDTO.email())){
-            throw new UserAlreadyExistsException("User already exists with this email!");
+            userRepository.save(userMapper.toEntity(userDTO));
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToSaveException("Failed to register! " + e.getMessage());
         }
-
-        saveUser(new UserDTO(
-                        null,
-                        userDTO.email(),
-                        passwordEncoder.encode(userDTO.password())
-                )
-        );
-
     }
 
     private boolean checkIfUserExists(String email){

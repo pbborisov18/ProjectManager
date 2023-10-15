@@ -14,6 +14,7 @@ import java.util.List;
 @Validated
 public interface UserMapper {
 
+    //TODO: Check out during the UserBusinessUnitRole rework.
     UserDTO toUserDTO(@Valid User user);
 
     @Named("toUserWithoutPasswordDTO")
