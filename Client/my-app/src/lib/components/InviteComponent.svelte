@@ -68,7 +68,7 @@
 </script>
 
 <div class="block">
-    <span>You are invited in {invite.businessUnit.name} by {invite.sender.email}</span>
+    <span>You are invited in {invite.businessUnit.name}</span>
     <div style="border-left:1px solid #BBBBBB;height:80%"></div>
     <div class="imageDivs clickable" on:click={acceptInvite}>
         <img src="{checkIcon}" alt="" draggable="false" >

@@ -2,6 +2,8 @@ package com.company.projectManager.invitation.service.impl;
 
 import com.company.projectManager.common.dto.BusinessUnitDTO;
 import com.company.projectManager.common.dto.UserNoPassDTO;
+import com.company.projectManager.common.entity.Authority;
+import com.company.projectManager.common.entity.Role;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnitRole;
 import com.company.projectManager.common.exception.*;
@@ -44,7 +46,7 @@ public class InviteServiceImpl implements InviteService {
         this.userBURoleRepository = userBURoleRepository;
     }
 
-    public List<InviteDTONoPass> findInvitesByAuthenticatedReceiver(InviteState inviteState) throws FailedToSelectException {
+    public List<InviteDTONoPass> findInvitesByAuthenticatedUserAndState(InviteState inviteState) throws FailedToSelectException {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -52,15 +54,14 @@ public class InviteServiceImpl implements InviteService {
                     inviteRepository.findByReceiver_EmailAndState(email, inviteState));
 
         } catch (ConstraintViolationException | DataAccessException e){
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
+            throw new FailedToSelectException("Failed to select! " + e.getMessage());
         }
     }
 
-
     public List<InviteDTONoPass> findAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
         try {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
             Optional<User> user = userRepository.findUserByEmail(email);
 
             if(user.isEmpty()){
@@ -71,9 +72,7 @@ public class InviteServiceImpl implements InviteService {
 
             if(userBURoleEntity.isEmpty()){
                 throw new UserNotInBusinessUnitException("User isn't part of the BusinessUnit");
-            }// else if(userBURoleEntity.get().getRole().getName() != RoleName.MANAGER){
-//                throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-//            }
+            }
             //-----------------
 
             List<Invite> invites = inviteRepository.findAllByBusinessUnitId(businessUnitDTO.id());
@@ -84,86 +83,82 @@ public class InviteServiceImpl implements InviteService {
 
             return inviteMapper.toDTO(invites);
         } catch (ConstraintViolationException | DataAccessException e){
-            throw new FailedToSelectException("Failed select! " + e.getMessage());
+            throw new FailedToSelectException("Failed to select! " + e.getMessage());
         }
     }
 
-    public void acceptInvite(InviteDTONoPass inviteDTONoPass){
-
-    }
-
-    public void cancelInvite(InviteDTONoPass inviteDTONoPass){
-
-    }
-
-    public void declineInvite(InviteDTONoPass inviteDTONoPass){
-
-    }
-
-
     @Transactional
-    public void updateInviteByAuthenticatedUser(InviteDTONoPass inviteDTONoPass) throws InvalidInvitationException, UserNotAuthorizedException, FailedToUpdateException, FailedToSelectException, UserUnauthenticatedException {
+    public void acceptInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToUpdateException, UserNotAuthorizedException {
         try {
-            Optional<User> loggedInUser = userRepository.findUserByEmail(
-                    SecurityContextHolder.getContext().getAuthentication().getName());
+            Optional<Invite> invite = inviteRepository.findById(inviteDTONoPass.id());
 
-            if(loggedInUser.isEmpty()){
-                throw new UserUnauthenticatedException("User is unauthenticated");
+            if (invite.isEmpty()) {
+                throw new EntityNotFoundException("Invite not found");
             }
 
-            Optional<Invite> existingInvite = inviteRepository.findById(inviteDTONoPass.id());
-
-            if(existingInvite.isEmpty()){
-                throw new FailedToSelectException("Invite doesn't exist!");
+            if(!inviteDTONoPass.receiver().email().equals(
+                    invite.get().getReceiver().getEmail())){
+                throw new UserNotAuthorizedException("Invite was sent to someone else");
             }
 
-            Optional<User> receiver = userRepository.findUserByEmail(inviteDTONoPass.receiver().email());
-            Optional<User> sender = userRepository.findUserByEmail(inviteDTONoPass.sender().email());
+            invite.get().setState(InviteState.ACCEPTED);
 
-            if(receiver.isEmpty() || sender.isEmpty()){
-                //Means someone has deleted their profile
-                inviteRepository.delete(existingInvite.get());
-                throw new InvalidInvitationException("Either sender or receiver doesn't exist");
-            }
+            //Keep the invite in the db so a user can't be invited to the same BU that they are already in
+            //Make sure to (manually) cascade delete the invites
+            inviteRepository.save(invite.get());
 
-            //Receiver can change the state to whatever
-            if(loggedInUser.get().getEmail().equals(sender.get().getEmail())){
-                //authenticated sender
-                if(inviteDTONoPass.state() != InviteState.CANCELLED){
-                    throw new UserNotAuthorizedException("You can only cancel the invite");
-                }
-            } else if (loggedInUser.get().getEmail().equals(receiver.get().getEmail())){
-                // in case you need to stuff in the future. I don't think I can do anything rn.
-            } else {
-                throw new UserNotAuthorizedException("You aren't the receiver nor sender!");
-            }
-
-            //Only update the state to avoid letting the users change stuff I don't want them to
-            existingInvite.get().setState(inviteDTONoPass.state());
-
-            inviteRepository.save(existingInvite.get());
-            //TODO: This has to be reworked
-            if(existingInvite.get().getState().equals(InviteState.ACCEPTED)){
-                userBURoleRepository.save(new UserBusinessUnitRole(
-                        null,
-                        receiver.get(),
-                        existingInvite.get().getBusinessUnit(),
-                        null
-                ));
-            }
-
+            //TODO: to revisit when authorization is done
+            //Can't do cascade persist cuz that will break the merge so will have to be done manually...
+            userBURoleRepository.save(new UserBusinessUnitRole(null,
+                                                                invite.get().getReceiver(),
+                                                                invite.get().getBusinessUnit(),
+                                                                new Role(null,
+                                                                        "Default",
+                                                                        List.of(new Authority(null, "Default")),
+                                                                        invite.get().getBusinessUnit())));
         } catch (ConstraintViolationException | DataAccessException e){
-            throw new FailedToUpdateException("Unsuccessful update! " + e.getMessage());
+            throw new FailedToUpdateException("Failed to update! " + e.getMessage());
         }
     }
 
-    //Checked
-    //TODO: If an invite is sent to an already invited person isn't handled correctly (letting the db throw a unique key collision)
-    @Transactional
-    public void createInviteByAuthenticatedUser(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, InvalidInvitationException, FailedToSaveException {
+    public void declineInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToUpdateException {
         try {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Optional<Invite> invite = inviteRepository.findById(inviteDTONoPass.id());
+
+            if (invite.isEmpty()) {
+                throw new EntityNotFoundException("Invite not found");
+            }
+
+            invite.get().setState(InviteState.DECLINED);
+
+            //Keep the invite in the db so the user can't be spammed the same invite
+            //Basically if you decline it acts as block (until you remove the invite)
+            inviteRepository.save(invite.get());
+        } catch (ConstraintViolationException | DataAccessException e){
+            throw new FailedToUpdateException("Failed to update! " + e.getMessage());
+        }
+    }
+
+    public void cancelInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToDeleteException {
+        try {
+            Optional<Invite> invite = inviteRepository.findById(inviteDTONoPass.id());
+
+            if (invite.isEmpty()) {
+                throw new EntityNotFoundException("Invite not found");
+            }
+
+            //Delete the invite in case
+            inviteRepository.delete(invite.get());
+        } catch (ConstraintViolationException | DataAccessException e){
+            throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
+        }
+    }
+
+
+    public void createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, InvalidInvitationException, FailedToSaveException {
+        try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
             Optional<User> user = userRepository.findUserByEmail(email);
 
             if(user.isEmpty()){
@@ -174,24 +169,32 @@ public class InviteServiceImpl implements InviteService {
 
             if(userBURoleEntity.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't part of the BusinessUnit");
-            }//            } else if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
-//                throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-//            }
+            }
             //-----------------
 
-            Optional<User> sender = userRepository.findUserByEmail(email);
             Optional<User> receiverEntity = userRepository.findUserByEmail(receiver.email());
 
             if(receiverEntity.isEmpty()){
                 throw new InvalidInvitationException("User doesn't exist");
             }
 
-            Invite invite = new Invite(null, InviteState.PENDING, sender.get() ,receiverEntity.get(), businessUnitMapper.toBusinessUnitEntity(businessUnitDTO));
+            Optional<Invite> inviteExists = inviteRepository.findInviteByBusinessUnit_IdAndReceiver_Email(businessUnitDTO.id(), receiver.email());
+
+            if(inviteExists.isPresent() ||
+                    receiver.email().equals(
+                            SecurityContextHolder.getContext().getAuthentication().getName())){
+                throw new InvalidInvitationException("Invite already exists!");
+            }
+
+            Invite invite = new Invite(null,
+                    InviteState.PENDING,
+                    receiverEntity.get(),
+                    businessUnitMapper.toBusinessUnitEntity(businessUnitDTO));
 
             inviteRepository.save(invite);
 
         } catch (ConstraintViolationException | DataAccessException e){
-            throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
+            throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }
     }
 

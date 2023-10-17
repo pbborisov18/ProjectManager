@@ -10,18 +10,16 @@ import java.util.List;
 
 public interface InviteService {
 
-    List<InviteDTONoPass> findInvitesByAuthenticatedReceiver(InviteState inviteState) throws FailedToSelectException;
+    List<InviteDTONoPass> findInvitesByAuthenticatedUserAndState(InviteState inviteState) throws FailedToSelectException;
 
     List<InviteDTONoPass> findAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException;
 
-    void acceptInvite(InviteDTONoPass inviteDTONoPass);
+    void acceptInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToUpdateException, UserNotAuthorizedException;
 
-    void cancelInvite(InviteDTONoPass inviteDTONoPass);
+    void declineInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToUpdateException;
 
-    void declineInvite(InviteDTONoPass inviteDTONoPass);
+    void cancelInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToDeleteException;
 
-    void updateInviteByAuthenticatedUser(InviteDTONoPass inviteDTONoPass) throws InvalidInvitationException, UserNotAuthorizedException, FailedToUpdateException, FailedToSelectException, UserUnauthenticatedException;
-
-    void createInviteByAuthenticatedUser(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, InvalidInvitationException, FailedToSaveException;
+    void createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, InvalidInvitationException, FailedToSaveException;
 
 }

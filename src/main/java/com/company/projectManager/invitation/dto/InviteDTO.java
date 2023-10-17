@@ -12,9 +12,6 @@ public record InviteDTO(
         InviteState state,
 
         @NotNull
-        UserDTO sender,
-
-        @NotNull
         UserDTO receiver,
 
         @NotNull

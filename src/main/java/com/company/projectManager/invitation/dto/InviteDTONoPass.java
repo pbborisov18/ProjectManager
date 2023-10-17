@@ -12,9 +12,6 @@ public record InviteDTONoPass(
         InviteState state,
 
         @NotNull
-        UserNoPassDTO sender,
-
-        @NotNull
         UserNoPassDTO receiver,
 
         @NotNull

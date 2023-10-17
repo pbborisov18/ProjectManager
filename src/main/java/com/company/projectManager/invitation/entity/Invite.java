@@ -26,12 +26,6 @@ public class Invite {
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "SenderId")
-    @Cascade(CascadeType.MERGE)
-    private User sender;
-
-    @NotNull
-    @ManyToOne
     @JoinColumn(name = "ReceiverId")
     @Cascade(CascadeType.MERGE)
     private User receiver;
@@ -45,10 +39,9 @@ public class Invite {
     public Invite() {
     }
 
-    public Invite(Long id, InviteState state, User sender, User receiver, BusinessUnit businessUnit) {
+    public Invite(Long id, InviteState state, User receiver, BusinessUnit businessUnit) {
         this.id = id;
         this.state = state;
-        this.sender = sender;
         this.receiver = receiver;
         this.businessUnit = businessUnit;
     }
@@ -80,14 +73,6 @@ public class Invite {
 
     public void setState(InviteState state) {
         this.state = state;
-    }
-
-    public User getSender() {
-        return sender;
-    }
-
-    public void setSender(User sender) {
-        this.sender = sender;
     }
 
     public User getReceiver() {

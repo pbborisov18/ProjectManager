@@ -1,10 +1,13 @@
-export async function load({ fetch, cookies }) {
-    const invitesResult = await fetch('http://localhost:8080/invites', {
+export async function load({ fetch }) {
+    const invitesResult = await fetch(
+        'http://localhost:8080/invites?' + new URLSearchParams({inviteState:'PENDING'}), {
         method: 'GET',
         headers: {
             'Content-Type': "application/json",
-            'JSESSION': cookies.get('token')
-        }}).catch(error =>{
+            credentials: "include"
+        }})
+        //TODO: to fix how the frontend handles this
+        .catch(error =>{
             return{
                 error : 500
             };
