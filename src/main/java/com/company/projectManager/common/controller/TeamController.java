@@ -5,7 +5,6 @@ import com.company.projectManager.common.dto.TeamDTO;
 import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +14,11 @@ import java.util.List;
 @RestController
 public class TeamController {
 
+    private final UserBusinessUnitRoleService userBusinessUnitRoleService;
 
-    @Autowired
-    UserBusinessUnitRoleService userBusinessUnitRoleService;
+    public TeamController(UserBusinessUnitRoleService userBusinessUnitRoleService) {
+        this.userBusinessUnitRoleService = userBusinessUnitRoleService;
+    }
 
     @PostMapping("/company/project/teams")
     public ResponseEntity<Object> getAllTeamsOfProject(@RequestBody ProjectDTO projectDTO){
