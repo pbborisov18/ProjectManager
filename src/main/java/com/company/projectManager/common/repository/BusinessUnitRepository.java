@@ -11,11 +11,11 @@ import java.util.List;
 @Repository
 public interface BusinessUnitRepository extends CrudRepository<BusinessUnit, Long> {
 
-    List<BusinessUnit> findAllByType(TypeName name);
+//    List<BusinessUnit> findAllByType(TypeName name);
 
-    List<BusinessUnit> findAllByCompany(BusinessUnit businessUnit);
+    List<BusinessUnit> findAllByCompanyId(Long id);
 
-    List<BusinessUnit> findAllByCompanyAndType(BusinessUnit businessUnit, TypeName typeName);
+//    List<BusinessUnit> findAllByCompanyAndType(BusinessUnit businessUnit, TypeName typeName);
 
-    List<BusinessUnit> findAllByProject(BusinessUnit businessUnit);
+    List<BusinessUnit> findAllByProjectId(Long id);
 }

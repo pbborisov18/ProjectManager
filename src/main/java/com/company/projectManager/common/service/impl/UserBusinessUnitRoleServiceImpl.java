@@ -11,7 +11,7 @@ import com.company.projectManager.common.mapper.UsersBusinessUnitsRolesMapper;
 import com.company.projectManager.common.repository.BusinessUnitRepository;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
-import com.company.projectManager.common.service.BusinessUnitService;
+//import com.company.projectManager.common.service.BusinessUnitService;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import com.company.projectManager.common.utils.TypeName;
 //import com.company.projectManager.common.utils.UserBusinessUnitRoleId;
@@ -42,20 +42,17 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     private final RoleMapper roleMapper;
 
-    private final BusinessUnitService businessUnitService;
-
     private final BusinessUnitRepository businessUnitRepository;
 
     private final InviteRepository inviteRepository;
 
-    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRolesRepository userBURoleRepository, UsersBusinessUnitsRolesMapper userBURoleMapper, UserRepository userRepository, UserMapper userMapper, BusinessUnitMapper businessUnitMapper, RoleMapper roleMapper, BusinessUnitService businessUnitService, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository) {
+    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRolesRepository userBURoleRepository, UsersBusinessUnitsRolesMapper userBURoleMapper, UserRepository userRepository, UserMapper userMapper, BusinessUnitMapper businessUnitMapper, RoleMapper roleMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository) {
         this.userBURoleRepository = userBURoleRepository;
         this.userBURoleMapper = userBURoleMapper;
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.businessUnitMapper = businessUnitMapper;
         this.roleMapper = roleMapper;
-        this.businessUnitService = businessUnitService;
         this.businessUnitRepository = businessUnitRepository;
         this.inviteRepository = inviteRepository;
     }
@@ -242,18 +239,12 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                         //Delete all relationships of the children projects and teams of the company
                         userBURoleRepository.deleteAll(
                                 userBURoleRepository.findAllByUserIdAndBusinessUnitCompanyId(user.get().getId(), companyDTO.id()));
-                        try {
-                            //Delete all children projects and teams of the company
-                            businessUnitRepository.deleteAll(
-                                    businessUnitMapper.toBusinessUnitEntities(
-                                            businessUnitService.findBusinessUnitsByCompany(companyDTO)));
-                        } catch (EntityNotFoundException e) {
-                            //No kids to delete
-                        }
+
+
+                        businessUnitRepository.deleteAll(businessUnitRepository.findAllByCompanyId(companyDTO.id()));
 
                         //Delete the company
-                        businessUnitService.deleteBusinessUnit(companyDTO);
-
+                        businessUnitRepository.deleteById(companyDTO.id());
 //                    }
                 }
             }
@@ -410,17 +401,12 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                         //Delete all relationships of the children teams of the project
                         userBURoleRepository.deleteAll(
                                 userBURoleRepository.findAllByUserIdAndBusinessUnitProjectId(user.get().getId(), projectDTO.id()));
-                        try{
-                            //Delete all children teams of the project
-                            businessUnitRepository.deleteAll(
-                                    businessUnitMapper.toBusinessUnitEntities(
-                                            businessUnitService.findBusinessUnitsByProject(projectDTO)));
-                        } catch (EntityNotFoundException e) {
-                            //No kids to delete
-                        }
+
+                        //Delete all children teams of the project
+                        businessUnitRepository.deleteAll(businessUnitRepository.findAllByProjectId(projectDTO.id()));
 
                         //Delete the project
-                        businessUnitService.deleteBusinessUnit(projectDTO);
+                        businessUnitRepository.deleteById(projectDTO.id());
 //                    }
                 }
             }
@@ -567,7 +553,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                         deleteAllInvitesByBusinessUnit(teamDTO);
 
                         //Delete the project
-                        businessUnitService.deleteBusinessUnit(teamDTO);
+                        businessUnitRepository.deleteById(teamDTO.id());
 //                    }
                 }
             }
