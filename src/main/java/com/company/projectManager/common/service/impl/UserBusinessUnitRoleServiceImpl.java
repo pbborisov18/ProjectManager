@@ -1,20 +1,19 @@
 package com.company.projectManager.common.service.impl;
 
 import com.company.projectManager.common.dto.*;
+import com.company.projectManager.common.entity.BusinessUnit;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnitRole;
 import com.company.projectManager.common.exception.*;
-import com.company.projectManager.common.mapper.BusinessUnitMapper;
 import com.company.projectManager.common.mapper.RoleMapper;
 import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.mapper.UsersBusinessUnitsRolesMapper;
 import com.company.projectManager.common.repository.BusinessUnitRepository;
+import com.company.projectManager.common.repository.RoleRepository;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
-//import com.company.projectManager.common.service.BusinessUnitService;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import com.company.projectManager.common.utils.TypeName;
-//import com.company.projectManager.common.utils.UserBusinessUnitRoleId;
 import com.company.projectManager.invitation.entity.Invite;
 import com.company.projectManager.invitation.repository.InviteRepository;
 import jakarta.validation.ConstraintViolationException;
@@ -24,8 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleService {
@@ -38,23 +39,24 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     private final UserMapper userMapper;
 
-    private final BusinessUnitMapper businessUnitMapper;
-
     private final RoleMapper roleMapper;
 
     private final BusinessUnitRepository businessUnitRepository;
 
     private final InviteRepository inviteRepository;
 
-    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRolesRepository userBURoleRepository, UsersBusinessUnitsRolesMapper userBURoleMapper, UserRepository userRepository, UserMapper userMapper, BusinessUnitMapper businessUnitMapper, RoleMapper roleMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository) {
+    private final RoleRepository roleRepository;
+
+    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRolesRepository userBURoleRepository, UsersBusinessUnitsRolesMapper userBURoleMapper, UserRepository userRepository, UserMapper userMapper, RoleMapper roleMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
+                                           RoleRepository roleRepository) {
         this.userBURoleRepository = userBURoleRepository;
         this.userBURoleMapper = userBURoleMapper;
         this.userRepository = userRepository;
         this.userMapper = userMapper;
-        this.businessUnitMapper = businessUnitMapper;
         this.roleMapper = roleMapper;
         this.businessUnitRepository = businessUnitRepository;
         this.inviteRepository = inviteRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Transactional
@@ -85,36 +87,24 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-    @Transactional
-    public List<UserNoPassBusinessUnitRoleDTO> findAllCompaniesByUserId(Long userId) throws FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllCompaniesByAuthenticatedUser() throws FailedToSelectException, EntityNotFoundException {
         try {
-            List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByUserIdAndBusinessUnitType(userId, TypeName.COMPANY);
+            //It's safe to use the id here for it to be more performant. You can get it from the authorities, 2nd "id" (Check out the class SecurityIds)
+            //Will do if more perf is needed but I doubt it would make a big difference for the life of this
+            //This is for every single method here that needs to do something using the authenticated user
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            if(userBURoleList.isEmpty()){
-                throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
+            List<UserNoPassBusinessUnitRoleDTO> userBURoles = userBURoleMapper.toDTO(
+                    userBURoleRepository.findAllByUserEmailAndBusinessUnitType(email, TypeName.COMPANY));
+
+            if(userBURoles.isEmpty()){
+                throw new EntityNotFoundException("No UserBusinessUnitRoles found");
             }
 
-            return userBURoleMapper.toDTO(userBURoleList);
+            return userBURoles;
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public List<UserNoPassBusinessUnitRoleDTO> findCompaniesByAuthenticatedUser() throws UserUnauthenticatedException, FailedToSelectException, EntityNotFoundException {
-        try {
-            Optional<User> user = userRepository.findUserByEmail(
-                    SecurityContextHolder.getContext().getAuthentication().getName());
-
-            if(user.isPresent()) {
-                return findAllCompaniesByUserId(user.get().getId());
-            } else {
-                throw new UserUnauthenticatedException("User is unauthenticated!");
-            }
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
+            throw new FailedToSelectException("Failed to select! " + e.getMessage());
         }
     }
 
@@ -151,146 +141,96 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
             if(user.isEmpty()) {
                 throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), companyDTO.id());
+            }
 
-                if(userBURoleEntity.isEmpty()) {
-                    throw new UserNotInBusinessUnitException("User isn't a part of the company!");
-                } else {
+            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), companyDTO.id());
+
+            if(userBURoleEntity.isEmpty()) {
+                throw new UserNotInBusinessUnitException("User isn't a part of the company!");
+            }
+
 //                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
 //                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
 //                    } else {
-                        UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserBusinessUnitRoleDTO(
-                                null,
-                                userMapper.toUserDTO(user.get()),
-                                companyDTO,
-                                roleMapper.toDTO(userBURoleEntity.get().getRole())
-                        );
+            UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserBusinessUnitRoleDTO(
+                    null,
+                    userMapper.toUserDTO(user.get()),
+                    companyDTO,
+                    roleMapper.toDTO(userBURoleEntity.get().getRole())
+            );
 
-                        saveUserBURole(userWithPassBusinessUnitRoleDTO);
-//                    }
-                }
-            }
+            saveUserBURole(userWithPassBusinessUnitRoleDTO);
+
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToUpdateException("Unsuccessful update! " + e.getMessage());
         }
     }
 
-    @Transactional
-    public void leaveCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToDeleteException, FailedToLeaveException, EntityNotFoundException {
+    public void leaveCompany(CompanyDTO companyDTO) throws FailedToLeaveException {
         try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            if(user.isEmpty()) {
-                throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), companyDTO.id());
+            //Delete all userBURole entries
+            List<UserBusinessUnitRole> userBURoles =
+                    userBURoleRepository.findAllByUserEmailAndBusinessUnitId(email, companyDTO.id());
 
-                if(userBURoleEntity.isEmpty()) {
-                    throw new UserNotInBusinessUnitException("User isn't a part of the company!");
-                } else {
-                    UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserBusinessUnitRoleDTO(
-                            null,
-                            userMapper.toUserDTO(user.get()),
-                            companyDTO,
-                            roleMapper.toDTO(userBURoleEntity.get().getRole())
-                    );
-                    //Deletes the current relationship in the table
-                    deleteUserBURole(userWithPassBusinessUnitRoleDTO);
+            userBURoleRepository.deleteAll(userBURoles);
 
-                    //Deletes the relationship with all children Projects and Teams under the company left
-                    userBURoleRepository.deleteAll(userBURoleRepository.findAllByUserIdAndBusinessUnitCompanyId(user.get().getId(), companyDTO.id()));
-                }
-            }
+            //Delete all child userBURole entries
+            List<UserBusinessUnitRole> childUserBURoles =
+                    userBURoleRepository.findAllByUserEmailAndBusinessUnitCompanyId(email, companyDTO.id());
+
+            userBURoleRepository.deleteAll(childUserBURoles);
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToLeaveException("Unsuccessful leave! " + e.getMessage());
+            throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
         }
     }
 
     @Transactional
-    public void deleteCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToDeleteException, FailedToSelectException, EntityNotFoundException {
+    public void deleteCompany(CompanyDTO companyDTO) throws FailedToDeleteException {
         try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            //If these are slow. Look into batch delete. Should be an ez change as I don't rely on cascading for deletion
+            //But isn't worth the extra effort for this project
 
-            if(user.isEmpty()) {
-                throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), companyDTO.id());
+            //Delete all invites for the company
+            inviteRepository.deleteAllByBusinessUnitId(companyDTO.id());
 
-                if(userBURoleEntity.isEmpty()) {
-                    throw new UserNotInBusinessUnitException("User isn't a part of the company!");
-                } else {
-                    //TODO: Fix with the custom authorization
-//                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
-//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-//                    } else {
-                        //Delete the relationship before the businessUnit
-                        userBURoleRepository.deleteAll(userBURoleRepository.findAllByBusinessUnitId(companyDTO.id()));
+            //TODO: think about this more (prob will need a rework)
+            //Delete all roles in the company
+            roleRepository.deleteAllByBusinessUnitId(companyDTO.id());
 
-                        //Delete all children invites
-                        for (UserBusinessUnitRole BUDTO : userBURoleRepository.findAllByUserIdAndBusinessUnitCompanyId(user.get().getId(), companyDTO.id())) {
-                            deleteAllInvitesByBusinessUnit(userBURoleMapper.toDTO(BUDTO).businessUnit());
-                        }
+            //Delete userBURoles
+            userBURoleRepository.deleteAllByBusinessUnitId(companyDTO.id());
 
-                        //delete all invites for the company
-                        deleteAllInvitesByBusinessUnit(companyDTO);
+            //Here's a good idea to call children but they are taking only 1 dto. I'll just make a helper method.
+            deleteAllProjects(businessUnitRepository.findAllByCompanyId(companyDTO.id()));
 
+            //Finally delete company
+            businessUnitRepository.deleteById(companyDTO.id());
 
-                        //Delete all relationships of the children projects and teams of the company
-                        userBURoleRepository.deleteAll(
-                                userBURoleRepository.findAllByUserIdAndBusinessUnitCompanyId(user.get().getId(), companyDTO.id()));
-
-
-                        businessUnitRepository.deleteAll(businessUnitRepository.findAllByCompanyId(companyDTO.id()));
-
-                        //Delete the company
-                        businessUnitRepository.deleteById(companyDTO.id());
-//                    }
-                }
-            }
         } catch (ConstraintViolationException | DataAccessException e) {
-
-            throw new FailedToDeleteException("Unsuccessful select! " + e.getMessage());
+            throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
         }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
     @Transactional
-    public List<UserNoPassBusinessUnitRoleDTO> findAllProjectsByUserIdAndCompany(Long userId, CompanyDTO companyDTO) throws FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllProjectsByAuthenticatedUserAndCompany(CompanyDTO companyDTO) throws FailedToSelectException, EntityNotFoundException {
         try {
-            List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByUserIdAndBusinessUnitTypeAndBusinessUnitCompanyId(userId, TypeName.PROJECT, companyDTO.id());
+            String email  = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            if(userBURoleList.isEmpty()){
-                throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
+            List<UserNoPassBusinessUnitRoleDTO> userBURoles = userBURoleMapper.toDTO(
+                    userBURoleRepository.findAllByUserEmailAndBusinessUnitCompanyIdAndBusinessUnitType(email, companyDTO.id(), TypeName.PROJECT));
+
+            if(userBURoles.isEmpty()){
+                throw new EntityNotFoundException("No UserBusinessUnitRoles found");
             }
 
-            return userBURoleMapper.toDTO(userBURoleList);
+            return userBURoles;
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public List<UserNoPassBusinessUnitRoleDTO> findAllProjectsByAuthenticatedUserAndCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSelectException, UserNotInBusinessUnitException, EntityNotFoundException {
-        try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-
-            if(user.isEmpty()) {
-                throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), companyDTO.id());
-
-                if(userBusinessUnitRole.isEmpty()){
-                    throw new UserNotInBusinessUnitException("User isn't a part of the company!");
-                } else{
-                    return findAllProjectsByUserIdAndCompany(user.get().getId(), companyDTO);
-                }
-            }
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
+            throw new FailedToSelectException("Failed to select! " + e.getMessage());
         }
     }
 
@@ -301,30 +241,31 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
             if(user.isEmpty()) {
                 throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                UserDTO userDTO = userMapper.toUserDTO(user.get());
+            }
 
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), projectDTO.company().id());
+            UserDTO userDTO = userMapper.toUserDTO(user.get());
 
-                if(userBusinessUnitRole.isEmpty()){
-                    throw new UserNotInBusinessUnitException("User isn't a part of the company!");
-                } else {
-                    //TODO: Fix with the custom authorization
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), projectDTO.company().id());
+
+            if(userBusinessUnitRole.isEmpty()){
+                throw new UserNotInBusinessUnitException("User isn't a part of the company!");
+            }
+
+            //TODO: Fix with the custom authorization
 //                    if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
 //                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
 //                    } else {
-                    //TODO: This has to be reworked
-                        UserBusinessUnitRoleDTO userBUrole = new UserBusinessUnitRoleDTO(
-                                null,
-                                userDTO,
-                                projectDTO,
-                                null
-                        );
+            //TODO: This has to be reworked
+            UserBusinessUnitRoleDTO userBUrole = new UserBusinessUnitRoleDTO(
+                    null,
+                    userDTO,
+                    projectDTO,
+                    null
+            );
 
-                        saveUserBURole(userBUrole);
-//                    }
-                }
-            }
+            saveUserBURole(userBUrole);
+//
+
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
         }
@@ -336,122 +277,70 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     }
 
     @Transactional
-    public void leaveProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, FailedToDeleteException, UserNotInBusinessUnitException, FailedToLeaveException, EntityNotFoundException {
+    public void leaveProject(ProjectDTO projectDTO) throws FailedToLeaveException {
         try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            if(user.isEmpty()) {
-                throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                UserDTO userDTO = userMapper.toUserDTO(user.get());
+            //Delete all userBURole entries
+            List<UserBusinessUnitRole> userBURoles =
+                    userBURoleRepository.findAllByUserEmailAndBusinessUnitId(email, projectDTO.id());
 
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), projectDTO.company().id());
+            userBURoleRepository.deleteAll(userBURoles);
 
-                if(userBusinessUnitRole.isEmpty()) {
-                    throw new UserNotInBusinessUnitException("User isn't a part of the company!");
-                } else {
+            //Delete all child userBURole entries
+            List<UserBusinessUnitRole> childUserBURoles =
+                    userBURoleRepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id());
 
-                    UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserBusinessUnitRoleDTO(
-                            null,
-                            userMapper.toUserDTO(user.get()),
-                            projectDTO,
-                            roleMapper.toDTO(userBusinessUnitRole.get().getRole())
-                    );
-                    //Deletes the current relationship in the table
-                    deleteUserBURole(userWithPassBusinessUnitRoleDTO);
-
-                    //Deletes the relationship with all children Teams under the Project
-                    userBURoleRepository.deleteAll(userBURoleRepository.findAllByUserIdAndBusinessUnitProjectId(user.get().getId(), projectDTO.id()));
-                }
-            }
+            userBURoleRepository.deleteAll(childUserBURoles);
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToLeaveException("Unsuccessful leave! " + e.getMessage());
         }
     }
 
     @Transactional
-    public void deleteProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, FailedToDeleteException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToSelectException, EntityNotFoundException {
+    public void deleteProject(ProjectDTO projectDTO) throws FailedToDeleteException {
         try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            //If these are slow. Look into batch delete. Should be an ez change as I don't rely on cascading for deletion
+            //But isn't worth the extra effort for this project
 
-            if(user.isEmpty()) {
-                throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), projectDTO.id());
+            //Delete all invites for the project
+            inviteRepository.deleteAllByBusinessUnitId(projectDTO.id());
 
-                if(userBURoleEntity.isEmpty()) {
-                    throw new UserNotInBusinessUnitException("User isn't a part of the project!");
-                } else {
-                    //TODO: Fix with the custom authorization
-//                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
-//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-//                    } else {
-                        //Delete the relationship before the businessUnit
-                        userBURoleRepository.deleteAll(
-                                userBURoleRepository.findAllByBusinessUnitId(projectDTO.id()));
+            //TODO: think about this more (prob will need a rework)
+            //Delete all roles in the project
+            roleRepository.deleteAllByBusinessUnitId(projectDTO.id());
 
-                        //Delete all children invites
-                        for (UserBusinessUnitRole BUDTO : userBURoleRepository.findAllByUserIdAndBusinessUnitProjectId(user.get().getId(), projectDTO.id())) {
-                            deleteAllInvitesByBusinessUnit(userBURoleMapper.toDTO(BUDTO).businessUnit());
-                        }
+            //Delete userBURoles
+            userBURoleRepository.deleteAllByBusinessUnitId(projectDTO.id());
 
-                        //delete all invites for the company
-                        deleteAllInvitesByBusinessUnit(projectDTO);
+            //Here's a good idea to call children but they are taking only 1 dto. I'll just make a helper method.
+            deleteAllTeams(businessUnitRepository.findAllByCompanyId(projectDTO.id()));
 
-                        //Delete all relationships of the children teams of the project
-                        userBURoleRepository.deleteAll(
-                                userBURoleRepository.findAllByUserIdAndBusinessUnitProjectId(user.get().getId(), projectDTO.id()));
-
-                        //Delete all children teams of the project
-                        businessUnitRepository.deleteAll(businessUnitRepository.findAllByProjectId(projectDTO.id()));
-
-                        //Delete the project
-                        businessUnitRepository.deleteById(projectDTO.id());
-//                    }
-                }
-            }
+            //Finally delete project
+            businessUnitRepository.deleteById(projectDTO.id());
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToDeleteException("Unsuccessful delete! " + e.getMessage());
+            throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
         }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
     @Transactional
-    public List<UserNoPassBusinessUnitRoleDTO> findAllTeamsByUserIdAndProject(Long userId, ProjectDTO projectDTO) throws FailedToSelectException, EntityNotFoundException {
+    public List<UserNoPassBusinessUnitRoleDTO> findAllTeamsByAuthenticatedUserAndProject(ProjectDTO projectDTO) throws FailedToSelectException, EntityNotFoundException {
         try {
-            List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByUserIdAndBusinessUnitTypeAndBusinessUnitProjectId(userId, TypeName.TEAM, projectDTO.id());
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            if(userBURoleList.isEmpty()){
-                throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
+            List<UserNoPassBusinessUnitRoleDTO> userBURoles = userBURoleMapper.toDTO(
+                    userBURoleRepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id()));
+
+            if(userBURoles.isEmpty()){
+                throw new EntityNotFoundException("No UserBusinessUnitRoles found");
             }
 
-            return userBURoleMapper.toDTO(userBURoleList);
+            return userBURoles;
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public List<UserNoPassBusinessUnitRoleDTO> findAllTeamsByAuthenticatedUserAndProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, FailedToSelectException, UserNotInBusinessUnitException, EntityNotFoundException {
-        try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-
-            if(user.isEmpty()) {
-                throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), projectDTO.id());
-
-                if(userBusinessUnitRole.isEmpty()){
-                    throw new UserNotInBusinessUnitException("User isn't a part of the parent project!");
-                } else{
-                    return findAllTeamsByUserIdAndProject(user.get().getId(), projectDTO);
-                }
-            }
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
+            throw new FailedToSelectException("Failed select! " + e.getMessage());
         }
     }
 
@@ -462,31 +351,30 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
             if(user.isEmpty()) {
                 throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                UserDTO userDTO = userMapper.toUserDTO(user.get());
+            }
 
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), teamDTO.project().id());
+            UserDTO userDTO = userMapper.toUserDTO(user.get());
 
-                if(userBusinessUnitRole.isEmpty()){
-                    throw new UserNotInBusinessUnitException("User isn't a part of the parent project!");
-                } else {
-                    //TODO: Fix with the custom authorization
+            Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), teamDTO.project().id());
+
+            if(userBusinessUnitRole.isEmpty()){
+                throw new UserNotInBusinessUnitException("User isn't a part of the parent project!");
+            }
+
+            //TODO: Fix with the custom authorization
 //                    if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
 //                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
 //                    } else {
-                    //TODO: This has to be reworked
-                        UserBusinessUnitRoleDTO userBUrole = new UserBusinessUnitRoleDTO(
-                                null,
-                                userDTO,
-                                teamDTO,
-                                null
-                        );
+            //TODO: This has to be reworked
+            UserBusinessUnitRoleDTO userBUrole = new UserBusinessUnitRoleDTO(
+                    null,
+                    userDTO,
+                    teamDTO,
+                    null
+            );
 
-                        saveUserBURole(userBUrole);
+            saveUserBURole(userBUrole);
 
-//                    }
-                }
-            }
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
         }
@@ -498,158 +386,99 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     }
 
     @Transactional
-    public void leaveTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToDeleteException, FailedToLeaveException, EntityNotFoundException {
+    public void leaveTeam(TeamDTO teamDTO) throws FailedToLeaveException {
         try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            if(user.isEmpty()) {
-                throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                UserDTO userDTO = userMapper.toUserDTO(user.get());
+            //Delete all userBURole entries
+            List<UserBusinessUnitRole> userBURoles =
+                    userBURoleRepository.findAllByUserEmailAndBusinessUnitId(email, teamDTO.id());
 
-                Optional<UserBusinessUnitRole> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), teamDTO.project().id());
-
-                if(userBusinessUnitRole.isEmpty()) {
-                    throw new UserNotInBusinessUnitException("User isn't a part of the team!");
-                } else {
-
-                    UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO = new UserBusinessUnitRoleDTO(
-                            null,
-                            userMapper.toUserDTO(user.get()),
-                            teamDTO,
-                            roleMapper.toDTO(userBusinessUnitRole.get().getRole())
-                    );
-                    //Deletes the current relationship in the table
-                    deleteUserBURole(userWithPassBusinessUnitRoleDTO);
-
-                }
-            }
+            userBURoleRepository.deleteAll(userBURoles);
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToLeaveException("Unsuccessful leave! " + e.getMessage());
         }
     }
 
     @Transactional
-    public void deleteTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, FailedToDeleteException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
+    public void deleteTeam(TeamDTO teamDTO) throws FailedToDeleteException {
         try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            //If these are slow. Look into batch delete. Should be an ez change as I don't rely on cascading for deletion
+            //But isn't worth the extra effort for this project
 
-            if(user.isEmpty()) {
-                throw new UserUnauthenticatedException("User is unauthenticated!");
-            } else {
-                Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), teamDTO.id());
+            //Delete all invites for the team
+            inviteRepository.deleteAllByBusinessUnitId(teamDTO.id());
 
-                if(userBURoleEntity.isEmpty()) {
-                    throw new UserNotInBusinessUnitException("User isn't a part of the team!");
-                } else {
-                    //TODO: Fix with the custom authorization
-//                    if (userBURoleEntity.get().getRole().getName() != RoleName.MANAGER) {
-//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-//                    } else {
-                        //Delete the relationship before the businessUnit
-                        userBURoleRepository.deleteAll(userBURoleRepository.findAllByBusinessUnitId(teamDTO.id()));
+            //TODO: think about this more (prob will need a rework)
+            //Delete all roles in the team
+            roleRepository.deleteAllByBusinessUnitId(teamDTO.id());
 
-                        //Delete invites
-                        deleteAllInvitesByBusinessUnit(teamDTO);
+            //Delete userBURoles
+            userBURoleRepository.deleteAllByBusinessUnitId(teamDTO.id());
 
-                        //Delete the project
-                        businessUnitRepository.deleteById(teamDTO.id());
-//                    }
-                }
-            }
+            //Finally delete team
+            businessUnitRepository.deleteById(teamDTO.id());
+
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToDeleteException("Unsuccessful delete! " + e.getMessage());
+            throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
         }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
+    //Was supposed to be private but transactional requires the method is public
+    //Better make sure this is called from somewhere where a transaction already exists rather than risking it an keeping it private
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void deleteAllProjects(List<BusinessUnit> projects) throws FailedToDeleteException {
+        try{
+            //Delete Invites
+            projects.forEach(project -> inviteRepository.deleteAllByBusinessUnitId(project.getId()));
 
-    //?? No idea why this isn't used
-    //TODO: fix
-    @Transactional
-    public UserNoPassBusinessUnitRoleDTO findById(Long userId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findById(userId);
+            //Delete UBURs
+            projects.forEach(project -> userBURoleRepository.deleteAllByBusinessUnitId(project.getId()));
 
-            if(userBURoleEntity.isEmpty()){
-                throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
-            }
+            //Delete Roles
+            projects.forEach(project -> roleRepository.deleteAllByBusinessUnitId(project.getId()));
 
-            return userBURoleMapper.toDTO(userBURoleEntity.get());
+            //Probably an idiotic way to do this
+            //Delete child Teams
+            List<BusinessUnit> businessUnits = new ArrayList<>();
+            projects.forEach(
+                    project -> businessUnits.addAll(businessUnitRepository.findAllByProjectId(project.getId())));
 
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
+            deleteAllTeams(businessUnits);
+
+            //Delete all projects
+            businessUnitRepository.deleteAll(projects);
+
+        } catch (ConstraintViolationException | DataAccessException e){
+            throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
         }
     }
 
-    //Useless cuz in no page will they all be displayed
-    @Transactional
-    public List<UserNoPassBusinessUnitRoleDTO> findAllByUserId(Long userId) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByUserId(userId);
+    //Was supposed to be private but transactional requires the method is public
+    //Better make sure this is called from somewhere where a transaction already exists rather than risking it an keeping it private
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void deleteAllTeams(List<BusinessUnit> teams) throws FailedToDeleteException {
+        try{
+            //Delete Invites
+            teams.forEach(team -> inviteRepository.deleteAllByBusinessUnitId(team.getId()));
 
-            if (userBURoleList.isEmpty()) {
-                throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
-            }
+            //Delete UBURs
+            teams.forEach(team -> userBURoleRepository.deleteAllByBusinessUnitId(team.getId()));
 
-            return userBURoleMapper.toDTO(userBURoleList);
+            //Delete Roles
+            teams.forEach(team -> roleRepository.deleteAllByBusinessUnitId(team.getId()));
 
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
+            //Delete all teams
+            businessUnitRepository.deleteAll(teams);
+
+        } catch (ConstraintViolationException | DataAccessException e){
+            throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
         }
     }
 
-    //I'm directly calling the repository where it's needed lol
-    @Transactional
-    public List<UserNoPassBusinessUnitRoleDTO> findAllByBusinessUnitId(Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByBusinessUnitId(businessUnitId);
 
-            if(userBURoleList.isEmpty()){
-                throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
-            }
-
-            return userBURoleMapper.toDTO(userBURoleList);
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-        }
-    }
-
-    //I guess useless filter
-    @Transactional
-    public List<UserNoPassBusinessUnitRoleDTO> findAllByRoleIdAndBusinessUnitId(Long roleId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            List<UserBusinessUnitRole> userBURoleList = userBURoleRepository.findAllByRoleIdAndBusinessUnitId(roleId, businessUnitId);
-
-            if(userBURoleList.isEmpty()){
-                throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
-            }
-
-            return userBURoleMapper.toDTO(userBURoleList);
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-        }
-    }
-
-    //I'm directly calling the repository where it's needed lol
-    @Transactional
-    public UserNoPassBusinessUnitRoleDTO findByUserIdAndBusinessUnitId(Long userId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            Optional<UserBusinessUnitRole> userBURole = userBURoleRepository.findByUserIdAndBusinessUnitId(userId, businessUnitId);
-
-            if(userBURole.isPresent()){
-                return userBURoleMapper.toDTO(userBURole.get());
-            } else {
-                throw new EntityNotFoundException("UserBusinessUnitRole does not exist!");
-            }
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
-        }
-    }
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void deleteAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToDeleteException {

@@ -25,7 +25,8 @@ public class ProjectController {
     @PostMapping("/company/projects")
     public ResponseEntity<Object> getAllProjectsOfCompany(@RequestBody CompanyDTO companyDTO){
         try {
-            List<UserNoPassBusinessUnitRoleDTO> userBusinessUnitRoleDTOs = userBusinessUnitRoleService.findAllProjectsByAuthenticatedUserAndCompany(companyDTO);
+            List<UserNoPassBusinessUnitRoleDTO> userBusinessUnitRoleDTOs =
+                    userBusinessUnitRoleService.findAllProjectsByAuthenticatedUserAndCompany(companyDTO);
 
             if(userBusinessUnitRoleDTOs.isEmpty()){
                 return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.NO_CONTENT);
@@ -33,14 +34,6 @@ public class ProjectController {
 
             return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.OK);
 
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToSelectException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityNotFoundException e) {

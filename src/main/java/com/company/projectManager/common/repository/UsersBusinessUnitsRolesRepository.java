@@ -11,21 +11,21 @@ public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBu
 
     List<UserBusinessUnitRole> findAllByUserId(Long userId);
 
-    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitType(Long userId, TypeName typeName);
+    List<UserBusinessUnitRole> findAllByUserEmailAndBusinessUnitType(String email, TypeName typeName);
 
-    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitTypeAndBusinessUnitCompanyId(Long userId, TypeName typeName, Long companyId);
+    List<UserBusinessUnitRole> findAllByUserEmailAndBusinessUnitCompanyIdAndBusinessUnitType(String email, Long companyId, TypeName type);
 
-    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitTypeAndBusinessUnitProjectId(Long userId, TypeName typeName, Long projectId);
+    List<UserBusinessUnitRole> findAllByUserEmailAndBusinessUnitProjectId(String email, Long projectId);
 
-    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitCompanyId(Long userId, Long companyId);
-
-    List<UserBusinessUnitRole> findAllByUserIdAndBusinessUnitProjectId(Long userId, Long projectId);
+    List<UserBusinessUnitRole> findAllByUserEmailAndBusinessUnitCompanyId(String email, Long companyId);
 
     List<UserBusinessUnitRole> findAllByBusinessUnitId(Long businessUnitId);
 
-    List<UserBusinessUnitRole> findAllByRoleIdAndBusinessUnitId(Long roleId, Long businessUnitId);
-
     Optional<UserBusinessUnitRole> findByUserIdAndBusinessUnitId(Long userId, Long businessUnitId);
 
+    List<UserBusinessUnitRole> findAllByUserEmailAndBusinessUnitId(String email, Long businessUnitId);
+
     Optional<UserBusinessUnitRole> findByUserIdAndBusinessUnitWhiteboardId(Long userId, Long whiteboardId);
+
+    void deleteAllByBusinessUnitId(Long businessUnitId);
 }

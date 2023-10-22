@@ -16,9 +16,7 @@ public interface UserBusinessUnitRoleService {
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    List<UserNoPassBusinessUnitRoleDTO> findAllCompaniesByUserId(Long userId) throws FailedToSelectException, EntityNotFoundException;
-
-    List<UserNoPassBusinessUnitRoleDTO> findCompaniesByAuthenticatedUser() throws UserUnauthenticatedException, FailedToSelectException, EntityNotFoundException;
+    List<UserNoPassBusinessUnitRoleDTO> findAllCompaniesByAuthenticatedUser() throws FailedToSelectException, EntityNotFoundException;
 
     void createCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSaveException;
 
@@ -30,9 +28,7 @@ public interface UserBusinessUnitRoleService {
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    List<UserNoPassBusinessUnitRoleDTO> findAllProjectsByUserIdAndCompany(Long userId, CompanyDTO companyDTO) throws FailedToSelectException, EntityNotFoundException;
-
-    List<UserNoPassBusinessUnitRoleDTO> findAllProjectsByAuthenticatedUserAndCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSelectException, UserNotInBusinessUnitException, EntityNotFoundException;
+    List<UserNoPassBusinessUnitRoleDTO> findAllProjectsByAuthenticatedUserAndCompany(CompanyDTO companyDTO) throws FailedToSelectException, EntityNotFoundException;
 
     void createProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToSaveException;
 
@@ -44,9 +40,7 @@ public interface UserBusinessUnitRoleService {
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    List<UserNoPassBusinessUnitRoleDTO> findAllTeamsByUserIdAndProject(Long userId, ProjectDTO projectDTO) throws FailedToSelectException, EntityNotFoundException;
-
-    List<UserNoPassBusinessUnitRoleDTO> findAllTeamsByAuthenticatedUserAndProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, FailedToSelectException, UserNotInBusinessUnitException, EntityNotFoundException;
+    List<UserNoPassBusinessUnitRoleDTO> findAllTeamsByAuthenticatedUserAndProject(ProjectDTO projectDTO) throws FailedToSelectException, EntityNotFoundException;
 
     void createTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToSaveException;
 
@@ -57,14 +51,4 @@ public interface UserBusinessUnitRoleService {
     void deleteTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, FailedToDeleteException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException;
 
     //////////////////////////////////////////////////////////////////////////////////////////
-
-    UserNoPassBusinessUnitRoleDTO findById(Long userId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException;
-
-    List<UserNoPassBusinessUnitRoleDTO> findAllByUserId(Long userId) throws FailedToSelectException, EntityNotFoundException;
-
-    List<UserNoPassBusinessUnitRoleDTO> findAllByBusinessUnitId(Long businessUnitId) throws FailedToSelectException, EntityNotFoundException;
-
-    List<UserNoPassBusinessUnitRoleDTO> findAllByRoleIdAndBusinessUnitId(Long roleId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException;
-
-    UserNoPassBusinessUnitRoleDTO findByUserIdAndBusinessUnitId(Long userId, Long businessUnitId) throws FailedToSelectException, EntityNotFoundException;
 }

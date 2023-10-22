@@ -22,8 +22,8 @@ public class CompanyController {
     @GetMapping("/companies")
     public ResponseEntity<Object> getAllCompaniesTheUserIsPartOf(){
         try {
-            List<UserNoPassBusinessUnitRoleDTO> userBusinessUnitRoleDTOs = userBusinessUnitRoleService.findCompaniesByAuthenticatedUser();
-
+            List<UserNoPassBusinessUnitRoleDTO> userBusinessUnitRoleDTOs =
+                    userBusinessUnitRoleService.findAllCompaniesByAuthenticatedUser();
 
             if(userBusinessUnitRoleDTOs.isEmpty()){
                 return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.NO_CONTENT);
@@ -31,8 +31,6 @@ public class CompanyController {
 
             return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.OK);
 
-        } catch (UserUnauthenticatedException e){
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (FailedToSelectException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityNotFoundException e){
