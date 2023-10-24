@@ -1,11 +1,12 @@
 package com.company.projectManager.common.controller;
 
 import com.company.projectManager.common.dto.CompanyDTO;
-import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
+import com.company.projectManager.common.dto.UserNoPassBusinessUnitAuthoritiesDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,8 +23,8 @@ public class CompanyController {
     @GetMapping("/companies")
     public ResponseEntity<Object> getAllCompaniesTheUserIsPartOf(){
         try {
-            List<UserNoPassBusinessUnitRoleDTO> userBusinessUnitRoleDTOs =
-                    userBusinessUnitRoleService.findAllCompaniesByAuthenticatedUser();
+            List<UserNoPassBusinessUnitAuthoritiesDTO> userBusinessUnitRoleDTOs =
+                    userBusinessUnitRoleService.findAllDistinctCompaniesByAuthenticatedUser();
 
             if(userBusinessUnitRoleDTOs.isEmpty()){
                 return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.NO_CONTENT);
@@ -38,6 +39,7 @@ public class CompanyController {
         }
     }
 
+    //No authorization to check as this should be allowed for any user
     @PostMapping("/createCompany")
     public ResponseEntity<Object> createCompany(@RequestBody CompanyDTO companyDTO){
         try {
@@ -73,6 +75,7 @@ public class CompanyController {
     }
 
     @PutMapping("/leaveCompany")
+    @PreAuthorize("partOfBU(#companyDTO.id())")
     public ResponseEntity<Object> leaveCompany(@RequestBody CompanyDTO companyDTO){
         try {
             userBusinessUnitRoleService.leaveCompany(companyDTO);
@@ -95,6 +98,7 @@ public class CompanyController {
     }
 
     @DeleteMapping("/deleteCompany")
+    @PreAuthorize("authorityCheck(#companyDTO.id(), \"DeleteBU\")")
     public ResponseEntity<Object> deleteCompany(@RequestBody CompanyDTO companyDTO){
         try {
             userBusinessUnitRoleService.deleteCompany(companyDTO);

@@ -263,9 +263,9 @@
         </Toast>
     </div>
 {/each}
-
+<!--TODO: Redo these-->
 <div class="clickable not-selectable BUwindow">
-    {#if BURole.role.name === "MANAGER"}
+    <!--{#if BURole.role.name === "MANAGER"}-->
         <!--the manager stuff here-->
 
         <span on:click={redirectToProjects}>{BURole.businessUnit.name}</span>
@@ -286,18 +286,18 @@
         <div class="imageDivs" on:click={() => deletePopup = true}>
             <img class="clickable not-selectable xImage" src="{deleteIcon}" alt="" draggable="false" >
         </div>
-    {:else if BURole.role.name === "EMPLOYEE"}
+    <!--{:else if BURole.role.name === "EMPLOYEE"}-->
         <!--the employee stuff here-->
-        <span on:click={redirectToProjects}>{BURole.businessUnit.name}</span>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs" on:click={redirectToWhiteboard}>
-        <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" >
-        </div>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs" on:click={() => leavePopup = true}>
-            <img class="clickable not-selectable xImage" src="{leaveIcon}" alt="" draggable="false" >
-        </div>
-    {/if}
+<!--        <span on:click={redirectToProjects}>{BURole.businessUnit.name}</span>-->
+<!--        <div style="border-left:1px solid #BBBBBB;height:80%"></div>-->
+<!--        <div class="imageDivs" on:click={redirectToWhiteboard}>-->
+<!--        <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" >-->
+<!--        </div>-->
+<!--        <div style="border-left:1px solid #BBBBBB;height:80%"></div>-->
+<!--        <div class="imageDivs" on:click={() => leavePopup = true}>-->
+<!--            <img class="clickable not-selectable xImage" src="{leaveIcon}" alt="" draggable="false" >-->
+<!--        </div>-->
+    <!--{/if}-->
 </div>
 
 <Modal bind:open={leavePopup} size="xs" autoclose>

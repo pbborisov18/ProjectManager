@@ -10,13 +10,7 @@ import java.util.List;
 
 public interface UserBusinessUnitRoleService {
 
-    void saveUserBURole(UserBusinessUnitRoleDTO userBURole) throws FailedToSaveException;
-
-    void deleteUserBURole(UserBusinessUnitRoleDTO userBuRole) throws FailedToDeleteException, EntityNotFoundException;
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-
-    List<UserNoPassBusinessUnitRoleDTO> findAllCompaniesByAuthenticatedUser() throws FailedToSelectException, EntityNotFoundException;
+    List<UserNoPassBusinessUnitAuthoritiesDTO> findAllDistinctCompaniesByAuthenticatedUser() throws FailedToSelectException, EntityNotFoundException;
 
     void createCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSaveException;
 

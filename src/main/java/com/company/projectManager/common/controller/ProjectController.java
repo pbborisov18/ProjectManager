@@ -8,6 +8,7 @@ import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +22,6 @@ public class ProjectController {
         this.userBusinessUnitRoleService = userBusinessUnitRoleService;
     }
 
-    //Tested
     @PostMapping("/company/projects")
     public ResponseEntity<Object> getAllProjectsOfCompany(@RequestBody CompanyDTO companyDTO){
         try {
@@ -41,7 +41,6 @@ public class ProjectController {
         }
     }
 
-    //Tested
     @PostMapping("/company/createProject")
     public ResponseEntity<Object> createProject(@RequestBody ProjectDTO projectDTO){
         try {
@@ -81,8 +80,8 @@ public class ProjectController {
         }
     }
 
-    //Tested
     @PutMapping("/company/leaveProject")
+    @PreAuthorize("partOfBU(#projectDTO.id())")
     public ResponseEntity<Object> leaveProject(@RequestBody ProjectDTO projectDTO){
         try {
             userBusinessUnitRoleService.leaveProject(projectDTO);
@@ -103,8 +102,8 @@ public class ProjectController {
         }
     }
 
-    //Tested
     @DeleteMapping("/company/deleteProject")
+    @PreAuthorize("authorityCheck(#projectDTO.id(), \"DeleteBU\")")
     public ResponseEntity<Object> deleteProject(@RequestBody ProjectDTO projectDTO){
         try {
             userBusinessUnitRoleService.deleteProject(projectDTO);

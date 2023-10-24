@@ -13,6 +13,8 @@ public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBu
 
     List<UserBusinessUnitRole> findAllByUserEmailAndBusinessUnitType(String email, TypeName typeName);
 
+    List<UserBusinessUnitRole> findDistinctByUserEmailAndBusinessUnitType(String email, TypeName typeName);
+
     List<UserBusinessUnitRole> findAllByUserEmailAndBusinessUnitCompanyIdAndBusinessUnitType(String email, Long companyId, TypeName type);
 
     List<UserBusinessUnitRole> findAllByUserEmailAndBusinessUnitProjectId(String email, Long projectId);
@@ -26,6 +28,8 @@ public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBu
     List<UserBusinessUnitRole> findAllByUserEmailAndBusinessUnitId(String email, Long businessUnitId);
 
     Optional<UserBusinessUnitRole> findByUserIdAndBusinessUnitWhiteboardId(Long userId, Long whiteboardId);
+
+    Long countAllByBusinessUnitId(Long businessUnitId);
 
     void deleteAllByBusinessUnitId(Long businessUnitId);
 }
