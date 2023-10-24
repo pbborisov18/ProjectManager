@@ -5,11 +5,12 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "UsersBusinessUnitsRoles", uniqueConstraints = {@UniqueConstraint(columnNames = {"UsersId", "BusinessUnitsId", "RolesId"})})
-public class UserBusinessUnitRole {
+@Table(name = "UsersBusinessUnits", uniqueConstraints = {@UniqueConstraint(columnNames = {"UsersId", "BusinessUnitsId"})})
+public class UserBusinessUnit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,19 +26,23 @@ public class UserBusinessUnitRole {
     @Cascade(CascadeType.MERGE)
     private BusinessUnit businessUnit;
 
-    @ManyToOne
-    @JoinColumn(name = "RolesId", referencedColumnName = "Id")
+    @ManyToMany
+    @JoinTable(
+            name = "UsersBusinessUnitsRoles",
+            joinColumns = @JoinColumn(name = "UsersBusinessUnitsId"),
+            inverseJoinColumns = @JoinColumn(name = "RolesId")
+    )
     @Cascade(CascadeType.MERGE)
-    private Role role;
+    private List<Role> roles;
 
-    public UserBusinessUnitRole() {
+    public UserBusinessUnit() {
     }
 
-    public UserBusinessUnitRole(Long id, User user, BusinessUnit businessUnit, Role role) {
+    public UserBusinessUnit(Long id, User user, BusinessUnit businessUnit, List<Role> roles) {
         this.id = id;
         this.user = user;
         this.businessUnit = businessUnit;
-        this.role = role;
+        this.roles = roles;
     }
 
     @Override
@@ -47,7 +52,7 @@ public class UserBusinessUnitRole {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        UserBusinessUnitRole that = (UserBusinessUnitRole) o;
+        UserBusinessUnit that = (UserBusinessUnit) o;
         return getId() != null && Objects.equals(getId(), that.getId());
     }
 
@@ -80,11 +85,11 @@ public class UserBusinessUnitRole {
         this.businessUnit = businessUnit;
     }
 
-    public Role getRole() {
-        return role;
+    public List<Role> getRoles() {
+        return roles;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 }

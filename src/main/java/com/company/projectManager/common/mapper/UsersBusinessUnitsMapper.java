@@ -1,47 +1,43 @@
 package com.company.projectManager.common.mapper;
 
 import com.company.projectManager.common.dto.*;
-import com.company.projectManager.common.entity.Authority;
 import com.company.projectManager.common.entity.Role;
-import com.company.projectManager.common.entity.UserBusinessUnitRole;
+import com.company.projectManager.common.entity.UserBusinessUnit;
 import jakarta.validation.Valid;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class, BusinessUnitMapper.class, AuthorityMapper.class, RoleMapper.class},collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
 @Validated
-public interface UsersBusinessUnitsRolesMapper {
+public interface UsersBusinessUnitsMapper {
     
     @Mapping(target = "user", qualifiedByName = {"toUserWithoutPasswordDTO"})
-    @Mapping(target = "role", qualifiedByName = {"toRoleDTO"})
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitDTO"})
-    UserNoPassBusinessUnitRoleDTO toDTO(@Valid UserBusinessUnitRole userBusinessUnitRole);
+    UserNoPassBusinessUnitDTO toDTO(@Valid UserBusinessUnit userBusinessUnit);
+
+    List<UserNoPassBusinessUnitDTO> toDTO(@Valid Iterable<UserBusinessUnit> usersBusinessUnitsRoles);
 
     @Mapping(target = "user", qualifiedByName = {"toUserWithoutPasswordDTO"})
     @Mapping(target = "authorityDTOList", //Expression here basically gets the authorities from the roles
-            expression = "java(authoritiesListToString(userBusinessUnitRole.getRole().getAuthorities()))")
+            expression = """
+                    java(authorityMapper.toDTO(
+                    userBusinessUnit.getRoles().stream().flatMap(role -> role.getAuthorities().stream()).distinct().toList()))
+                    """)
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitDTO"})
-    UserNoPassBusinessUnitAuthoritiesDTO toAuthoritiesDTO(@Valid UserBusinessUnitRole userBusinessUnitRole);
+    UserNoPassBusinessUnitAuthoritiesDTO toAuthoritiesDTO(@Valid UserBusinessUnit userBusinessUnit);
 
-    List<UserNoPassBusinessUnitRoleDTO> toDTO(@Valid Iterable<UserBusinessUnitRole> usersBusinessUnitsRoles);
-
-    List<UserNoPassBusinessUnitAuthoritiesDTO> toAuthoritiesDTO(@Valid Iterable<UserBusinessUnitRole> userBusinessUnitRoles);
+    List<UserNoPassBusinessUnitAuthoritiesDTO> toAuthoritiesDTO(@Valid Iterable<UserBusinessUnit> userBusinessUnitRoles);
 
     @Mapping(target = "user", qualifiedByName = {"toUserEntity"})
-    @Mapping(target = "role", qualifiedByName = {"toRoleEntity"})
+    @Mapping(target = "roles", source = "roles" ,qualifiedByName = {"toRoleEntity"})
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitEntity"})
-    UserBusinessUnitRole toEntity(@Valid UserBusinessUnitRoleDTO userWithPassBusinessUnitRoleDTO);
+    UserBusinessUnit toEntity(@Valid UserBusinessUnitDTO userWithPassBusinessUnitRoleDTO);
 
-    List<UserBusinessUnitRole> toEntity(@Valid Iterable<UserBusinessUnitRoleDTO> usersWithPassBusinessUnitsRolesDTOs);
+    List<UserBusinessUnit> toEntity(@Valid Iterable<UserBusinessUnitDTO> usersWithPassBusinessUnitsRolesDTOs);
 
     //Since mapstruct is "clever" and after I tell it to use x dependency
     //it doesn't care and still checks if it needs x dependency.

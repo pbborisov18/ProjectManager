@@ -2,7 +2,9 @@ package com.company.projectManager.common.dto;
 
 import jakarta.validation.constraints.NotNull;
 
-public record UserBusinessUnitRoleDTO(
+import java.util.List;
+
+public record UserBusinessUnitDTO(
 
         Long id,
 
@@ -13,7 +15,7 @@ public record UserBusinessUnitRoleDTO(
         BusinessUnitDTO businessUnit,
 
         @NotNull
-        RoleDTO role
+        List<RoleDTO> roles
 ) {
 
 }

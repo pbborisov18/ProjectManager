@@ -3,7 +3,7 @@ package com.company.projectManager.whiteboard.whiteboards.service.impl;
 import com.company.projectManager.common.dto.BusinessUnitDTO;
 import com.company.projectManager.common.entity.BusinessUnit;
 import com.company.projectManager.common.entity.User;
-import com.company.projectManager.common.entity.UserBusinessUnitRole;
+import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.repository.BusinessUnitRepository;
 import com.company.projectManager.common.repository.UserRepository;
@@ -64,7 +64,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
             if(user.isEmpty()){
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
             if(userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -98,7 +98,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
             if(userBusinessUnitRole.isEmpty()){
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -148,7 +148,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
             throw new UserUnauthenticatedException("User isn't authenticated!");
         }
 
-        Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+        Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
         if(userBusinessUnitRole.isEmpty()){
             throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -203,7 +203,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
             if(userBusinessUnitRole.isEmpty()){
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");

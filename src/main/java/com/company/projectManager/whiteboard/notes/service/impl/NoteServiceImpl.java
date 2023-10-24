@@ -1,8 +1,7 @@
 package com.company.projectManager.whiteboard.notes.service.impl;
 
-import com.company.projectManager.common.dto.BusinessUnitDTO;
 import com.company.projectManager.common.entity.User;
-import com.company.projectManager.common.entity.UserBusinessUnitRole;
+import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
@@ -12,14 +11,11 @@ import com.company.projectManager.whiteboard.notes.entity.Note;
 import com.company.projectManager.whiteboard.notes.mapper.NoteMapper;
 import com.company.projectManager.whiteboard.notes.repository.NoteRepository;
 import com.company.projectManager.whiteboard.notes.service.NoteService;
-import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +46,7 @@ public class NoteServiceImpl implements NoteService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
 
             if (userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -79,7 +75,7 @@ public class NoteServiceImpl implements NoteService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
 
             if (userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -102,7 +98,7 @@ public class NoteServiceImpl implements NoteService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
 
             if (userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -126,7 +122,7 @@ public class NoteServiceImpl implements NoteService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), notes.get(0).columnDTO().whiteboardDTO().id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), notes.get(0).columnDTO().whiteboardDTO().id());
 
             if (userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -149,7 +145,7 @@ public class NoteServiceImpl implements NoteService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
 
             if (userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");

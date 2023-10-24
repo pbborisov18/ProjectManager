@@ -2,34 +2,36 @@ package com.company.projectManager.common.security;
 
 import org.springframework.security.core.GrantedAuthority;
 
+import java.util.List;
+
 public class SecurityIds implements GrantedAuthority {
 
-    private Long uBURId;
+    private Long uBUId;
     private Long userId;
     private Long businessUnitId;
-    private Long roleId;
+    private List<Long> roleIds;
 
-    public SecurityIds(Long uBURId, Long userId, Long businessUnitId, Long roleId) {
-        this.uBURId = uBURId;
+    public SecurityIds(Long uBURId, Long userId, Long businessUnitId, List<Long> roleIds) {
+        this.uBUId = uBURId;
         this.userId = userId;
         this.businessUnitId = businessUnitId;
-        this.roleId = roleId;
+        this.roleIds = roleIds;
     }
 
     @Override
     public String getAuthority() {
-        return this.uBURId + ":" +
+        return this.uBUId + ":" +
                 this.userId + ":" +
                 this.businessUnitId + ":" +
-                this.roleId;
+                this.roleIds;
     }
 
-    public Long getuBURId() {
-        return uBURId;
+    public Long getuBUId() {
+        return uBUId;
     }
 
-    public void setuBURId(Long uBURId) {
-        this.uBURId = uBURId;
+    public void setuBUId(Long uBUId) {
+        this.uBUId = uBUId;
     }
 
     public Long getUserId() {
@@ -48,11 +50,11 @@ public class SecurityIds implements GrantedAuthority {
         this.businessUnitId = businessUnitId;
     }
 
-    public Long getRoleId() {
-        return roleId;
+    public List<Long> getRoleId() {
+        return roleIds;
     }
 
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
+    public void setRoleId(List<Long> roleIds) {
+        this.roleIds = roleIds;
     }
 }

@@ -2,8 +2,9 @@ package com.company.projectManager.common.service.impl;
 
 import com.company.projectManager.common.dto.UserDTO;
 import com.company.projectManager.common.dto.UserNoPassDTO;
+import com.company.projectManager.common.entity.Role;
 import com.company.projectManager.common.entity.User;
-import com.company.projectManager.common.entity.UserBusinessUnitRole;
+import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.repository.UserRepository;
@@ -20,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,23 +134,29 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional //Transactional so I can get the role ids
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findUserByEmail(username);
 
-        if(user.isPresent()){
-            List<UserBusinessUnitRole> userBURole = usersBusinessUnitsRolesRepository.findAllByUserId(user.get().getId());
-
-            List<GrantedAuthority> roles = new ArrayList<>();
-
-            for (UserBusinessUnitRole ubr : userBURole) {
-                SecurityIds securityRole = new SecurityIds(ubr.getId(), ubr.getUser().getId(), ubr.getBusinessUnit().getId(), ubr.getRole().getId());
-                roles.add(securityRole);
-            }
-
-            return new SecurityUser(user.get(), roles);
+        if(user.isEmpty()) {
+            throw new UsernameNotFoundException("Email not found " + username);
         }
 
-        throw new UsernameNotFoundException("Email not found " + username);
+        List<UserBusinessUnit> userBURole = usersBusinessUnitsRolesRepository.findAllByUserId(user.get().getId());
+
+        List<GrantedAuthority> roles = new ArrayList<>();
+
+        for (UserBusinessUnit ubr : userBURole) {
+            SecurityIds securityRole = new SecurityIds(
+                    ubr.getId(),
+                    ubr.getUser().getId(),
+                    ubr.getBusinessUnit().getId(),
+                    ubr.getRoles().stream().mapToLong(Role::getId).boxed().toList()
+            );
+            roles.add(securityRole);
+        }
+
+        return new SecurityUser(user.get(), roles);
     }
 
 }

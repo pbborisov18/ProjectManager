@@ -2,7 +2,7 @@ package com.company.projectManager.common.controller;
 
 import com.company.projectManager.common.dto.ProjectDTO;
 import com.company.projectManager.common.dto.TeamDTO;
-import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
+import com.company.projectManager.common.dto.UserNoPassBusinessUnitAuthoritiesDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class TeamController {
     @PostMapping("/company/project/teams")
     public ResponseEntity<Object> getAllTeamsOfProject(@RequestBody ProjectDTO projectDTO){
         try {
-            List<UserNoPassBusinessUnitRoleDTO> userBusinessUnitRoleDTOs =
+            List<UserNoPassBusinessUnitAuthoritiesDTO> userBusinessUnitRoleDTOs =
                     userBusinessUnitRoleService.findAllTeamsByAuthenticatedUserAndProject(projectDTO);
 
             if(userBusinessUnitRoleDTOs.isEmpty()){

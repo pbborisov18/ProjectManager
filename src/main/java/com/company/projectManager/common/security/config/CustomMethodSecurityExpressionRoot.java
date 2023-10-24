@@ -13,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot implements MethodSecurityExpressionOperations {
@@ -47,13 +48,15 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot i
             //0. UserBusinessUnitRole id
             //1. User id
             //2. BusinessUnit id
-            //3. Role id
+            //3. Role ids
             String[] userAuthoritiesId = userAuthorities.getAuthority().split(":");
 
             //if the correct BU is found that means the user is in the BU
             if(userAuthoritiesId[2].equals(String.valueOf(buIdToCheck))){
                 //That's all the role ids the user has in that BU
-                roleIdsToSearchFor.add(Long.valueOf(userAuthoritiesId[3]));
+                roleIdsToSearchFor.addAll(Arrays.stream(
+                        userAuthoritiesId[3].substring(1, userAuthoritiesId[3].length() - 1).split(", "))
+                                .mapToLong(Long::parseLong).boxed().toList());
             }
         }
 

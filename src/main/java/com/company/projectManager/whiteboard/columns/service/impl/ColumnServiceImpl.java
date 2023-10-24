@@ -1,7 +1,7 @@
 package com.company.projectManager.whiteboard.columns.service.impl;
 
 import com.company.projectManager.common.entity.User;
-import com.company.projectManager.common.entity.UserBusinessUnitRole;
+import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
@@ -50,7 +50,7 @@ public class ColumnServiceImpl implements ColumnService {
             if (user.isEmpty()) {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), whiteboard.id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), whiteboard.id());
 
             if (userBusinessUnitRole.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -81,7 +81,7 @@ public class ColumnServiceImpl implements ColumnService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
 
             if(userBusinessUnitRole.isEmpty()){
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -109,7 +109,7 @@ public class ColumnServiceImpl implements ColumnService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
 
             if(userBusinessUnitRole.isEmpty()){
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -137,7 +137,7 @@ public class ColumnServiceImpl implements ColumnService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columns.get(0).whiteboardDTO().id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columns.get(0).whiteboardDTO().id());
 
             if(userBusinessUnitRole.isEmpty()){
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
@@ -166,7 +166,7 @@ public class ColumnServiceImpl implements ColumnService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
+            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
 
             if(userBusinessUnitRole.isEmpty()){
                 throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");

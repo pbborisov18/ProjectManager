@@ -2,10 +2,8 @@ package com.company.projectManager.invitation.service.impl;
 
 import com.company.projectManager.common.dto.BusinessUnitDTO;
 import com.company.projectManager.common.dto.UserNoPassDTO;
-import com.company.projectManager.common.entity.Authority;
-import com.company.projectManager.common.entity.Role;
 import com.company.projectManager.common.entity.User;
-import com.company.projectManager.common.entity.UserBusinessUnitRole;
+import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.BusinessUnitMapper;
 import com.company.projectManager.common.repository.UserRepository;
@@ -68,7 +66,7 @@ public class InviteServiceImpl implements InviteService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+            Optional<UserBusinessUnit> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
             if(userBURoleEntity.isEmpty()){
                 throw new UserNotInBusinessUnitException("User isn't part of the BusinessUnit");
@@ -109,13 +107,13 @@ public class InviteServiceImpl implements InviteService {
 
             //TODO: to revisit when authorization is done
             //Can't do cascade persist cuz that will break the merge so will have to be done manually...
-            userBURoleRepository.save(new UserBusinessUnitRole(null,
-                                                                invite.get().getReceiver(),
-                                                                invite.get().getBusinessUnit(),
-                                                                new Role(null,
-                                                                        "Default",
-                                                                        List.of(new Authority(null, "Default")),
-                                                                        invite.get().getBusinessUnit())));
+//            userBURoleRepository.save(new UserBusinessUnit(null,
+//                                                                invite.get().getReceiver(),
+//                                                                invite.get().getBusinessUnit(),
+//                                                                new Role(null,
+//                                                                        "Default",
+//                                                                        List.of(new Authority(null, "Default")),
+//                                                                        invite.get().getBusinessUnit())));
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToUpdateException("Failed to update! " + e.getMessage());
         }
@@ -165,7 +163,7 @@ public class InviteServiceImpl implements InviteService {
                 throw new UserUnauthenticatedException("User isn't authenticated!");
             }
 
-            Optional<UserBusinessUnitRole> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+            Optional<UserBusinessUnit> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
             if(userBURoleEntity.isEmpty()) {
                 throw new UserNotInBusinessUnitException("User isn't part of the BusinessUnit");
