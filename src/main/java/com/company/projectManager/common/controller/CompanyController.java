@@ -1,7 +1,7 @@
 package com.company.projectManager.common.controller;
 
 import com.company.projectManager.common.dto.CompanyDTO;
-import com.company.projectManager.common.dto.UserNoPassBusinessUnitAuthoritiesDTO;
+import com.company.projectManager.common.dto.BusinessUnitAuthoritiesDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class CompanyController {
     @GetMapping("/companies")
     public ResponseEntity<Object> getAllCompaniesTheUserIsPartOf(){
         try {
-            List<UserNoPassBusinessUnitAuthoritiesDTO> userBusinessUnitRoleDTOs =
+            List<BusinessUnitAuthoritiesDTO> userBusinessUnitRoleDTOs =
                     userBusinessUnitRoleService.findAllDistinctCompaniesByAuthenticatedUser();
 
             if(userBusinessUnitRoleDTOs.isEmpty()){

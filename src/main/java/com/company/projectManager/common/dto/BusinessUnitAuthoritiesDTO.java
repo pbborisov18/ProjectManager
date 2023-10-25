@@ -4,12 +4,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record UserNoPassBusinessUnitAuthoritiesDTO(
+public record BusinessUnitAuthoritiesDTO(
 
         Long id,
-
-        @NotNull
-        UserNoPassDTO user,
 
         @NotNull
         BusinessUnitDTO businessUnit,

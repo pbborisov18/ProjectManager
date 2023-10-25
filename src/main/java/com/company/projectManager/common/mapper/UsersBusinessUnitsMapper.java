@@ -21,16 +21,15 @@ public interface UsersBusinessUnitsMapper {
 
     List<UserNoPassBusinessUnitDTO> toDTO(@Valid Iterable<UserBusinessUnit> usersBusinessUnitsRoles);
 
-    @Mapping(target = "user", qualifiedByName = {"toUserWithoutPasswordDTO"})
     @Mapping(target = "authorityDTOList", //Expression here basically gets the authorities from the roles
             expression = """
                     java(authorityMapper.toDTO(
                     userBusinessUnit.getRoles().stream().flatMap(role -> role.getAuthorities().stream()).distinct().toList()))
                     """)
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitDTO"})
-    UserNoPassBusinessUnitAuthoritiesDTO toAuthoritiesDTO(@Valid UserBusinessUnit userBusinessUnit);
+    BusinessUnitAuthoritiesDTO toAuthoritiesDTO(@Valid UserBusinessUnit userBusinessUnit);
 
-    List<UserNoPassBusinessUnitAuthoritiesDTO> toAuthoritiesDTO(@Valid Iterable<UserBusinessUnit> userBusinessUnitRoles);
+    List<BusinessUnitAuthoritiesDTO> toAuthoritiesDTO(@Valid Iterable<UserBusinessUnit> userBusinessUnitRoles);
 
     @Mapping(target = "user", qualifiedByName = {"toUserEntity"})
     @Mapping(target = "roles", source = "roles" ,qualifiedByName = {"toRoleEntity"})

@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface UserBusinessUnitRoleService {
 
-    List<UserNoPassBusinessUnitAuthoritiesDTO> findAllDistinctCompaniesByAuthenticatedUser() throws FailedToSelectException, EntityNotFoundException;
+    List<BusinessUnitAuthoritiesDTO> findAllDistinctCompaniesByAuthenticatedUser() throws FailedToSelectException, EntityNotFoundException;
 
     void createCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSaveException;
 
-    void updateCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToSaveException, FailedToUpdateException, UserNotAuthorizedException;
+    void updateCompany(CompanyDTO companyDTO) throws FailedToUpdateException, EntityNotFoundException;
 
     void leaveCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToDeleteException, FailedToLeaveException, EntityNotFoundException;
 
@@ -22,7 +22,7 @@ public interface UserBusinessUnitRoleService {
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    List<UserNoPassBusinessUnitAuthoritiesDTO> findAllProjectsByAuthenticatedUserAndCompany(CompanyDTO companyDTO) throws FailedToSelectException, EntityNotFoundException;
+    List<BusinessUnitAuthoritiesDTO> findAllProjectsByAuthenticatedUserAndCompany(CompanyDTO companyDTO) throws FailedToSelectException, EntityNotFoundException;
 
     void createProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToSaveException;
 
@@ -34,7 +34,7 @@ public interface UserBusinessUnitRoleService {
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    List<UserNoPassBusinessUnitAuthoritiesDTO> findAllTeamsByAuthenticatedUserAndProject(ProjectDTO projectDTO) throws FailedToSelectException, EntityNotFoundException;
+    List<BusinessUnitAuthoritiesDTO> findAllTeamsByAuthenticatedUserAndProject(ProjectDTO projectDTO) throws FailedToSelectException, EntityNotFoundException;
 
     void createTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToSaveException;
 
