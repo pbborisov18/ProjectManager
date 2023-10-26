@@ -1,4 +1,4 @@
-package com.company.projectManager.common.dto;
+package com.company.projectManager.common.dto.user;
 
 
 import jakarta.validation.constraints.Email;

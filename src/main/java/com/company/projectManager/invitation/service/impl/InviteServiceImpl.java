@@ -1,7 +1,7 @@
 package com.company.projectManager.invitation.service.impl;
 
 import com.company.projectManager.common.dto.BusinessUnitDTO;
-import com.company.projectManager.common.dto.UserNoPassDTO;
+import com.company.projectManager.common.dto.user.UserNoPassDTO;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;

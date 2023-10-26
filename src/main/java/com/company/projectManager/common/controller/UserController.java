@@ -1,7 +1,7 @@
 package com.company.projectManager.common.controller;
 
 import com.company.projectManager.common.dto.UserDTO;
-import com.company.projectManager.common.dto.UserNoPassDTO;
+import com.company.projectManager.common.dto.user.UserNoPassDTO;
 import com.company.projectManager.common.exception.EntityNotFoundException;
 import com.company.projectManager.common.exception.FailedToSaveException;
 import com.company.projectManager.common.exception.FailedToSelectException;

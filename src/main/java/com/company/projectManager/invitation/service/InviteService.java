@@ -1,7 +1,7 @@
 package com.company.projectManager.invitation.service;
 
 import com.company.projectManager.common.dto.BusinessUnitDTO;
-import com.company.projectManager.common.dto.UserNoPassDTO;
+import com.company.projectManager.common.dto.user.UserNoPassDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.utils.InviteState;
 import com.company.projectManager.invitation.dto.InviteDTONoPass;

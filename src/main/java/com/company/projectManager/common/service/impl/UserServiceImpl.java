@@ -1,7 +1,7 @@
 package com.company.projectManager.common.service.impl;
 
 import com.company.projectManager.common.dto.UserDTO;
-import com.company.projectManager.common.dto.UserNoPassDTO;
+import com.company.projectManager.common.dto.user.UserNoPassDTO;
 import com.company.projectManager.common.entity.Role;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnit;
