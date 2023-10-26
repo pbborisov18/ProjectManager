@@ -46,9 +46,8 @@ public class CompanyController {
             userBusinessUnitRoleService.createCompany(companyDTO);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
+        } catch (UserUnauthenticatedException e) { //Pretty much useless check as it should never happen
+            //If it is triggerred I guess the security is down. very bad...
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -56,20 +55,15 @@ public class CompanyController {
     }
 
     @PutMapping("/updateCompany")
+    @PreAuthorize("authorityCheck(#companyDTO.id(), \"UpdateBU\")")
     public ResponseEntity<Object> updateCompany(@RequestBody CompanyDTO companyDTO){
         try {
             userBusinessUnitRoleService.updateCompany(companyDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (FailedToSaveException | FailedToUpdateException e) {
+        } catch (EntityNotFoundException e){
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (FailedToUpdateException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -81,19 +75,8 @@ public class CompanyController {
             userBusinessUnitRoleService.leaveCompany(companyDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            //(you can't leave something you are already not a part of)
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToDeleteException | FailedToLeaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
@@ -104,19 +87,8 @@ public class CompanyController {
             userBusinessUnitRoleService.deleteCompany(companyDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            //(you can't leave something you are already not a part of)
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (FailedToDeleteException | FailedToSelectException e) {
+        } catch (FailedToDeleteException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 

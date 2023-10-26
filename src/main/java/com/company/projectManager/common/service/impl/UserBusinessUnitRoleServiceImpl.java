@@ -11,7 +11,6 @@ import com.company.projectManager.common.repository.*;
 import com.company.projectManager.common.security.SecurityIds;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import com.company.projectManager.common.utils.TypeName;
-import com.company.projectManager.invitation.entity.Invite;
 import com.company.projectManager.invitation.repository.InviteRepository;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
@@ -39,8 +38,6 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     private final UserRepository userRepository;
 
-    private final UserMapper userMapper;
-
 
     private final BusinessUnitRepository businessUnitRepository;
 
@@ -50,20 +47,16 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     private final InviteRepository inviteRepository;
 
 
-    private final RoleMapper roleMapper;
-
     private final RoleRepository roleRepository;
 
     private final AuthoritityRepository authoritityRepository;
 
-    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRolesRepository userBURoleRepository, UsersBusinessUnitsMapper userBURoleMapper, UserRepository userRepository, UserMapper userMapper, BusinessUnitMapper businessUnitMapper, RoleMapper roleMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
+    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRolesRepository userBURoleRepository, UsersBusinessUnitsMapper userBURoleMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
                                            RoleRepository roleRepository, AuthoritityRepository authorityRepository) {
         this.userBURoleRepository = userBURoleRepository;
         this.userBURoleMapper = userBURoleMapper;
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
         this.businessUnitMapper = businessUnitMapper;
-        this.roleMapper = roleMapper;
         this.businessUnitRepository = businessUnitRepository;
         this.inviteRepository = inviteRepository;
         this.roleRepository = roleRepository;
@@ -95,6 +88,8 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     @Transactional
     public void createCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSaveException {
         try {
+            //You can get the user id from the authorities in case you need extra perf
+            //This is just more readable
             Optional<User> user = userRepository.findUserByEmail(
                     SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -117,21 +112,8 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), bu, List.of(role));
             userBURoleRepository.save(userBUrole);
 
-            //Might be a good idea to pull this in another method
             //Add the required authorities without needing the user to re-log
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-            List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
-            updatedAuthorities.addAll(auth.getAuthorities());//add the authorities we already had
-            updatedAuthorities.add(new SecurityIds( //Add the new authority
-                            userBUrole.getId(),
-                            userBUrole.getUser().getId(),
-                            userBUrole.getBusinessUnit().getId(),
-                            userBUrole.getRoles().stream().mapToLong(Role::getId).boxed().toList()
-            ));
-
-            Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(), updatedAuthorities);
-            SecurityContextHolder.getContext().setAuthentication(newAuth);
+            addAuthoritiesToSecurityContext(userBUrole);
 
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
@@ -210,8 +192,9 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             //Finally delete company
             businessUnitRepository.deleteById(companyDTO.id());
 
-            //Not 100% necessary as the users can't "query" the db due to authorization
-            //cuz we check against the db. And since the db won't return anything the user will get access denied
+            //Not 100% necessary
+            //cuz in authorization I need to get values from the db. We just deleted the them.
+            //So they won't get through the authorization
             //MAYBE TODO: Delete/remove the role from the SecurityContext
 //            SessionRegistry sessionRegistry = new SessionRegistryImpl();
 //
@@ -243,45 +226,63 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     }
 
     @Transactional
-    public void createProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToSaveException {
+    public void createProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, FailedToSaveException {
         try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            //You can get the user id from the authorities in case you need extra perf
+            //This is just more readable
+            Optional<User> user = userRepository.findUserByEmail(
+                    SecurityContextHolder.getContext().getAuthentication().getName());
 
             if(user.isEmpty()) {
+                //Should never be thrown cuz of the login filter the request goes through before coming here
+                //but doing it so there isn't an unexpected exception thrown bellow in case something goes wrong
                 throw new UserUnauthenticatedException("User is unauthenticated!");
             }
 
-            UserDTO userDTO = userMapper.toUserDTO(user.get());
+            //Save the bu to the db
+            BusinessUnit project = businessUnitMapper.toBusinessUnitEntity(projectDTO);
+            businessUnitRepository.save(project);
 
-            Optional<UserBusinessUnit> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), projectDTO.company().id());
+            //Save the role the user will have
+            Role role = new Role(null, "Admin",
+                    (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
+                    project);
+            roleRepository.save(role);
 
-            if(userBusinessUnitRole.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't a part of the company!");
-            }
+            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), project, List.of(role));
+            userBURoleRepository.save(userBUrole);
 
-            //TODO: Fix with the custom authorization
-//                    if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-//                    } else {
-            //TODO: This has to be reworked
-            UserBusinessUnitDTO userBUrole = new UserBusinessUnitDTO(
-                    null,
-                    userDTO,
-                    projectDTO,
-                    null
-            );
+            //Port parent roles to child
+            List<Role> parentRoles = roleRepository.findAllByBusinessUnitId(projectDTO.company().id());
+            parentRoles.forEach(r -> new Role(null, r.getName(), r.getAuthorities(), project));
+            roleRepository.saveAll(parentRoles);
 
-//            saveUserBURole(userBUrole);
-//
+            //Add the required authorities without needing the user to re-log
+            addAuthoritiesToSecurityContext(userBUrole);
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
+            throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }
     }
 
+    //Doing it this way so there is no way to cheese the system
+    //You can only update the name for now
+    //Might implement other stuff in the future
     @Transactional
-    public void updateProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, UserNotAuthorizedException, FailedToSaveException, UserNotInBusinessUnitException {
-        createProject(projectDTO);
+    public void updateProject(ProjectDTO projectDTO) throws EntityNotFoundException, FailedToUpdateException {
+        try {
+            Optional<BusinessUnit> bu = businessUnitRepository.findById(projectDTO.id());
+
+            if(bu.isEmpty()){
+                throw new EntityNotFoundException("You can't update a company without id");
+            }
+
+            bu.get().setName(projectDTO.name());
+
+            businessUnitRepository.save(bu.get());
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToUpdateException("Failed to update! " + e.getMessage());
+        }
     }
 
     @Transactional
@@ -363,44 +364,55 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     }
 
     @Transactional
-    public void createTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToSaveException {
+    public void createTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, FailedToSaveException {
         try {
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            //You can get the user id from the authorities in case you need extra perf
+            //This is just more readable
+            Optional<User> user = userRepository.findUserByEmail(
+                    SecurityContextHolder.getContext().getAuthentication().getName());
 
             if(user.isEmpty()) {
+                //Should never be thrown cuz of the login filter the request goes through before coming here
+                //but doing it so there isn't an unexpected exception thrown bellow in case something goes wrong
                 throw new UserUnauthenticatedException("User is unauthenticated!");
             }
 
-            UserDTO userDTO = userMapper.toUserDTO(user.get());
+            //Save the bu to the db
+            BusinessUnit bu = businessUnitMapper.toBusinessUnitEntity(teamDTO);
+            businessUnitRepository.save(bu);
 
-            Optional<UserBusinessUnit> userBusinessUnitRole = userBURoleRepository.findByUserIdAndBusinessUnitId(userDTO.id(), teamDTO.project().id());
+            //Get all the parent roles
+            List<Role> parentRoles = roleRepository.findAllByBusinessUnitId(teamDTO.project().id());
 
-            if(userBusinessUnitRole.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't a part of the parent project!");
-            }
+            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), bu, parentRoles);
+            userBURoleRepository.save(userBUrole);
 
-            //TODO: Fix with the custom authorization
-//                    if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-//                        throw new UserNotAuthorizedException("User doesn't have the necessary permissions!");
-//                    } else {
-            //TODO: This has to be reworked
-            UserBusinessUnitDTO userBUrole = new UserBusinessUnitDTO(
-                    null,
-                    userDTO,
-                    teamDTO,
-                    null
-            );
-
-//            saveUserBURole(userBUrole);
+            //Add the required authorities without needing the user to re-log
+            addAuthoritiesToSecurityContext(userBUrole);
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
+            throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }
     }
 
+    //Doing it this way so there is no way to cheese the system
+    //You can only update the name for now
+    //Might implement other stuff in the future
     @Transactional
-    public void updateTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, UserNotAuthorizedException, FailedToSaveException, UserNotInBusinessUnitException {
-        createTeam(teamDTO);
+    public void updateTeam(TeamDTO teamDTO) throws EntityNotFoundException, FailedToUpdateException {
+        try {
+            Optional<BusinessUnit> bu = businessUnitRepository.findById(teamDTO.id());
+
+            if(bu.isEmpty()){
+                throw new EntityNotFoundException("You can't update a company without id");
+            }
+
+            bu.get().setName(teamDTO.name());
+
+            businessUnitRepository.save(bu.get());
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToUpdateException("Failed to update! " + e.getMessage());
+        }
     }
 
     @Transactional
@@ -475,6 +487,23 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
         SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
 
+    public void addAuthoritiesToSecurityContext(UserBusinessUnit userBUrole){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
+        updatedAuthorities.addAll(auth.getAuthorities());//add the authorities we already had
+        updatedAuthorities.add(new SecurityIds( //Add the new authority
+                userBUrole.getId(),
+                userBUrole.getUser().getId(),
+                userBUrole.getBusinessUnit().getId(),
+                userBUrole.getRoles().stream().mapToLong(Role::getId).boxed().toList()
+        ));
+
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(), updatedAuthorities);
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+    }
+
+
     //Was supposed to be private but transactional requires the method is public
     //Better make sure this is called from somewhere where a transaction already exists rather than risking it an keeping it private
     @Transactional(propagation = Propagation.MANDATORY)
@@ -524,23 +553,6 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
-        }
-    }
-
-
-
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void deleteAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToDeleteException {
-        try {
-            List<Invite> invites = inviteRepository.findAllByBusinessUnitId(businessUnitDTO.id());
-
-            if(invites.isEmpty()){
-                return;
-            }
-
-            inviteRepository.deleteAll(invites);
-        } catch (ConstraintViolationException | DataAccessException e){
-            throw new FailedToDeleteException("Unsuccessful delete! " + e.getMessage());
         }
     }
 

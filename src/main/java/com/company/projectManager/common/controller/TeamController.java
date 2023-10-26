@@ -7,6 +7,7 @@ import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class TeamController {
     }
 
     @PostMapping("/company/project/teams")
+    @PreAuthorize("partOfBU(#projectDTO.id())")
     public ResponseEntity<Object> getAllTeamsOfProject(@RequestBody ProjectDTO projectDTO){
         try {
             List<BusinessUnitAuthoritiesDTO> userBusinessUnitRoleDTOs =
@@ -40,83 +42,56 @@ public class TeamController {
     }
 
     @PostMapping("/company/project/createTeam")
+    @PreAuthorize("authorityCheck(#teamDTO.project().id(), \"CreateChildren\")")
     public ResponseEntity<Object> createTeam(@RequestBody TeamDTO teamDTO){
         try {
             userBusinessUnitRoleService.createTeam(teamDTO);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
+        } catch (UserUnauthenticatedException e) { //Pretty much useless check as it should never happen
+            //If it is triggerred I guess the security is down. very bad...
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/company/project/updateTeam")
+    @PreAuthorize("authorityCheck(#teamDTO.id(), \"UpdateBU\")")
     public ResponseEntity<Object> updateTeam(@RequestBody TeamDTO teamDTO){
         try {
             userBusinessUnitRoleService.updateTeam(teamDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotAuthorizedException | UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (FailedToSaveException e) {
+        } catch (FailedToUpdateException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping("/company/project/leaveTeam")
+    @PreAuthorize("partOfBU(#teamDTO.id())")
     public ResponseEntity<Object> leaveTeam(@RequestBody TeamDTO teamDTO){
         try {
             userBusinessUnitRoleService.leaveTeam(teamDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToDeleteException | FailedToLeaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
 
     @DeleteMapping("/company/project/deleteTeam")
+    @PreAuthorize("authorityCheck(#teamDTO.id(), \"DeleteBU\")")
     public ResponseEntity<Object> deleteTeam(@RequestBody TeamDTO teamDTO){
         try {
             userBusinessUnitRoleService.deleteTeam(teamDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (FailedToDeleteException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
