@@ -1,5 +1,6 @@
 package com.company.projectManager.common.dto;
 
+import com.company.projectManager.common.dto.user.UserDTO;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;

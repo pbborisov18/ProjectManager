@@ -1,6 +1,6 @@
 package com.company.projectManager.common.service;
 
-import com.company.projectManager.common.dto.UserDTO;
+import com.company.projectManager.common.dto.user.UserDTO;
 import com.company.projectManager.common.dto.user.UserNoPassDTO;
 import com.company.projectManager.common.exception.*;
 
