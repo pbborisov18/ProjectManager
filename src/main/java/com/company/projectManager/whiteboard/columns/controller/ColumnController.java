@@ -1,18 +1,15 @@
 package com.company.projectManager.whiteboard.columns.controller;
 
-import com.company.projectManager.common.dto.BusinessUnitDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.whiteboard.columns.dto.ColumnDTO;
 import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
 import com.company.projectManager.whiteboard.columns.service.ColumnService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class ColumnController {

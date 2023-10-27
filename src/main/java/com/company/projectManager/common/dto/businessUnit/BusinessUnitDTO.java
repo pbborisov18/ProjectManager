@@ -1,4 +1,4 @@
-package com.company.projectManager.common.dto;
+package com.company.projectManager.common.dto.businessUnit;
 
 import com.company.projectManager.common.utils.BusinessUnitDTODeserializer;
 import com.company.projectManager.common.utils.TypeName;

@@ -1,7 +1,10 @@
 package com.company.projectManager.common.utils;
 
 
-import com.company.projectManager.common.dto.*;
+import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
+import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
+import com.company.projectManager.common.dto.businessUnit.ProjectDTO;
+import com.company.projectManager.common.dto.businessUnit.TeamDTO;
 import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;

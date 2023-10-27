@@ -1,9 +1,9 @@
 package com.company.projectManager.common.mapper;
 
-import com.company.projectManager.common.dto.BusinessUnitDTO;
-import com.company.projectManager.common.dto.CompanyDTO;
-import com.company.projectManager.common.dto.ProjectDTO;
-import com.company.projectManager.common.dto.TeamDTO;
+import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
+import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
+import com.company.projectManager.common.dto.businessUnit.ProjectDTO;
+import com.company.projectManager.common.dto.businessUnit.TeamDTO;
 import com.company.projectManager.common.entity.BusinessUnit;
 import com.company.projectManager.whiteboard.whiteboards.mapper.WhiteboardMapper;
 import jakarta.validation.Valid;

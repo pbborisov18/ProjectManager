@@ -2,6 +2,9 @@ package com.company.projectManager.common.service;
 
 
 import com.company.projectManager.common.dto.*;
+import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
+import com.company.projectManager.common.dto.businessUnit.ProjectDTO;
+import com.company.projectManager.common.dto.businessUnit.TeamDTO;
 import com.company.projectManager.common.exception.*;
 
 

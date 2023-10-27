@@ -1,6 +1,6 @@
 package com.company.projectManager.whiteboard.whiteboards.service.impl;
 
-import com.company.projectManager.common.dto.BusinessUnitDTO;
+import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
 import com.company.projectManager.common.entity.BusinessUnit;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnit;

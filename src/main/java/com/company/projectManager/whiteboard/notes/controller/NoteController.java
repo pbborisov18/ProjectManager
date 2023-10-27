@@ -1,13 +1,9 @@
 package com.company.projectManager.whiteboard.notes.controller;
 
-import com.company.projectManager.common.dto.BusinessUnitDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.whiteboard.columns.dto.ColumnDTO;
 import com.company.projectManager.whiteboard.notes.dto.NoteDTO;
 import com.company.projectManager.whiteboard.notes.service.NoteService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.company.projectManager.common.exception.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class NoteController {

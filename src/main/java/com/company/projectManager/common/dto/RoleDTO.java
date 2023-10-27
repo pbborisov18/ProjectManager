@@ -1,5 +1,6 @@
 package com.company.projectManager.common.dto;
 
+import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
 import com.company.projectManager.common.entity.Authority;
 import jakarta.validation.constraints.NotNull;
 

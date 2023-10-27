@@ -1,6 +1,5 @@
 package com.company.projectManager.whiteboard.notes.service;
 
-import com.company.projectManager.common.dto.BusinessUnitDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.whiteboard.columns.dto.ColumnDTO;
 import com.company.projectManager.whiteboard.notes.dto.NoteDTO;

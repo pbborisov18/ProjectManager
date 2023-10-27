@@ -2,8 +2,8 @@ package com.company.projectManager.common.controller;
 
 
 import com.company.projectManager.common.dto.BusinessUnitAuthoritiesDTO;
-import com.company.projectManager.common.dto.CompanyDTO;
-import com.company.projectManager.common.dto.ProjectDTO;
+import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
+import com.company.projectManager.common.dto.businessUnit.ProjectDTO;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import org.springframework.http.HttpStatus;

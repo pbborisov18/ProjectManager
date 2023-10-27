@@ -1,4 +1,4 @@
-package com.company.projectManager.common.dto;
+package com.company.projectManager.common.dto.businessUnit;
 
 import com.company.projectManager.common.utils.TypeName;
 import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 
 
-public record CompanyDTO(
+public record TeamDTO(
         Long id,
 
         @NotNull
@@ -18,17 +18,14 @@ public record CompanyDTO(
         @NotNull
         TypeName type,
 
+        @NotNull
+        CompanyDTO company,
+
+        @NotNull
+        ProjectDTO project,
+
         @Nullable
         WhiteboardDTO whiteboard
 
 ) implements BusinessUnitDTO{
-
-        public CompanyDTO company(){
-                return null;
-        }
-
-        public ProjectDTO project(){
-                return null;
-        }
-
 }
