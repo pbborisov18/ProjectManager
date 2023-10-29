@@ -6,6 +6,7 @@ import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.BusinessUnitMapper;
+import com.company.projectManager.common.repository.RoleRepository;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
 import com.company.projectManager.common.utils.InviteState;
@@ -30,18 +31,23 @@ public class InviteServiceImpl implements InviteService {
 
     private final InviteMapper inviteMapper;
 
+
     private final UserRepository userRepository;
+
 
     private final BusinessUnitMapper businessUnitMapper;
 
     private final UsersBusinessUnitsRolesRepository userBURoleRepository;
+    private final RoleRepository roleRepository;
 
-    public InviteServiceImpl(InviteRepository inviteRepository, InviteMapper inviteMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, UsersBusinessUnitsRolesRepository userBURoleRepository) {
+    public InviteServiceImpl(InviteRepository inviteRepository, InviteMapper inviteMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, UsersBusinessUnitsRolesRepository userBURoleRepository,
+                             RoleRepository roleRepository) {
         this.inviteRepository = inviteRepository;
         this.inviteMapper = inviteMapper;
         this.userRepository = userRepository;
         this.businessUnitMapper = businessUnitMapper;
         this.userBURoleRepository = userBURoleRepository;
+        this.roleRepository = roleRepository;
     }
 
     public List<InviteDTONoPass> findInvitesByAuthenticatedUserAndState(InviteState inviteState) throws FailedToSelectException {
@@ -49,30 +55,15 @@ public class InviteServiceImpl implements InviteService {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             return inviteMapper.toDTO(
-                    inviteRepository.findByReceiver_EmailAndState(email, inviteState));
+                    inviteRepository.findByReceiverEmailAndState(email, inviteState));
 
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToSelectException("Failed to select! " + e.getMessage());
         }
     }
 
-    public List<InviteDTONoPass> findAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
+    public List<InviteDTONoPass> findAllInvitesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, EntityNotFoundException {
         try {
-            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            Optional<User> user = userRepository.findUserByEmail(email);
-
-            if(user.isEmpty()){
-                throw new UserUnauthenticatedException("User isn't authenticated!");
-            }
-
-            Optional<UserBusinessUnit> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
-
-            if(userBURoleEntity.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't part of the BusinessUnit");
-            }
-            //-----------------
-
             List<Invite> invites = inviteRepository.findAllByBusinessUnitId(businessUnitDTO.id());
 
             if(invites.isEmpty()){
@@ -105,15 +96,10 @@ public class InviteServiceImpl implements InviteService {
             //Make sure to (manually) cascade delete the invites
             inviteRepository.save(invite.get());
 
-            //TODO: to revisit when authorization is done
-            //Can't do cascade persist cuz that will break the merge so will have to be done manually...
-//            userBURoleRepository.save(new UserBusinessUnit(null,
-//                                                                invite.get().getReceiver(),
-//                                                                invite.get().getBusinessUnit(),
-//                                                                new Role(null,
-//                                                                        "Default",
-//                                                                        List.of(new Authority(null, "Default")),
-//                                                                        invite.get().getBusinessUnit())));
+            userBURoleRepository.save(new UserBusinessUnit(null,
+                                                                invite.get().getReceiver(),
+                                                                invite.get().getBusinessUnit(),
+                                                                List.of(roleRepository.findByNameAndBusinessUnitId("Default", invite.get().getBusinessUnit().getId()).get())));
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToUpdateException("Failed to update! " + e.getMessage());
         }
@@ -153,35 +139,20 @@ public class InviteServiceImpl implements InviteService {
     }
 
 
-    public void createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws UserUnauthenticatedException, UserNotInBusinessUnitException, InvalidInvitationException, FailedToSaveException {
+    public void createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws InvalidInvitationException, FailedToSaveException {
         try {
-            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            Optional<User> user = userRepository.findUserByEmail(email);
-
-            if(user.isEmpty()){
-                throw new UserUnauthenticatedException("User isn't authenticated!");
-            }
-
-            Optional<UserBusinessUnit> userBURoleEntity = userBURoleRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
-
-            if(userBURoleEntity.isEmpty()) {
-                throw new UserNotInBusinessUnitException("User isn't part of the BusinessUnit");
-            }
-            //-----------------
-
             Optional<User> receiverEntity = userRepository.findUserByEmail(receiver.email());
 
             if(receiverEntity.isEmpty()){
                 throw new InvalidInvitationException("User doesn't exist");
             }
 
-            Optional<Invite> inviteExists = inviteRepository.findInviteByBusinessUnit_IdAndReceiver_Email(businessUnitDTO.id(), receiver.email());
+            Optional<Invite> inviteExists = inviteRepository.findInviteByBusinessUnitIdAndReceiverEmail(businessUnitDTO.id(), receiver.email());
 
+            //Checks if invite already exists. Or the user is being a smartass trying to invite themselves
             if(inviteExists.isPresent() ||
-                    receiver.email().equals(
-                            SecurityContextHolder.getContext().getAuthentication().getName())){
-                throw new InvalidInvitationException("Invite already exists!");
+                    receiver.email().equals(SecurityContextHolder.getContext().getAuthentication().getName())){
+                throw new InvalidInvitationException("Invalid invite!");
             }
 
             Invite invite = new Invite(null,

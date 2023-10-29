@@ -9,9 +9,9 @@ import java.util.Optional;
 
 public interface InviteRepository extends CrudRepository<Invite, Long>{
 
-    Optional<Invite> findInviteByBusinessUnit_IdAndReceiver_Email(Long id, String email);
+    Optional<Invite> findInviteByBusinessUnitIdAndReceiverEmail(Long id, String email);
 
-    List<Invite> findByReceiver_EmailAndState(String email, InviteState state);
+    List<Invite> findByReceiverEmailAndState(String email, InviteState state);
 
     List<Invite> findAllByBusinessUnitId(Long businessUnitId);
 
