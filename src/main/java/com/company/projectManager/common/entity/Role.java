@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Roles")
+@Table(name = "Roles",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"Name", "BusinessUnitsId"})})
 public class Role {
 
     @Id

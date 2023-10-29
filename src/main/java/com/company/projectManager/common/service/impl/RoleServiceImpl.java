@@ -1,136 +1,132 @@
 package com.company.projectManager.common.service.impl;
 
 import com.company.projectManager.common.dto.RoleDTO;
+import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
 import com.company.projectManager.common.entity.Role;
+import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.RoleMapper;
 import com.company.projectManager.common.repository.RoleRepository;
+import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
 import com.company.projectManager.common.service.RoleService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RoleServiceImpl implements RoleService {
 
+    private final UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository;
+
     private final RoleRepository roleRepository;
     private final RoleMapper roleMapper;
 
-    public RoleServiceImpl(RoleRepository roleRepository, RoleMapper roleMapper) {
+    public RoleServiceImpl(UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository, RoleRepository roleRepository, RoleMapper roleMapper) {
+        this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
         this.roleRepository = roleRepository;
         this.roleMapper = roleMapper;
     }
 
-    //Probably won't be used
-    public void saveRole(RoleDTO roleDTO) throws FailedToSaveException {
-        try {
-            Role role = roleMapper.toEntity(roleDTO);
-
-            roleRepository.save(role);
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save!" + e.getMessage());
-        }
-    }
-
-    //Probably won't be used
-    public void updateRole(RoleDTO roleDTO) throws FailedToUpdateException, EntityNotFoundException {
-        try {
-            Optional<Role> existingRole = roleRepository.findById(roleDTO.id());
-
-            if(existingRole.isEmpty()) {
-                throw new EntityNotFoundException("Role doesn't exist!");
-            }
-
-            Role role = roleMapper.toEntity(roleDTO);
-
-            roleRepository.save(role);
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToUpdateException("Unsuccessful update!" + e.getMessage());
-        }
-    }
-
-    //Probably will be used in the future in case
-    public void deleteRole(RoleDTO roleDTO) throws FailedToDeleteException, EntityNotFoundException {
+    public List<RoleDTO> findRolesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException {
         try{
-            Optional<Role> role = roleRepository.findById(roleDTO.id());
+            List<Role> roles = roleRepository.findAllByBusinessUnitId(businessUnitDTO.id());
 
-            if(role.isEmpty()) {
-                throw new EntityNotFoundException("Role was not found");
-            }
-
-            roleRepository.delete(role.get());
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToDeleteException("Unsuccessful delete!" + e.getMessage());
-        }
-    }
-
-    public RoleDTO findRoleById(Long id) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            Optional<Role> role = roleRepository.findById(id);
-
-            if(role.isEmpty()) {
-                throw new EntityNotFoundException("Role was not found");
-            }
-
-            return roleMapper.toDTO(role.get());
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
-        }
-    }
-
-    public RoleDTO findRoleByName(String name) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            Optional<Role> role = roleRepository.findByName(name);
-
-            if(role.isEmpty()) {
-                throw new EntityNotFoundException("Role was not found");
-            }
-
-            return roleMapper.toDTO(role.get());
-
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
-        }
-    }
-
-    public List<RoleDTO> findAllRoles() throws FailedToSelectException, EntityNotFoundException {
-        try {
-            List<Role> roles = (List<Role>) roleRepository.findAll();
-
-            if(roles.isEmpty()) {
-                throw new EntityNotFoundException("Role was not found");
-            }
+            //There should always be at least 1 role
+            //so no need to check if this is empty
 
             return roleMapper.toDTO(roles);
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
+            throw new FailedToSelectException("Failed to select!" + e.getMessage());
+        }
+    }
+
+    public void saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest {
+        try {
+            if(roleRepository.countAllByBusinessUnitId(role.businessUnit().id()) > 50){
+                throw new InvalidRoleRequest("Too many roles!");
+            }
+
+            roleRepository.save(roleMapper.toEntity(role));
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToSaveException("Failed to save!" + e.getMessage());
+        }
+    }
+
+    //As much as I want to just do .save() (or call saveRole())
+    //I can't. I have to make sure that nobody is playing funny here
+    //Performance will be worse but it has to happen
+    public void updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException {
+        try {
+            Optional<Role> foundRole = roleRepository.findById(role.id());
+
+            if(foundRole.isEmpty()){
+                throw new EntityNotFoundException("Role doesn't exist");
+            }
+
+            //Default and Admin won't be allowed to have name changes
+            if(!foundRole.get().getName().equals("Default") ||
+                !foundRole.get().getName().equals("Admin")) {
+                foundRole.get().setName(role.name());
+            }
+
+            foundRole.get().setAuthorities(role.authorities());
+            //I am not setting the business unit in case someone gets any funny ideas
+            //Id is already the same
+
+            roleRepository.save(foundRole.get());
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToUpdateException("Failed to update!" + e.getMessage());
         }
     }
 
     @Transactional
-    public List<RoleDTO> findAllRolesById(List<Long> ids) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            List<Role> roles = (List<Role>) roleRepository.findAllById(ids);
+    public void deleteRole(RoleDTO role) throws FailedToDeleteException, EntityNotFoundException, InvalidRoleRequest {
+        try{
+            Optional<Role> foundRole = roleRepository.findById(role.id());
 
-            if(roles.isEmpty()) {
+            if(foundRole.isEmpty()) {
                 throw new EntityNotFoundException("Role was not found");
+            } else if(foundRole.get().getName().equals("Default") || foundRole.get().getName().equals("Admin")) {
+                throw new InvalidRoleRequest("These roles aren't allowed to be deleted");
             }
 
-            return roleMapper.toDTO(roles);
+            //Need check and re-assign roles for all users who have them
+            //If the user has no roles left - give him default
+            List<UserBusinessUnit> uburs = usersBusinessUnitsRolesRepository.findAllByBusinessUnitIdAndRolesId(role.businessUnit().id(), role.id());
 
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select!" + e.getMessage());
+            //if it's empty means no one has this role
+            //so no need to do checks and assign new roles
+            if(!uburs.isEmpty()){
+
+                for (UserBusinessUnit current : uburs) {
+                    //if current user has 1 role in the current bu
+                    //that means the user has the role we are trying to delete and it's his last one
+                    //so give him the default role of the current bu
+                    if (usersBusinessUnitsRolesRepository.countAllByUserIdAndBusinessUnitId(current.getUser().getId(), current.getBusinessUnit().getId())
+                            == 1L) {
+                        usersBusinessUnitsRolesRepository.save(
+                                new UserBusinessUnit(
+                                        null, current.getUser(), current.getBusinessUnit(),
+                                        List.of(
+                                                roleRepository.findByNameAndBusinessUnitId("Default",
+                                                        //This role should always exist for a bu so we can straight up do .get()
+                                                        current.getBusinessUnit().getId()).get())));
+                    }
+                }
+
+                //Then we just delete the roles after we've made sure no user is left without a role
+                usersBusinessUnitsRolesRepository.deleteAll(uburs);
+            }
+
+            roleRepository.delete(foundRole.get());
+
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
+            throw new FailedToDeleteException("Failed to delete!" + e.getMessage());
         }
-
     }
-
 
 }

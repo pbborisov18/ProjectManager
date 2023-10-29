@@ -12,9 +12,11 @@ import java.util.Optional;
 @Repository
 public interface RoleRepository extends CrudRepository<Role, Long> {
 
-    Optional<Role> findByName(String name);
-
     List<Role> findAllByBusinessUnitId(Long id);
+
+    Optional<Role> findByNameAndBusinessUnitId(String name, Long id);
+
+    Long countAllByBusinessUnitId(Long id);
 
     void deleteAllByBusinessUnitId(Long id);
 }

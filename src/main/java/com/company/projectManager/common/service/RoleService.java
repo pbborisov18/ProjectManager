@@ -1,28 +1,19 @@
 package com.company.projectManager.common.service;
 
 import com.company.projectManager.common.dto.RoleDTO;
-import com.company.projectManager.common.exception.FailedToDeleteException;
-import com.company.projectManager.common.exception.FailedToSaveException;
-import com.company.projectManager.common.exception.FailedToSelectException;
-import com.company.projectManager.common.exception.FailedToUpdateException;
-import com.company.projectManager.common.exception.EntityNotFoundException;
+import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
+import com.company.projectManager.common.exception.*;
 
 import java.util.List;
 
-
 public interface RoleService {
 
-    void saveRole(RoleDTO roleDTO) throws FailedToSaveException;
+    List<RoleDTO> findRolesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException;
 
-    void updateRole(RoleDTO roleDTO) throws FailedToUpdateException, EntityNotFoundException;
+    void saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest;
 
-    void deleteRole(RoleDTO roleDTO) throws FailedToDeleteException, EntityNotFoundException;
+    void updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException;
 
-    RoleDTO findRoleById(Long id) throws FailedToSelectException, EntityNotFoundException;
+    void deleteRole(RoleDTO role) throws FailedToDeleteException, EntityNotFoundException, InvalidRoleRequest;
 
-    RoleDTO findRoleByName(String name) throws FailedToSelectException, EntityNotFoundException;
-
-    List<RoleDTO> findAllRoles() throws FailedToSelectException, EntityNotFoundException;
-
-    List<RoleDTO> findAllRolesById(List<Long> ids) throws FailedToSelectException, EntityNotFoundException;
 }

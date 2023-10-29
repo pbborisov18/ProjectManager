@@ -16,6 +16,7 @@ public interface UserBusinessUnitRoleService {
     //I'd rather leave all those methods instead of having countless `if` checks inside
     //There will be quite a bit of code duplication but that allows for flexibility in the future
     //And not needing to add more if checks
+    //Or needing it to split into more methods in the future (as they are already split)
 
     List<BusinessUnitAuthoritiesDTO> findAllDistinctCompaniesByAuthenticatedUser() throws FailedToSelectException, EntityNotFoundException;
 

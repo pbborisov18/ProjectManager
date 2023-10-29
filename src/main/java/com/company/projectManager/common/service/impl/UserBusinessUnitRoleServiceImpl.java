@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -49,6 +46,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
 
     private final RoleRepository roleRepository;
+
 
     private final AuthoritityRepository authoritityRepository;
 
@@ -101,22 +99,26 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             }
 
             //Save the bu to the db
-            BusinessUnit bu = businessUnitMapper.toBusinessUnitEntity(companyDTO);
-            businessUnitRepository.save(bu);
+            BusinessUnit company = businessUnitMapper.toBusinessUnitEntity(companyDTO);
+            businessUnitRepository.save(company);
 
-            //Save the role the user will have
-            Role role = new Role(null, "Admin",
+            //Save the two roles every bu comes with
+            Role adminRole = new Role(null, "Admin",
                     (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
-                    bu);
-            roleRepository.save(role);
+                    company);
+            Role defaultRole = new Role(null, "Default",
+                    List.of(authoritityRepository.findByName("InteractWithWhiteboard").get(),
+                            authoritityRepository.findByName("SeeWhiteboard").get()),
+                    company);
+            roleRepository.saveAll(List.of(adminRole, defaultRole));
 
-            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), bu, List.of(role));
+            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), company, List.of(adminRole));
             userBURoleRepository.save(userBUrole);
 
             //Add the required authorities without needing the user to re-log
             addAuthoritiesToSecurityContext(userBUrole);
 
-        } catch (ConstraintViolationException | DataAccessException e) {
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }
     }
@@ -168,7 +170,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             deleteAuthoritiesFromSecurityContext(
                     Stream.concat(userBURoles.stream(), childUserBURoles.stream()).toList());
 
-        } catch (ConstraintViolationException | DataAccessException e) {
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
         }
     }
@@ -244,24 +246,23 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             BusinessUnit project = businessUnitMapper.toBusinessUnitEntity(projectDTO);
             businessUnitRepository.save(project);
 
-            //Save the role the user will have
-            Role role = new Role(null, "Admin",
+            //Save the two roles every bu comes with
+            Role adminRole = new Role(null, "Admin",
                     (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
                     project);
-            roleRepository.save(role);
+            Role defaultRole = new Role(null, "Default",
+                    List.of(authoritityRepository.findByName("InteractWithWhiteboard").get(),
+                            authoritityRepository.findByName("SeeWhiteboard").get()),
+                    project);
+            roleRepository.saveAll(List.of(adminRole, defaultRole));
 
-            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), project, List.of(role));
+            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), project, List.of(adminRole));
             userBURoleRepository.save(userBUrole);
-
-            //Port parent roles to child
-            List<Role> parentRoles = roleRepository.findAllByBusinessUnitId(projectDTO.company().id());
-            parentRoles.forEach(r -> new Role(null, r.getName(), r.getAuthorities(), project));
-            roleRepository.saveAll(parentRoles);
 
             //Add the required authorities without needing the user to re-log
             addAuthoritiesToSecurityContext(userBUrole);
 
-        } catch (ConstraintViolationException | DataAccessException e) {
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }
     }
@@ -312,7 +313,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             deleteAuthoritiesFromSecurityContext(
                     Stream.concat(userBURoles.stream(), childUserBURoles.stream()).toList());
 
-        } catch (ConstraintViolationException | DataAccessException e) {
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
         }
     }
@@ -360,7 +361,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             return userBURoles;
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Failed select! " + e.getMessage());
+            throw new FailedToSelectException("Failed to select! " + e.getMessage());
         }
     }
 
@@ -379,19 +380,27 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             }
 
             //Save the bu to the db
-            BusinessUnit bu = businessUnitMapper.toBusinessUnitEntity(teamDTO);
-            businessUnitRepository.save(bu);
+            BusinessUnit team = businessUnitMapper.toBusinessUnitEntity(teamDTO);
+            businessUnitRepository.save(team);
 
-            //Get all the parent roles
-            List<Role> parentRoles = roleRepository.findAllByBusinessUnitId(teamDTO.project().id());
+            //Save the two roles every bu comes with
+            Role adminRole = new Role(null, "Admin",
+                    (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
+                    team);
+            Role defaultRole = new Role(null, "Default",
+                    //Probably add support for custom roles in the future
+                    List.of(authoritityRepository.findByName("InteractWithWhiteboard").get(),
+                            authoritityRepository.findByName("SeeWhiteboard").get()),
+                    team);
+            roleRepository.saveAll(List.of(adminRole, defaultRole));
 
-            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), bu, parentRoles);
+            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), team, List.of(adminRole, defaultRole));
             userBURoleRepository.save(userBUrole);
 
             //Add the required authorities without needing the user to re-log
             addAuthoritiesToSecurityContext(userBUrole);
 
-        } catch (ConstraintViolationException | DataAccessException e) {
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }
     }
@@ -435,7 +444,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             //Remove the required authorities without needing the user to re-log
             deleteAuthoritiesFromSecurityContext(userBURoles);
 
-        } catch (ConstraintViolationException | DataAccessException e) {
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
         }
     }
@@ -467,7 +476,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     //////////////////////////////////////////////////////////////////////////////////////////
 
     //To put it simply I'm not sure if I'm doing something wrong (probably I am)
-    public void deleteAuthoritiesFromSecurityContext(List<UserBusinessUnit> userBURoles){
+    public void deleteAuthoritiesFromSecurityContext(List<UserBusinessUnit> userBURoles) throws NoSuchElementException{
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());

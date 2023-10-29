@@ -13,21 +13,21 @@ public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBu
 
     List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitType(String email, TypeName typeName);
 
-    List<UserBusinessUnit> findDistinctByUserEmailAndBusinessUnitType(String email, TypeName typeName);
-
     List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitCompanyIdAndBusinessUnitType(String email, Long companyId, TypeName type);
 
     List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitProjectId(String email, Long projectId);
 
     List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitCompanyId(String email, Long companyId);
 
-    List<UserBusinessUnit> findAllByBusinessUnitId(Long businessUnitId);
-
     Optional<UserBusinessUnit> findByUserIdAndBusinessUnitId(Long userId, Long businessUnitId);
 
     List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitId(String email, Long businessUnitId);
 
+    Long countAllByUserIdAndBusinessUnitId(Long id, Long businessUnitId);
+
     Optional<UserBusinessUnit> findByUserIdAndBusinessUnitWhiteboardId(Long userId, Long whiteboardId);
+
+    List<UserBusinessUnit> findAllByBusinessUnitIdAndRolesId(Long businessUnitId, Long roleId);
 
     Long countAllByBusinessUnitId(Long businessUnitId);
 
