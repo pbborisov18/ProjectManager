@@ -18,10 +18,12 @@ import com.company.projectManager.invitation.service.InviteService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -96,11 +98,14 @@ public class InviteServiceImpl implements InviteService {
             //Make sure to (manually) cascade delete the invites
             inviteRepository.save(invite.get());
 
-            userBURoleRepository.save(new UserBusinessUnit(null,
-                                                                invite.get().getReceiver(),
-                                                                invite.get().getBusinessUnit(),
-                                                                List.of(roleRepository.findByNameAndBusinessUnitId("Default", invite.get().getBusinessUnit().getId()).get())));
-        } catch (ConstraintViolationException | DataAccessException e){
+            userBURoleRepository.save(
+                    new UserBusinessUnit(null,
+                            invite.get().getReceiver(),
+                            invite.get().getBusinessUnit(),
+                            //Get the default role in the business unit
+                            List.of(roleRepository.findByNameAndBusinessUnitId("Default", invite.get().getBusinessUnit().getId())
+                                    .get())));
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e){
             throw new FailedToUpdateException("Failed to update! " + e.getMessage());
         }
     }
@@ -123,6 +128,7 @@ public class InviteServiceImpl implements InviteService {
         }
     }
 
+    @PreAuthorize("authorityCheck(#inviteDTONoPass.businessUnit().id(), \"ManageSentInvites\")")
     public void cancelInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToDeleteException {
         try {
             Optional<Invite> invite = inviteRepository.findById(inviteDTONoPass.id());

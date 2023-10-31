@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -42,7 +41,7 @@ public class InviteController {
             switch (invite.state()) {
                 case ACCEPTED -> inviteService.acceptInvite(invite);
                 case DECLINED -> inviteService.declineInvite(invite);
-                case CANCELLED -> inviteService.cancelInvite(invite);
+                case CANCELLED -> inviteService.cancelInvite(invite); //There is @PreAuthorize on the service method
             }
 
             return new ResponseEntity<>(HttpStatus.OK);
@@ -75,7 +74,7 @@ public class InviteController {
     }
 
     @PostMapping({"/company/invite", "/company/project/invite", "/company/project/team/invite"})
-    @PreAuthorize("authorityCheck(#buUserDTO.businessUnitDTO().id(), \"SendInvite\")")
+    @PreAuthorize("authorityCheck(#buUserDTO.businessUnitDTO().id(), \"ManageSentInvites\")")
     public ResponseEntity<Object> createInviteForCompany(@RequestBody BusinessUnitUserNoPassDTO buUserDTO){
         try {
             inviteService.createInvite(buUserDTO.businessUnitDTO(), buUserDTO.userNoPassDTO());
