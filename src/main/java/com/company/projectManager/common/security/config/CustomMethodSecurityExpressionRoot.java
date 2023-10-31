@@ -63,7 +63,7 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot i
         //Get all the role objects by Id
         List<RoleDTO> roles = null;
         try {
-            roles = roleService.findAllRolesById(roleIdsToSearchFor);
+            roles = roleService.findRolesByIds(roleIdsToSearchFor);
         } catch (FailedToSelectException | EntityNotFoundException e) {
             return false;
         }

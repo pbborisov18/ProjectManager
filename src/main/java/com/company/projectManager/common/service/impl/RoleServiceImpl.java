@@ -129,4 +129,12 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
+    @Transactional
+    public List<RoleDTO> findRolesByIds(List<Long> ids) throws FailedToSelectException, EntityNotFoundException {
+        try {
+            return roleMapper.toDTO(roleRepository.findAllById(ids));
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToSelectException("Failed to select!" + e.getMessage());
+        }
+    }
 }

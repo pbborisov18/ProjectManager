@@ -16,4 +16,6 @@ public interface RoleService {
 
     void deleteRole(RoleDTO role) throws FailedToDeleteException, EntityNotFoundException, InvalidRoleRequest;
 
+    List<RoleDTO> findRolesByIds(List<Long> ids) throws FailedToSelectException, EntityNotFoundException;
+
 }
