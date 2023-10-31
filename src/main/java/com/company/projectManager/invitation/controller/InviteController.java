@@ -56,6 +56,24 @@ public class InviteController {
         }
     }
 
+    @DeleteMapping("/invites")
+    public ResponseEntity<Object> deleteInvite(@RequestBody @Valid InviteDTONoPass invite){
+        try {
+            inviteService.deleteInvite(invite);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (UserNotAuthorizedException e) {
+            //Returns 403 which means unauthorized (no permission)
+            //Reason being someone created this 30 yrs ago and stuff changes
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (EntityNotFoundException e){
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (FailedToDeleteException  e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
     //Why is this Post? Cuz "something something" GET requests with bodies is bad cuz semantics(and spring doesn't read it),
     //"something something", expose the data in the url (send a big object through it even though it has a limit of characters yes)
     //I'd consider this another "mistake" as 403 and 401 being backwards. Been wrong for so long it's right now

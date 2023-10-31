@@ -110,12 +110,17 @@ public class InviteServiceImpl implements InviteService {
         }
     }
 
-    public void declineInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToUpdateException {
+    public void declineInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToUpdateException, UserNotAuthorizedException {
         try {
             Optional<Invite> invite = inviteRepository.findById(inviteDTONoPass.id());
 
             if (invite.isEmpty()) {
                 throw new EntityNotFoundException("Invite not found");
+            }
+
+            if(!inviteDTONoPass.receiver().email().equals(
+                    invite.get().getReceiver().getEmail())){
+                throw new UserNotAuthorizedException("Invite was sent to someone else");
             }
 
             invite.get().setState(InviteState.DECLINED);
@@ -128,6 +133,29 @@ public class InviteServiceImpl implements InviteService {
         }
     }
 
+    //Delete from receiver
+    public void deleteInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, UserNotAuthorizedException, FailedToDeleteException {
+        try {
+            Optional<Invite> invite = inviteRepository.findById(inviteDTONoPass.id());
+
+            if (invite.isEmpty()) {
+                throw new EntityNotFoundException("Invite not found");
+            }
+
+            if(!inviteDTONoPass.receiver().email().equals(
+                    invite.get().getReceiver().getEmail())){
+                throw new UserNotAuthorizedException("Invite was sent to someone else");
+            }
+
+            //Delete invite. Acts as ignore
+            //User should be able to receive the same invite for the same bu afterwards
+            inviteRepository.delete(invite.get());
+        } catch (ConstraintViolationException | DataAccessException e){
+            throw new FailedToDeleteException("Failed to update! " + e.getMessage());
+        }
+    }
+
+    //Delete from bu(sender)
     @PreAuthorize("authorityCheck(#inviteDTONoPass.businessUnit().id(), \"ManageSentInvites\")")
     public void cancelInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToDeleteException {
         try {
@@ -137,7 +165,7 @@ public class InviteServiceImpl implements InviteService {
                 throw new EntityNotFoundException("Invite not found");
             }
 
-            //Delete the invite in case
+            //Delete the invite in case you want to invite the user again
             inviteRepository.delete(invite.get());
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToDeleteException("Failed to delete! " + e.getMessage());

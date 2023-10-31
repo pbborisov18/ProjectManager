@@ -16,7 +16,9 @@ public interface InviteService {
 
     void acceptInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToUpdateException, UserNotAuthorizedException;
 
-    void declineInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToUpdateException;
+    void declineInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToUpdateException, UserNotAuthorizedException;
+
+    void deleteInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, UserNotAuthorizedException, FailedToDeleteException;
 
     void cancelInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToDeleteException;
 
