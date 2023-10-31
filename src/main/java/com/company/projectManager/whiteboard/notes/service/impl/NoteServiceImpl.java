@@ -37,7 +37,7 @@ public class NoteServiceImpl implements NoteService {
         this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
     }
 
-    public List<NoteDTO> findAllNotesByColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, EntityNotFoundException, FailedToSaveException {
+    public List<NoteDTO> findAllNotesByColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, EntityNotFoundException, FailedToSaveException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -48,9 +48,7 @@ public class NoteServiceImpl implements NoteService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
 
-            if (userBusinessUnitRole.isEmpty()) {
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
+
             //-----------------
 
             List<Note> notes = noteRepository.findAllByColumnId(columnDTO.id());
@@ -66,7 +64,7 @@ public class NoteServiceImpl implements NoteService {
         }
     }
 
-    public void createNote(NoteDTO noteDTO) throws UserNotInBusinessUnitException, UserUnauthenticatedException, FailedToSaveException {
+    public void createNote(NoteDTO noteDTO) throws UserUnauthenticatedException, FailedToSaveException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -77,9 +75,7 @@ public class NoteServiceImpl implements NoteService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
 
-            if (userBusinessUnitRole.isEmpty()) {
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
+
             //-----------------
 
             noteRepository.save(noteMapper.toEntity(noteDTO));
@@ -89,7 +85,7 @@ public class NoteServiceImpl implements NoteService {
         }
     }
 
-    public void updateNote(NoteDTO noteDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToUpdateException {
+    public void updateNote(NoteDTO noteDTO) throws UserUnauthenticatedException, FailedToUpdateException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -100,9 +96,6 @@ public class NoteServiceImpl implements NoteService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
 
-            if (userBusinessUnitRole.isEmpty()) {
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
             //-----------------
 
             noteRepository.save(noteMapper.toEntity(noteDTO));
@@ -113,7 +106,7 @@ public class NoteServiceImpl implements NoteService {
     }
 
     //Probably can optimize this in some way but this is for future me
-    public void updateNotes(List<NoteDTO> notes) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToUpdateException {
+    public void updateNotes(List<NoteDTO> notes) throws UserUnauthenticatedException, FailedToUpdateException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -123,10 +116,6 @@ public class NoteServiceImpl implements NoteService {
             }
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), notes.get(0).columnDTO().whiteboardDTO().id());
-
-            if (userBusinessUnitRole.isEmpty()) {
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
             //-----------------
 
             noteRepository.saveAll(noteMapper.toEntity(notes));
@@ -136,7 +125,7 @@ public class NoteServiceImpl implements NoteService {
         }
     }
 
-    public void deleteNote(NoteDTO noteDTO) throws FailedToSelectException, UserNotInBusinessUnitException, UserUnauthenticatedException {
+    public void deleteNote(NoteDTO noteDTO) throws FailedToSelectException, UserUnauthenticatedException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -147,9 +136,7 @@ public class NoteServiceImpl implements NoteService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), noteDTO.columnDTO().whiteboardDTO().id());
 
-            if (userBusinessUnitRole.isEmpty()) {
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
+
             //-----------------
 
             noteRepository.delete(noteMapper.toEntity(noteDTO));

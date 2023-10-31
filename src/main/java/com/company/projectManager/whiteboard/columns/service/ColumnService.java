@@ -10,14 +10,14 @@ import java.util.List;
 
 public interface ColumnService {
 
-    List<ColumnDTO> findAllColumnsByWhiteboard(WhiteboardDTO whiteboardDTO) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, EntityNotFoundException;
+    List<ColumnDTO> findAllColumnsByWhiteboard(WhiteboardDTO whiteboardDTO) throws FailedToSelectException, UserUnauthenticatedException, EntityNotFoundException;
 
-    void createColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToSaveException, UserNotAuthorizedException;
+    void createColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, FailedToSaveException, UserNotAuthorizedException;
 
-    void updateColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToUpdateException;
+    void updateColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotAuthorizedException, FailedToUpdateException;
 
-    void updateColumns(List<ColumnDTO> columns)  throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToUpdateException;
+    void updateColumns(List<ColumnDTO> columns)  throws UserUnauthenticatedException, UserNotAuthorizedException, FailedToUpdateException;
 
-    void deleteColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToDeleteException, UserNotAuthorizedException;
+    void deleteColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, FailedToDeleteException, UserNotAuthorizedException;
 
 }

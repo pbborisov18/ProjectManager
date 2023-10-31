@@ -34,10 +34,6 @@ public class ColumnController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToSelectException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityNotFoundException e) {
@@ -57,11 +53,7 @@ public class ColumnController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        }  catch (ClassCastException e){
+        } catch (ClassCastException | UserNotAuthorizedException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -78,11 +70,7 @@ public class ColumnController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        }  catch (ClassCastException e){
+        } catch (ClassCastException | UserNotAuthorizedException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -95,15 +83,11 @@ public class ColumnController {
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (FailedToUpdateException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserUnauthenticatedException e) {
+        } catch (UserUnauthenticatedException | UserNotAuthorizedException e) {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        }  catch (ClassCastException e){
+        } catch (ClassCastException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -118,11 +102,7 @@ public class ColumnController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (FailedToDeleteException e) {
+        } catch (FailedToDeleteException | UserNotAuthorizedException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

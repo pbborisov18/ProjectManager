@@ -39,9 +39,7 @@ public class WhiteboardController {
 
             //if whiteboard is found return it
             return new ResponseEntity<>(whiteboardDTO, HttpStatus.OK);
-        } catch (UserUnauthenticatedException | UserNotInBusinessUnitException e) {
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (FailedToSelectException e) {
+        } catch (FailedToSelectException | UserUnauthenticatedException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityNotFoundException e){
             //if it isn't send a request back asking to redirect to */createWhiteboard
@@ -65,14 +63,10 @@ public class WhiteboardController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (EntityNotFoundException | FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserUnauthenticatedException e) {
+        } catch (UserUnauthenticatedException | UserNotAuthorizedException e) {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (ClassCastException | JsonProcessingException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -103,11 +97,7 @@ public class WhiteboardController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
-        } catch (ClassCastException | JsonProcessingException e){
+        } catch (ClassCastException | JsonProcessingException | UserNotAuthorizedException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -123,15 +113,11 @@ public class WhiteboardController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException | UserNotAuthorizedException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToSaveException | FailedToSelectException | FailedToDeleteException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (ClassCastException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException | UserNotAuthorizedException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }

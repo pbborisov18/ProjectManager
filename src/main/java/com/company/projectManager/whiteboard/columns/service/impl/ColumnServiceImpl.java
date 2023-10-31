@@ -42,7 +42,7 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
 //    @Transactional
-    public List<ColumnDTO> findAllColumnsByWhiteboard(WhiteboardDTO whiteboard) throws FailedToSelectException, UserUnauthenticatedException, UserNotInBusinessUnitException, EntityNotFoundException {
+    public List<ColumnDTO> findAllColumnsByWhiteboard(WhiteboardDTO whiteboard) throws FailedToSelectException, UserUnauthenticatedException, EntityNotFoundException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -52,9 +52,6 @@ public class ColumnServiceImpl implements ColumnService {
             }
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), whiteboard.id());
 
-            if (userBusinessUnitRole.isEmpty()) {
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
             //-----------------
 
             List<Column> column = columnRepository.findAllByWhiteboardId(whiteboard.id());
@@ -72,7 +69,7 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
 //    @Transactional
-    public void createColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToSaveException, UserNotAuthorizedException {
+    public void createColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, FailedToSaveException, UserNotAuthorizedException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -83,9 +80,7 @@ public class ColumnServiceImpl implements ColumnService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
 
-            if(userBusinessUnitRole.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
+
             //To be deleted when doing authorization anyway
 //            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
 //                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
@@ -100,7 +95,7 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     //Currently not in use. Frontend needs to be updated. Perfect time for tests I'd say
-    public void updateColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToUpdateException {
+    public void updateColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotAuthorizedException, FailedToUpdateException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -111,9 +106,7 @@ public class ColumnServiceImpl implements ColumnService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
 
-            if(userBusinessUnitRole.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
+
             //To be deleted when doing authorization anyway
 //            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
 //                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
@@ -128,7 +121,7 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     //Currently not in use. Frontend needs to be updated. Perfect time for tests I'd say
-    public void updateColumns(List<ColumnDTO> columns)throws UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, FailedToUpdateException {
+    public void updateColumns(List<ColumnDTO> columns)throws UserUnauthenticatedException, UserNotAuthorizedException, FailedToUpdateException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -139,9 +132,7 @@ public class ColumnServiceImpl implements ColumnService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columns.get(0).whiteboardDTO().id());
 
-            if(userBusinessUnitRole.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
+
             //To be deleted when doing authorization anyway
 //            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
 //                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
@@ -157,7 +148,7 @@ public class ColumnServiceImpl implements ColumnService {
 
     //Currently not in use. Frontend needs to be updated. Perfect time for tests I'd say
 //    @Transactional
-    public void deleteColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToDeleteException, UserNotAuthorizedException {
+    public void deleteColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, FailedToDeleteException, UserNotAuthorizedException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -168,9 +159,7 @@ public class ColumnServiceImpl implements ColumnService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitWhiteboardId(user.get().getId(), columnDTO.whiteboardDTO().id());
 
-            if(userBusinessUnitRole.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
+
             //To be deleted when doing authorization anyway
 //            if (userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
 //                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");

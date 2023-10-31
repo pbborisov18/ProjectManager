@@ -56,7 +56,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
         this.columnRepository = columnRepository;
     }
 
-    public WhiteboardDTO findWhiteboard(BusinessUnitDTO businessUnitDTO) throws UserUnauthenticatedException, UserNotInBusinessUnitException, FailedToSelectException, EntityNotFoundException  {
+    public WhiteboardDTO findWhiteboard(BusinessUnitDTO businessUnitDTO) throws UserUnauthenticatedException, FailedToSelectException, EntityNotFoundException  {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -66,9 +66,6 @@ public class WhiteboardServiceImpl implements WhiteboardService {
             }
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
-            if(userBusinessUnitRole.isEmpty()) {
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
             //-----------------
 
             Optional<BusinessUnit> businessUnit = businessUnitRepository.findById(businessUnitDTO.id());
@@ -89,7 +86,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
     }
 
     @Transactional
-    public void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
+    public void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, UserUnauthenticatedException, UserNotAuthorizedException, EntityNotFoundException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -100,9 +97,6 @@ public class WhiteboardServiceImpl implements WhiteboardService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
-            if(userBusinessUnitRole.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
 
 //            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
 //                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
@@ -140,7 +134,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
     }
 
     @Transactional
-    public void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO, List<ColumnDTO> columns) throws FailedToSaveException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
+    public void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO, List<ColumnDTO> columns) throws FailedToSaveException, UserUnauthenticatedException, UserNotAuthorizedException, EntityNotFoundException {
         //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
         Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -150,9 +144,6 @@ public class WhiteboardServiceImpl implements WhiteboardService {
 
         Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
-        if(userBusinessUnitRole.isEmpty()){
-            throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-        }
 
 //        if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
 //            throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
@@ -194,7 +185,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
     }
 
     @Transactional
-    public void deleteWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, UserUnauthenticatedException, UserNotInBusinessUnitException, UserNotAuthorizedException, EntityNotFoundException {
+    public void deleteWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, UserUnauthenticatedException, UserNotAuthorizedException, EntityNotFoundException {
         try {
             //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
             Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -205,9 +196,6 @@ public class WhiteboardServiceImpl implements WhiteboardService {
 
             Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
 
-            if(userBusinessUnitRole.isEmpty()){
-                throw new UserNotInBusinessUnitException("User isn't a part of the business unit!");
-            }
 
 //            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
 //                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");

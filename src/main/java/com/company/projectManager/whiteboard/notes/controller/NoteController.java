@@ -36,10 +36,6 @@ public class NoteController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (ClassCastException e){
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -55,10 +51,6 @@ public class NoteController {
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (FailedToSelectException | FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (UserUnauthenticatedException e) {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
@@ -76,10 +68,6 @@ public class NoteController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToUpdateException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -95,10 +83,6 @@ public class NoteController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToUpdateException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -114,10 +98,6 @@ public class NoteController {
             //Returns 401 which means unauthenticated (not logged in)
             //Reason being someone created this 30 yrs ago and stuff changes
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (UserNotInBusinessUnitException e) {
-            //Returns 403 which means unauthorized (no permission)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (FailedToSelectException | FailedToDeleteException | EntityNotFoundException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
