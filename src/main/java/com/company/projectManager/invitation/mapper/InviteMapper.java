@@ -13,19 +13,16 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
-//TODO: Revisit during User part refactoring
 @Mapper(componentModel = "spring", uses = {UserMapper.class, BusinessUnitMapper.class},collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
 @Validated
 public interface InviteMapper {
 
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitDTO"})
-//    @Mapping(target = "receiver", qualifiedByName = {"toUserWithoutPasswordDTO"})
     InviteDTONoPass toDTO(@Valid Invite invite);
 
     List<InviteDTONoPass> toDTO(@Valid Iterable<Invite> invites);
 
     @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitEntity"})
-//    @Mapping(target = "receiver", qualifiedByName = {"toUserEntity"})
     Invite toEntity(@Valid InviteDTO invite);
 
     List<Invite> toEntity(@Valid Iterable<InviteDTO> invites);
