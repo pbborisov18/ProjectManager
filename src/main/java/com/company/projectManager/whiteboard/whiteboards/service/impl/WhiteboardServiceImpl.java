@@ -2,14 +2,11 @@ package com.company.projectManager.whiteboard.whiteboards.service.impl;
 
 import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
 import com.company.projectManager.common.entity.BusinessUnit;
-import com.company.projectManager.common.entity.User;
-import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.repository.BusinessUnitRepository;
-import com.company.projectManager.common.repository.UserRepository;
-import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
 import com.company.projectManager.whiteboard.columns.dto.ColumnDTO;
 import com.company.projectManager.whiteboard.columns.entity.Column;
+import com.company.projectManager.whiteboard.columns.mapper.ColumnMapper;
 import com.company.projectManager.whiteboard.columns.repository.ColumnRepository;
 import com.company.projectManager.whiteboard.notes.repository.NoteRepository;
 import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
@@ -17,57 +14,44 @@ import com.company.projectManager.whiteboard.whiteboards.entity.Whiteboard;
 import com.company.projectManager.whiteboard.whiteboards.mapper.WhiteboardMapper;
 import com.company.projectManager.whiteboard.whiteboards.repository.WhiteboardRepository;
 import com.company.projectManager.whiteboard.whiteboards.service.WhiteboardService;
-import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class WhiteboardServiceImpl implements WhiteboardService {
 
-    private final UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository;
-
-    private final UserRepository userRepository;
-
-
-
-    private final BusinessUnitRepository businessUnitRepository;
-
     private final WhiteboardRepository whiteboardRepository;
 
     private final WhiteboardMapper whiteboardMapper;
 
-    private final NoteRepository noteRepository;
 
     private final ColumnRepository columnRepository;
 
-    public WhiteboardServiceImpl(WhiteboardRepository whiteboardRepository, WhiteboardMapper whiteboardMapper, UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository, UserRepository userRepository, BusinessUnitRepository businessUnitRepository, NoteRepository noteRepository, ColumnRepository columnRepository) {
+    private final ColumnMapper columnMapper;
+
+
+    private final NoteRepository noteRepository;
+
+
+    private final BusinessUnitRepository businessUnitRepository;
+
+    public WhiteboardServiceImpl(WhiteboardRepository whiteboardRepository, WhiteboardMapper whiteboardMapper, BusinessUnitRepository businessUnitRepository, NoteRepository noteRepository, ColumnRepository columnRepository, ColumnMapper columnMapper) {
         this.whiteboardRepository = whiteboardRepository;
         this.whiteboardMapper = whiteboardMapper;
-        this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
-        this.userRepository = userRepository;
         this.businessUnitRepository = businessUnitRepository;
         this.noteRepository = noteRepository;
         this.columnRepository = columnRepository;
+        this.columnMapper = columnMapper;
     }
 
-    public WhiteboardDTO findWhiteboard(BusinessUnitDTO businessUnitDTO) throws UserUnauthenticatedException, FailedToSelectException, EntityNotFoundException  {
+    public WhiteboardDTO findWhiteboard(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, EntityNotFoundException  {
         try {
-            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-
-            if(user.isEmpty()){
-                throw new UserUnauthenticatedException("User isn't authenticated!");
-            }
-            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
-
-            //-----------------
-
             Optional<BusinessUnit> businessUnit = businessUnitRepository.findById(businessUnitDTO.id());
 
             if(businessUnit.isEmpty()){
@@ -81,40 +65,21 @@ public class WhiteboardServiceImpl implements WhiteboardService {
             return whiteboardMapper.toDTO(businessUnit.get().getWhiteboard());
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Unsuccessful select! " + e.getMessage());
+            throw new FailedToSelectException("Failed to select! " + e.getMessage());
         }
     }
 
     @Transactional
-    public void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, UserUnauthenticatedException, UserNotAuthorizedException, EntityNotFoundException {
+    public void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, EntityNotFoundException {
         try {
-            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-
-            if(user.isEmpty()){
-                throw new UserUnauthenticatedException("User isn't authenticated!");
-            }
-
-            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
-
-
-//            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-//                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
-//            }
-            //-----------------
-
             Optional<BusinessUnit> businessUnit = businessUnitRepository.findById(businessUnitDTO.id());
 
             if(businessUnit.isEmpty()){
                 throw new EntityNotFoundException("BusinessUnit not found");
             }
 
-
             Whiteboard whiteboard = whiteboardMapper.toEntity(whiteboardDTO);
-            //????????????????????????????
-            //There is transactional wtf. Why do I need to save this before the columns?
-            //The initializeDefaultColumns uses a Transactional MANDATORY. So it doesn't make a new transaction
-            //WTF
+
             whiteboardRepository.save(whiteboard);
 
             //Initialize the default columns
@@ -126,82 +91,38 @@ public class WhiteboardServiceImpl implements WhiteboardService {
             //Save the business unit and whiteboard cuz cascade
             businessUnitRepository.save(businessUnit.get());
 
-
-
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save!" + e.getMessage());
+            throw new FailedToSaveException("Failed to save!" + e.getMessage());
         }
     }
 
     @Transactional
-    public void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO, List<ColumnDTO> columns) throws FailedToSaveException, UserUnauthenticatedException, UserNotAuthorizedException, EntityNotFoundException {
-        //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
-        Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-
-        if(user.isEmpty()){
-            throw new UserUnauthenticatedException("User isn't authenticated!");
-        }
-
-        Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
-
-
-//        if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-//            throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
-//        }
-        //-----------------
-
-        Optional<BusinessUnit> businessUnit = businessUnitRepository.findById(businessUnitDTO.id());
-
-        if(businessUnit.isEmpty()){
-            throw new EntityNotFoundException("BusinessUnit not found");
-        }
-
-        Whiteboard whiteboard = whiteboardMapper.toEntity(whiteboardDTO);
-
-        whiteboardRepository.save(whiteboard);
-
-        List<Column> columnEntities = new ArrayList<>();
-
-        //Why not use mapper? Cuz validations cuz column's will have the whiteboard set as null
-        for (ColumnDTO column : columns){
-            Column columnEntity = new Column();
-            columnEntity.setName(column.name());
-            columnEntity.setPosition(column.position());
-            columnEntity.setWhiteboard(whiteboard);
-
-            columnEntities.add(columnEntity);
-        }
-
-        //Since hibernate isn't stupid it will only execute this after the whiteboard is already in the db
-        columnRepository.saveAll(columnEntities);
-
-        //Assign the whiteboard to the businessUnit
-        businessUnit.get().setWhiteboard(whiteboard);
-
-        //Save the business unit and whiteboard cuz cascade
-        //Cascade doesn't work for some reason :O
-        businessUnitRepository.save(businessUnit.get());
-
-    }
-
-    @Transactional
-    public void deleteWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, UserUnauthenticatedException, UserNotAuthorizedException, EntityNotFoundException {
+    public void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO, List<ColumnDTO> columns) throws FailedToSaveException, EntityNotFoundException {
         try {
-            //AUTHENTICATION (Already done in the security config) AND AUTHORIZATION (To be moved)
-            Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+            Optional<BusinessUnit> businessUnit = businessUnitRepository.findById(businessUnitDTO.id());
 
-            if(user.isEmpty()){
-                throw new UserUnauthenticatedException("User isn't authenticated!");
+            if(businessUnit.isEmpty()){
+                throw new EntityNotFoundException("BusinessUnit not found");
             }
 
-            Optional<UserBusinessUnit> userBusinessUnitRole = usersBusinessUnitsRolesRepository.findByUserIdAndBusinessUnitId(user.get().getId(), businessUnitDTO.id());
+            Whiteboard whiteboard = whiteboardMapper.toEntity(whiteboardDTO);
+            whiteboardRepository.save(whiteboard);
 
+            //Since I can't have "backwards" cascading I have to save the columns manually
+            List<Column> columnEntities = columnMapper.toEntity(columns);
+            columnRepository.saveAll(columnEntities);
 
-//            if(userBusinessUnitRole.get().getRole().getName() != RoleName.MANAGER){
-//                throw new UserNotAuthorizedException("User doesn't have the necessary permissions");
-//            }
-            //-----------------
+            //Assign the whiteboard to the businessUnit
+            businessUnit.get().setWhiteboard(whiteboard);
+            businessUnitRepository.save(businessUnit.get());
+        } catch (ConstraintViolationException | DataAccessException e) {
+            throw new FailedToSaveException("Failed to save!" + e.getMessage());
+        }
+    }
 
+    @Transactional
+    public void deleteWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToDeleteException, EntityNotFoundException {
+        try {
             Optional<BusinessUnit> businessUnit = businessUnitRepository.findById(businessUnitDTO.id());
 
             if(businessUnit.isEmpty()){
@@ -214,8 +135,6 @@ public class WhiteboardServiceImpl implements WhiteboardService {
 
             //Update that Business Unit won't have a relationship with the whiteboard
             businessUnit.get().setWhiteboard(null);
-
-            //Save the business unit
             businessUnitRepository.save(businessUnit.get());
 
             //Delete Notes
@@ -230,12 +149,12 @@ public class WhiteboardServiceImpl implements WhiteboardService {
             whiteboardRepository.delete(whiteboardMapper.toEntity(whiteboardDTO));
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save!" + e.getMessage());
+            throw new FailedToDeleteException("Failed to delete!" + e.getMessage());
         }
     }
 
     //Why is this public? Cuz transactional doesn't work on private methods
-    @Transactional(Transactional.TxType.MANDATORY)
+    @Transactional(propagation = Propagation.MANDATORY)
     public void initializeDefaultColumns(Whiteboard whiteboard) throws FailedToSaveException {
         try {
             Column column1 = new Column(null, "To do", whiteboard, 1L);
@@ -247,7 +166,7 @@ public class WhiteboardServiceImpl implements WhiteboardService {
             columnRepository.saveAll(List.of(column1, column2, column3, column4));
 
         } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSaveException("Unsuccessful save! " + e.getMessage());
+            throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }
     }
 }

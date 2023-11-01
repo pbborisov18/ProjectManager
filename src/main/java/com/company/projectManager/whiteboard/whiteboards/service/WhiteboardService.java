@@ -10,12 +10,12 @@ import java.util.List;
 
 public interface WhiteboardService {
 
-    WhiteboardDTO findWhiteboard(BusinessUnitDTO businessUnitDTO) throws UserUnauthenticatedException, FailedToSelectException, EntityNotFoundException;
+    WhiteboardDTO findWhiteboard(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, EntityNotFoundException;
 
-    void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, UserUnauthenticatedException, UserNotAuthorizedException, EntityNotFoundException;
+    void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, EntityNotFoundException;
 
-    void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO, List<ColumnDTO> columns) throws FailedToSaveException, UserUnauthenticatedException, UserNotAuthorizedException, EntityNotFoundException;
+    void createWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO, List<ColumnDTO> columns) throws FailedToSaveException, EntityNotFoundException;
 
-    void deleteWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToSaveException, UserUnauthenticatedException, UserNotAuthorizedException, FailedToSelectException, FailedToDeleteException, EntityNotFoundException;
+    void deleteWhiteboard(WhiteboardDTO whiteboardDTO, BusinessUnitDTO businessUnitDTO) throws FailedToDeleteException, EntityNotFoundException;
 
 }
