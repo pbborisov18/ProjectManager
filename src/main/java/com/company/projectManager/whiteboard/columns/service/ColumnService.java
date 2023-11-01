@@ -10,14 +10,14 @@ import java.util.List;
 
 public interface ColumnService {
 
-    List<ColumnDTO> findAllColumnsByWhiteboard(WhiteboardDTO whiteboardDTO) throws FailedToSelectException, UserUnauthenticatedException, EntityNotFoundException;
+    List<ColumnDTO> findAllColumnsByWhiteboard(WhiteboardDTO whiteboardDTO) throws FailedToSelectException, EntityNotFoundException;
 
-    void createColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, FailedToSaveException, UserNotAuthorizedException;
+    void createColumn(ColumnDTO columnDTO) throws FailedToSaveException;
 
-    void updateColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, UserNotAuthorizedException, FailedToUpdateException;
+    void updateColumn(ColumnDTO columnDTO) throws FailedToSaveException;
 
-    void updateColumns(List<ColumnDTO> columns)  throws UserUnauthenticatedException, UserNotAuthorizedException, FailedToUpdateException;
+    void updateColumns(List<ColumnDTO> columns) throws  FailedToUpdateException;
 
-    void deleteColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, FailedToDeleteException, UserNotAuthorizedException;
+    void deleteColumn(ColumnDTO columnDTO) throws FailedToDeleteException;
 
 }

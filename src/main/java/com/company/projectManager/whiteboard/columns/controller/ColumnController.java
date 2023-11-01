@@ -1,12 +1,15 @@
 package com.company.projectManager.whiteboard.columns.controller;
 
 import com.company.projectManager.common.exception.*;
+import com.company.projectManager.whiteboard.columns.dto.ColumnBusinessUnitDTO;
 import com.company.projectManager.whiteboard.columns.dto.ColumnDTO;
-import com.company.projectManager.whiteboard.whiteboards.dto.WhiteboardDTO;
+import com.company.projectManager.whiteboard.columns.dto.ColumnsBusinessUnitDTO;
+import com.company.projectManager.whiteboard.columns.dto.WhiteboardBusinessUnitDTO;
 import com.company.projectManager.whiteboard.columns.service.ColumnService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,15 +28,12 @@ public class ColumnController {
     //I'm either breaking one standard or the other. This one is worse to break but easier to implement.
     //(You might say I'm a total idiot for doing this and I'd agree with you)
     @PostMapping(value = {"/company/columns", "/company/project/columns", "/company/project/team/columns"})
-    public ResponseEntity<Object> getAllColumnsOfWhiteboard(@RequestBody WhiteboardDTO whiteboardDTO){
+    @PreAuthorize("authorityCheck(#whiteboardBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
+    public ResponseEntity<Object> getAllColumnsOfWhiteboard(@RequestBody @Valid WhiteboardBusinessUnitDTO whiteboardBUDTO){
         try {
-            List<ColumnDTO> columns = columnService.findAllColumnsByWhiteboard(whiteboardDTO);
+            List<ColumnDTO> columns = columnService.findAllColumnsByWhiteboard(whiteboardBUDTO.whiteboardDTO());
 
             return new ResponseEntity<>(columns, HttpStatus.OK);
-        }  catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (FailedToSelectException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (EntityNotFoundException e) {
@@ -42,67 +42,49 @@ public class ColumnController {
     }
 
     @PostMapping(value = {"/company/createColumn", "/company/project/createColumn", "/company/project/team/createColumn"})
-    public ResponseEntity<Object> createColumn(@RequestBody @Valid ColumnDTO columnDTO) {
+    @PreAuthorize("authorityCheck(#columnBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
+    public ResponseEntity<Object> createColumn(@RequestBody @Valid ColumnBusinessUnitDTO columnBUDTO) {
         try {
-            columnService.createColumn(columnDTO);
+            columnService.createColumn(columnBUDTO.columnDTO());
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (ClassCastException | UserNotAuthorizedException e){
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping(value = {"/company/updateColumns", "/company/project/updateColumns", "/company/project/team/updateColumns"})
-    public ResponseEntity<Object> updateColumns(@RequestBody List<ColumnDTO> columns) {
+    @PreAuthorize("authorityCheck(#columnsBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
+    public ResponseEntity<Object> updateColumns(@RequestBody @Valid ColumnsBusinessUnitDTO columnsBUDTO) {
         try {
-            columnService.updateColumns(columns);
+            columnService.updateColumns(columnsBUDTO.columns());
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (FailedToUpdateException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (ClassCastException | UserNotAuthorizedException e){
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping(value = {"/company/updateColumn", "/company/project/updateColumn", "/company/project/team/updateColumn"})
-    public ResponseEntity<Object> updateColumn(@RequestBody @Valid ColumnDTO columnDTO) {
+    @PreAuthorize("authorityCheck(#columnBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
+    public ResponseEntity<Object> updateColumn(@RequestBody @Valid ColumnBusinessUnitDTO columnBUDTO) {
         try {
-            columnService.updateColumn(columnDTO);
+            columnService.updateColumn(columnBUDTO.columnDTO());
 
             return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (FailedToUpdateException e) {
+        } catch (FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserUnauthenticatedException | UserNotAuthorizedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (ClassCastException e){
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping(value = {"/company/deleteColumn", "/company/project/deleteColumn", "/company/project/team/deleteColumn"})
-    public ResponseEntity<Object> deleteColumn(@RequestBody @Valid ColumnDTO columnDTO) {
+    @PreAuthorize("authorityCheck(#columnBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
+    public ResponseEntity<Object> deleteColumn(@RequestBody @Valid ColumnBusinessUnitDTO columnBUDTO) {
         try {
-            columnService.deleteColumn(columnDTO);
+            columnService.deleteColumn(columnBUDTO.columnDTO());
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (FailedToDeleteException | UserNotAuthorizedException e) {
+        } catch (FailedToDeleteException  e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
