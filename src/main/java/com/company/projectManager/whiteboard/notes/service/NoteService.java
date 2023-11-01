@@ -8,14 +8,14 @@ import java.util.List;
 
 public interface NoteService {
 
-    List<NoteDTO> findAllNotesByColumn(ColumnDTO columnDTO) throws UserUnauthenticatedException, EntityNotFoundException, FailedToSaveException;
+    List<NoteDTO> findAllNotesByColumn(ColumnDTO columnDTO) throws EntityNotFoundException, FailedToSaveException;
 
-    void createNote(NoteDTO noteDTO) throws FailedToSelectException, UserUnauthenticatedException, FailedToSaveException;
+    void createNote(NoteDTO noteDTO) throws FailedToSaveException;
 
-    void updateNote(NoteDTO noteDTO) throws UserUnauthenticatedException, FailedToUpdateException;
+    void updateNote(NoteDTO noteDTO) throws FailedToUpdateException;
 
-    void updateNotes(List<NoteDTO> noteDTO) throws UserUnauthenticatedException, FailedToUpdateException;
+    void updateNotes(List<NoteDTO> noteDTO) throws FailedToUpdateException;
 
-    void deleteNote(NoteDTO noteDTO) throws FailedToDeleteException, FailedToSelectException, UserUnauthenticatedException, EntityNotFoundException;
+    void deleteNote(NoteDTO noteDTO) throws FailedToDeleteException;
 
 }

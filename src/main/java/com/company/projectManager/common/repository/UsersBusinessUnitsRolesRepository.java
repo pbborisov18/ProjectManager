@@ -5,7 +5,6 @@ import com.company.projectManager.common.utils.TypeName;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBusinessUnit, Long> {
 
@@ -19,13 +18,9 @@ public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBu
 
     List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitCompanyId(String email, Long companyId);
 
-    Optional<UserBusinessUnit> findByUserIdAndBusinessUnitId(Long userId, Long businessUnitId);
-
     List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitId(String email, Long businessUnitId);
 
     Long countAllByUserIdAndBusinessUnitId(Long id, Long businessUnitId);
-
-    Optional<UserBusinessUnit> findByUserIdAndBusinessUnitWhiteboardId(Long userId, Long whiteboardId);
 
     List<UserBusinessUnit> findAllByBusinessUnitIdAndRolesId(Long businessUnitId, Long roleId);
 

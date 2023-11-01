@@ -1,13 +1,16 @@
 package com.company.projectManager.whiteboard.notes.controller;
 
 import com.company.projectManager.common.exception.*;
-import com.company.projectManager.whiteboard.columns.dto.ColumnDTO;
+import com.company.projectManager.whiteboard.notes.dto.ColumnBusinessUnitDTO;
+import com.company.projectManager.whiteboard.notes.dto.NoteBusinessUnitDTO;
 import com.company.projectManager.whiteboard.notes.dto.NoteDTO;
+import com.company.projectManager.whiteboard.notes.dto.NotesBusinessUnitDTO;
 import com.company.projectManager.whiteboard.notes.service.NoteService;
 import com.company.projectManager.common.exception.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,80 +28,63 @@ public class NoteController {
     //something something, expose the data in the url (no)
     //I'm either breaking one standard or the other. This one is worse to break but easier to implement. (You might say I'm a total idiot for doing this and I'd agree with you)
     @PostMapping(value = {"/company/whiteboard/notes", "/company/project/whiteboard/notes", "/company/project/team/whiteboard/notes"})
-    public ResponseEntity<Object> getAllNotesOfColumn(@RequestBody @Valid ColumnDTO columnDTO){
+    @PreAuthorize("authorityCheck(#columnBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
+    public ResponseEntity<Object> getAllNotesOfColumn(@RequestBody @Valid ColumnBusinessUnitDTO columnBUDTO){
         try {
-            List<NoteDTO> notes = noteService.findAllNotesByColumn(columnDTO);
+            List<NoteDTO> notes = noteService.findAllNotesByColumn(columnBUDTO.columnDTO());
 
             return new ResponseEntity<>(notes, HttpStatus.OK);
-        } catch (FailedToSaveException e) {
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (ClassCastException e){
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (FailedToSaveException e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping(value = {"/company/whiteboard/createNote", "/company/project/whiteboard/createNote", "/company/project/team/whiteboard/createNote"})
-    public ResponseEntity<Object> createNote(@RequestBody @Valid NoteDTO noteDTO) {
+    @PreAuthorize("authorityCheck(#noteBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
+    public ResponseEntity<Object> createNote(@RequestBody @Valid NoteBusinessUnitDTO noteBUDTO) {
         try {
-            noteService.createNote(noteDTO);
+            noteService.createNote(noteBUDTO.noteDTO());
 
             return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (FailedToSelectException | FailedToSaveException e) {
+        } catch (FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
     @PutMapping(value = {"/company/whiteboard/updateNote", "/company/project/whiteboard/updateNote", "/company/project/team/whiteboard/updateNote"})
-    public ResponseEntity<Object> updateNote(@RequestBody @Valid NoteDTO noteDTO){
+    @PreAuthorize("authorityCheck(#noteBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
+    public ResponseEntity<Object> updateNote(@RequestBody @Valid NoteBusinessUnitDTO noteBUDTO){
         try {
-            noteService.updateNote(noteDTO);
+            noteService.updateNote(noteBUDTO.noteDTO());
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (FailedToUpdateException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping(value = {"/company/whiteboard/updateNotes", "/company/project/whiteboard/updateNotes", "/company/project/team/whiteboard/updateNotes"})
-    public ResponseEntity<Object> updateNotes(@RequestBody List<NoteDTO> notes){
+    @PreAuthorize("authorityCheck(#notesBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
+    public ResponseEntity<Object> updateNotes(@RequestBody @Valid NotesBusinessUnitDTO notesBUDTO){
         try {
-            noteService.updateNotes(notes);
+            noteService.updateNotes(notesBUDTO.notes());
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         } catch (FailedToUpdateException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping(value = {"/company/whiteboard/deleteNote", "/company/project/whiteboard/deleteNote", "/company/project/team/whiteboard/deleteNote"})
-    public ResponseEntity<Object> deleteNote(@RequestBody @Valid NoteDTO noteDTO){
+    @PreAuthorize("authorityCheck(#noteBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
+    public ResponseEntity<Object> deleteNote(@RequestBody @Valid NoteBusinessUnitDTO noteBUDTO){
         try {
-            noteService.deleteNote(noteDTO);
+            noteService.deleteNote(noteBUDTO.noteDTO());
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (UserUnauthenticatedException e) {
-            //Returns 401 which means unauthenticated (not logged in)
-            //Reason being someone created this 30 yrs ago and stuff changes
-            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (FailedToSelectException | FailedToDeleteException | EntityNotFoundException e) {
+        } catch (FailedToDeleteException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
