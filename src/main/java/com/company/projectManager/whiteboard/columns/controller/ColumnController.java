@@ -28,7 +28,7 @@ public class ColumnController {
     //I'm either breaking one standard or the other. This one is worse to break but easier to implement.
     //(You might say I'm a total idiot for doing this and I'd agree with you)
     @PostMapping(value = {"/company/columns", "/company/project/columns", "/company/project/team/columns"})
-    @PreAuthorize("authorityCheck(#whiteboardBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
+    @PreAuthorize("authorityCheck(#whiteboardBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
     public ResponseEntity<Object> getAllColumnsOfWhiteboard(@RequestBody @Valid WhiteboardBusinessUnitDTO whiteboardBUDTO){
         try {
             List<ColumnDTO> columns = columnService.findAllColumnsByWhiteboard(whiteboardBUDTO.whiteboardDTO());
