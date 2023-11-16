@@ -10,7 +10,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "Users", uniqueConstraints = {@UniqueConstraint(columnNames = {"Email"})})
-public class User{
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +26,12 @@ public class User{
     private String password;
 
     public User() {
+    }
+
+    public User(Long id, String email, String password) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
     }
 
     @Override
