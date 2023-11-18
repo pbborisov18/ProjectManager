@@ -1,6 +1,7 @@
 package com.company.projectManager.common.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -12,10 +13,12 @@ import java.util.Objects;
 @Table(name = "Authorities", uniqueConstraints = {@UniqueConstraint(columnNames = {"Name"})})
 public class Authority {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
+    @NotBlank
     private String name;
 
     public Authority() {
