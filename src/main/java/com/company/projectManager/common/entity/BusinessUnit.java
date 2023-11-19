@@ -48,8 +48,10 @@ public class BusinessUnit {
     @Cascade(CascadeType.MERGE)
     private Whiteboard whiteboard;
 
-    public BusinessUnit() {
-    }
+    public BusinessUnit() {}
+
+    //probably can make a few more constructors so I don't have to use nulls in so many places
+    //but I'll end up with 24 constructors (yes I calculated it) so no
 
     public BusinessUnit(Long id, String name, TypeName type, @Nullable BusinessUnit company, @Nullable BusinessUnit project, @Nullable Whiteboard whiteboard) {
         this.id = id;
