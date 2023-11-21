@@ -20,7 +20,7 @@
           Agile Ace
         </h2>
         <p class="mt-4 text-lg leading-relaxed text-blueGray-500">
-            Поддържайте проектите си организирани, по план и на едно място с нашата лесна за използване платформа.
+            Keep your projects organized, on schedule, and in one place with our easy-to-use platform.
         </p>
         <div class="mt-12">
           <a on:click={redirectToLogin}
