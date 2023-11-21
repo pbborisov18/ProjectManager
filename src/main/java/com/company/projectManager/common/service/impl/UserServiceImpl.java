@@ -122,8 +122,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             if(checkIfUserExists(userDTO.email())){
                 throw new UserAlreadyExistsException("User already exists with this email!");
             }
+            User user = userMapper.toEntity(userDTO);
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            userRepository.save(userMapper.toEntity(userDTO));
+            userRepository.save(user);
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSaveException("Failed to register! " + e.getMessage());
         }
