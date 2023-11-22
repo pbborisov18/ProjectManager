@@ -302,10 +302,8 @@
 <!--        </Toast>-->
 <!--    </div>-->
 <!--{/each}-->
-<!--TODO: Redo these-->
+
 <div class="clickable not-selectable BUwindow">
-    <!--{#if BURole.role.name === "MANAGER"}-->
-        <!--the manager stuff here-->
 
     <span on:click={redirectToProjects}> {BURole.businessUnit.name} </span>
 
@@ -315,16 +313,19 @@
             <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" >
         </div>
     {/if}
+
     {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
         <div style="border-left:1px solid #BBBBBB;height:80%"/>
         <div class="imageDivs" on:click={() => editPopup = true}>
             <img class="clickable not-selectable" src="{editIcon}" alt="" draggable="false" >
         </div>
     {/if}
+
     <div style="border-left:1px solid #BBBBBB;height:80%"/>
     <div class="imageDivs" on:click={() => leavePopup = true}>
         <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" >
     </div>
+
     {#if BURole.authorityDTOList.some(authority => authority.name === "DeleteBU")}
         <div style="border-left:1px solid #BBBBBB;height:80%"/>
         <div class="imageDivs" on:click={() => deletePopup = true}>
@@ -333,7 +334,7 @@
     {/if}
 </div>
 
-<Modal bind:open={leavePopup} size="xs" autoclose>
+<Modal bind:open={leavePopup} size="xs" autoclose outsideclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         Are you sure you want to leave the company?
@@ -342,7 +343,7 @@
     </div>
 </Modal>
 
-<Modal bind:open={deletePopup} size="xs" autoclose>
+<Modal bind:open={deletePopup} size="xs" autoclose outsideclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         Are you sure you want to delete the company?
@@ -351,8 +352,8 @@
     </div>
 </Modal>
 
-<Modal title="Edit a company" bind:open={editPopup} size="XL" autoclose>
-        <div class="bodyPopup">
+<Modal title="Edit a company" bind:open={editPopup} size="sm" autoclose outsideclose>
+    <div class="bodyPopup">
 
         <div class="editDiv">
             <div class="companyNameLabel">
@@ -361,28 +362,27 @@
                     <input class="text-black inputName" type="text" bind:value={BUEditName} required/>
                 </Input>
             </div>
-
-            <img class="inviteImg clickable not-selectable" src="{inviteToCompanyIcon}" alt="" draggable="false"
-                 on:click={() => {
+            {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}
+                <img class="inviteImg clickable not-selectable" src="{inviteToCompanyIcon}" alt="" draggable="false"
+                     on:click={() => {
                     getAllInvitesByCompany();
                     inviteToCompanyPopup = true;
                 }}>
-
+            {/if}
         </div>
-        <div>
-            <Button type="submit" on:click={editBU}>Edit</Button>
-
+        <div class="flex flex-col">
+            <Button color="blue" type="submit" on:click={editBU}>Edit</Button>
         </div>
     </div>
 </Modal>
 
-<Modal title="Invite people in {BURole.businessUnit.name}" bind:open={inviteToCompanyPopup} size="XL" autoclose>
+<Modal title="Invite people in {BURole.businessUnit.name}" bind:open={inviteToCompanyPopup} size="sm" outsideclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             {#if alreadyInvited.length > 0}
                 <div class="invited text-black">
                     <span>Invited people</span>
-                    <Listgroup items="{alreadyInvited}" let:item class="w-48">
+                    <Listgroup items="{alreadyInvited}" let:item>
                         <div class="parent text-black">
                             <div class="text">
                                 {item.receiver.email}
@@ -395,7 +395,7 @@
                     </Listgroup>
                 </div>
             {/if}
-            <div>
+            <div class="flex flex-col">
                 <Label for="projectName" class="mb-2">Email invite to</Label>
                 <Input type="text" id="projectName" required>
                     <input type="text" bind:value={inviteeEmail} />
@@ -403,7 +403,7 @@
             </div>
 
 
-            <Button type="submit" on:click={invitePersonToCompany}>Send</Button>
+            <Button color="blue" type="submit" on:click={invitePersonToCompany}>Send</Button>
         </div>
     </form>
 </Modal>
@@ -513,6 +513,7 @@
       flex-direction: row;
       align-items: center;
       justify-content: center; /* Align child elements horizontally */
+      min-width: fit-content;
   }
 
   .invited{
