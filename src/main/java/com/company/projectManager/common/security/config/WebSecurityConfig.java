@@ -71,7 +71,7 @@ public class WebSecurityConfig {
 
 
                 .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers("/", "/login", "/register", "/*.html", "/style/**","/error", "/favicon", "/sign-up").permitAll()
+                    requests.requestMatchers("/", "/login", "/register", "/*.html", "/style/**","/error", "/favicon").permitAll()
                             .anyRequest().authenticated();
                 })
 
@@ -81,7 +81,6 @@ public class WebSecurityConfig {
                         response.setContentType("text/plain");
                         response.getWriter().write("Unauthenticated!");
                     });
-
                 })
 
 
