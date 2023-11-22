@@ -70,6 +70,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             //This is for every single method here that needs to do something using the authenticated user
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
+            //TODO: This is a n+1 query. Will have to fix in the future
             List<BusinessUnitAuthoritiesDTO> userBURoles = userBURoleMapper.toAuthoritiesDTO(
                     userBURoleRepository.findAllByUserEmailAndBusinessUnitType(email, TypeName.COMPANY));
 
