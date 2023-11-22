@@ -106,9 +106,10 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             Role adminRole = new Role(null, "Admin",
                     (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
                     company);
+            //TODO: Fix this up
+            //Doesn't trigger roll back for some reason even though method is transactional. wtf?
             Role defaultRole = new Role(null, "Default",
-                    List.of(authoritityRepository.findByName("InteractWithWhiteboard").get(),
-                            authoritityRepository.findByName("SeeWhiteboard").get()),
+                    List.of(authoritityRepository.findByName("InteractWithWhiteboard").get()),
                     company);
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
