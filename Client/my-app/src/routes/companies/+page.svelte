@@ -13,11 +13,8 @@
     let user;
     let BURoles;
 
-    if(data.userBURoles){
-        user = data.userBURoles[0].user;
-        BURoles = data.userBURoles.map(({ businessUnit, role }) => ({ businessUnit, role }));
-    } else if(data.user){
-        user = data.user;
+    if(data.BURoles){
+        BURoles = data.BURoles.map(({id, businessUnit, authorityDTOList}) => ({id, businessUnit, authorityDTOList}));
     }
 
     function handleBUDestroy(BURole) {
@@ -104,8 +101,7 @@
         }).then(response=>{
             if (response.status === 200) {
                 response.json().then( value =>{
-                    BURoles = value.map(({ businessUnit, role }) => ({ businessUnit, role }));
-                    data.error = 200;
+                    BURoles = value.map(({id, businessUnit, authorityDTOList}) => ({id, businessUnit, authorityDTOList}));
                 });
             } else if(response.status === 400){
                 response.text().then(text => {
@@ -130,21 +126,19 @@
 
 </script>
 
-
-
-{#await data.userBURoles}
+{#await BURoles}
     <img src="{loadingGif}" alt="">
-{:then userBURoles}
+{:then BURoles}
+    <!--TODO: Fix the notifications-->
+    <!--{#each notifications as notification}-->
+    <!--    <div class="notificationDiv">-->
+    <!--        <Toast simple position="bottom-right">-->
+    <!--            {notification.message}-->
+    <!--        </Toast>-->
+    <!--    </div>-->
+    <!--{/each}-->
 
-    {#each notifications as notification}
-        <div class="notificationDiv">
-            <Toast simple position="bottom-right">
-                {notification.message}
-            </Toast>
-        </div>
-    {/each}
-
-    {#if data.error === 204}
+    {#if data.error === 204 && BURoles.length === 0}
         <Header/>
         <div class="addCompany">
             <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
@@ -158,15 +152,6 @@
         <p>Internal server error!</p>
     {:else if data.error === 401}
         <!--wait for the page to load and then it will redirect-->
-    {:else if BURoles.length === 0}
-        <Header />
-        <div class="addCompany">
-            <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
-        </div>
-        <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>You aren't part of any companies.</h1>
-            <h1>Wait to be invited or make yourself one by clicking here.</h1>
-        </div>
     {:else}
         <Header/>
         <div class="addCompany">
@@ -175,7 +160,7 @@
 
         <div class="mainDiv">
             {#each BURoles as BURole}
-                    <CompanyComponent BURole={BURole}  onDestroy={() => handleBUDestroy(BURole)} />
+                <CompanyComponent BURole={BURole}  onDestroy={() => handleBUDestroy(BURole)} />
             {/each}
         </div>
     {/if}

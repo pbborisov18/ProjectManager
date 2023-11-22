@@ -1,24 +1,25 @@
-export async function load({ fetch, cookies }) {
+export async function load({ fetch }) {
+
     const companiesResult = await fetch('http://localhost:8080/companies', {
         method: 'GET',
         headers: {
             'Content-Type': "application/json",
             credentials: "include"
-        }}).catch(error =>{
+        }}).catch( () => {
             return {
                 error : 500
             };
         });
 
-    // console.log(companiesResult.status);
 
     if (companiesResult.status === 200) {
         return {
-            userBURoles: companiesResult.json()
+            BURoles: companiesResult.json()
         };
     }
 
     //204 = No content
+    //TODO: Find out how to fix this
     if(companiesResult.status === 204){
 
         const userResult = await fetch('http://localhost:8080/authenticatedUser', {

@@ -6,7 +6,7 @@
         Input,
         Label,
         Modal,
-        Listgroup, Toast
+        Listgroup, Toast, CloseButton
     } from 'flowbite-svelte'
     import "../../tailwind.css";
     import { company } from "$lib/stores.js";
@@ -178,8 +178,8 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({companyDTO: BURole.businessUnit,
-                receiver: {id:null, email: inviteeEmail}}),
+            body: JSON.stringify({businessUnitDTO: BURole.businessUnit,
+                userNoPassDTO: {id:null, email: inviteeEmail}}),
             credentials: "include"
         }).then(response=>{
             if (response.status === 201) {
@@ -205,6 +205,8 @@
         }).catch(error => {
             console.error(error);
         });
+
+        inviteeEmail = "";
     }
 
     function getAllInvitesByCompany(){
@@ -244,6 +246,43 @@
         });
     }
 
+    let clickedInvite;
+
+    function cancelInvite(){
+        if(clickedInvite) {
+            clickedInvite = {   ...clickedInvite,
+                                state:"CANCELLED"}
+
+            fetch("http://localhost:8080/invites", {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(clickedInvite),
+                credentials: "include"
+            }).then(response=>{
+                if (response.status === 200) {
+
+                } else if(response.status === 400){
+                    response.text().then(text => {
+                        throw new Error(text);
+                    })
+                } else if(response.status === 401){
+                    response.text().then(text => {
+                        throw new Error(text);
+                    });
+                    goto("/login");
+                } else if(response.status === 500){
+                    response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+            }).catch(error => {
+                console.error(error);
+            });
+        }
+    }
+
     function redirectToProjects(){
         company.set(JSON.stringify(BURole));
         goto(`/company/projects`);
@@ -256,48 +295,42 @@
 
 </script>
 
-{#each notifications as notification}
-    <div class="notificationDiv">
-        <Toast simple position="bottom-right">
-            {notification.message}
-        </Toast>
-    </div>
-{/each}
+<!--{#each notifications as notification}-->
+<!--    <div class="notificationDiv">-->
+<!--        <Toast simple position="bottom-right">-->
+<!--            {notification.message}-->
+<!--        </Toast>-->
+<!--    </div>-->
+<!--{/each}-->
 <!--TODO: Redo these-->
 <div class="clickable not-selectable BUwindow">
     <!--{#if BURole.role.name === "MANAGER"}-->
         <!--the manager stuff here-->
 
-        <span on:click={redirectToProjects}>{BURole.businessUnit.name}</span>
+    <span on:click={redirectToProjects}> {BURole.businessUnit.name} </span>
 
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+    {#if BURole.authorityDTOList.some(authority => authority.name === "InteractWithWhiteboard")}
+        <div style="border-left:1px solid #BBBBBB;height:80%"/>
         <div class="imageDivs" on:click={redirectToWhiteboard}>
             <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" >
         </div>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+    {/if}
+    {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
+        <div style="border-left:1px solid #BBBBBB;height:80%"/>
         <div class="imageDivs" on:click={() => editPopup = true}>
             <img class="clickable not-selectable" src="{editIcon}" alt="" draggable="false" >
         </div>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs" on:click={() => leavePopup = true}>
-            <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" >
-        </div>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+    {/if}
+    <div style="border-left:1px solid #BBBBBB;height:80%"/>
+    <div class="imageDivs" on:click={() => leavePopup = true}>
+        <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" >
+    </div>
+    {#if BURole.authorityDTOList.some(authority => authority.name === "DeleteBU")}
+        <div style="border-left:1px solid #BBBBBB;height:80%"/>
         <div class="imageDivs" on:click={() => deletePopup = true}>
             <img class="clickable not-selectable xImage" src="{deleteIcon}" alt="" draggable="false" >
         </div>
-    <!--{:else if BURole.role.name === "EMPLOYEE"}-->
-        <!--the employee stuff here-->
-<!--        <span on:click={redirectToProjects}>{BURole.businessUnit.name}</span>-->
-<!--        <div style="border-left:1px solid #BBBBBB;height:80%"></div>-->
-<!--        <div class="imageDivs" on:click={redirectToWhiteboard}>-->
-<!--        <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" >-->
-<!--        </div>-->
-<!--        <div style="border-left:1px solid #BBBBBB;height:80%"></div>-->
-<!--        <div class="imageDivs" on:click={() => leavePopup = true}>-->
-<!--            <img class="clickable not-selectable xImage" src="{leaveIcon}" alt="" draggable="false" >-->
-<!--        </div>-->
-    <!--{/if}-->
+    {/if}
 </div>
 
 <Modal bind:open={leavePopup} size="xs" autoclose>
@@ -354,6 +387,10 @@
                             <div class="text">
                                 {item.receiver.email}
                             </div>
+                            <CloseButton class="close-button" on:click={() => {
+                                clickedInvite = item;
+                                cancelInvite();
+                            }}/>
                         </div>
                     </Listgroup>
                 </div>
@@ -376,7 +413,6 @@
     background-color: #F8F8F8;
   }
 
-
   .BUwindow {
       background-color: #e7e7e7;
 
@@ -387,7 +423,6 @@
       align-items: center; /* align items vertically */
       border: 1px solid #BBBBBB;
       min-height: 8vh;
-
 
       span {
           flex-basis: 65%;
@@ -490,7 +525,6 @@
   }
 
   .notificationDiv{
-      background-color: red;
       position: absolute;
       height: 80vh;
       width: 100vw;
