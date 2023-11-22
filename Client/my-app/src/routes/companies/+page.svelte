@@ -130,6 +130,7 @@
     <img src="{loadingGif}" alt="">
 {:then BURoles}
     <!--TODO: Fix the notifications-->
+    <!--In the future. A lot of complex shit on how to handle them all coming from different places/pages/files-->
     <!--{#each notifications as notification}-->
     <!--    <div class="notificationDiv">-->
     <!--        <Toast simple position="bottom-right">-->
@@ -167,16 +168,17 @@
 
 {/await}
 
-<Modal title="Create a company" bind:open={createPopup} size="XL" autoclose>
+
+<Modal title="Create a company" bind:open={createPopup} size="xs" autoclose outsideclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
-            <div>
+            <div class="flex flex-col">
                 <Label for="companyName" class="mb-2">Company name</Label>
                 <Input type="text" id="companyName" required>
                     <input type="text" bind:value />
                 </Input>
             </div>
-            <Button type="stu" on:click={createCompany}>Create</Button>
+            <Button color="blue" on:click={createCompany}>Create</Button>
         </div>
     </form>
 </Modal>
@@ -196,7 +198,7 @@
         align-items: center;
         font-family: sans-serif;
         font-weight: lighter;
-        box-shadow: 0px 0px 1px 1px #BBBBBB;
+        box-shadow: 0 0 1px 1px #BBBBBB;
         overflow-y: auto;
         overflow-x: hidden;
     }
@@ -228,6 +230,7 @@
         position: absolute;
         height: 100vh;
         width: 100vw;
+        background-color: red;
     }
 
 </style>
