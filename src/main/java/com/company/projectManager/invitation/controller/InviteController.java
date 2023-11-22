@@ -28,12 +28,15 @@ public class InviteController {
         try {
             List<InviteDTONoPass> invites = inviteService.findInvitesByAuthenticatedUserAndState(inviteState);
 
+            if(invites.isEmpty()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
             return new ResponseEntity<>(invites, HttpStatus.OK);
         } catch (FailedToSelectException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @PutMapping("/invites")
     public ResponseEntity<Object> actionInvite(@RequestBody @Valid InviteDTONoPass invite){

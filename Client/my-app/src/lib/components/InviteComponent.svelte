@@ -6,6 +6,14 @@
     export let invite;
     export let onDestroy;
 
+    function declineOrDeleteInvite() {
+        if(invite.state === "PENDING") {
+            declineInvite();
+        } else {
+            deleteInvite();
+        }
+    }
+
     function declineInvite(){
         let updatedInvite = {
             ...invite,
@@ -15,7 +23,6 @@
     }
 
     function acceptInvite(){
-        //send a request to accept the invite
         let updatedInvite = {
             ...invite,
             state: "ACCEPTED"
@@ -65,16 +72,56 @@
         });
     }
 
+    function deleteInvite() {
+        fetch('http://localhost:8080/invites', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(invite),
+            credentials: "include"
+        })
+            .then(response => {
+                if (response.ok) {
+                    //Show the user that everything was successful
+                    //Remove component after is reacted with
+                    onDestroy();
+                } else if(response.status === 400){
+                    response.text().then(text => {
+                        throw new Error(text);
+                    })
+                } else if(response.status === 401){
+                    response.text().then(text => {
+                        throw new Error(text);
+                    });
+                    goto("/login");
+                } else if(response.status === 403){
+                    response.text().then(text => {
+                        throw new Error(text);
+                    });
+                } else if(response.status === 500){
+                    response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+            }).catch(error => {
+            console.error(error);
+        });
+    }
+
+
 </script>
 
 <div class="block">
     <span>You are invited in {invite.businessUnit.name}</span>
+    {#if invite.state === "PENDING"}
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+        <div class="imageDivs clickable" on:click={acceptInvite}>
+            <img src="{checkIcon}" alt="" draggable="false" >
+        </div>
+    {/if}
     <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-    <div class="imageDivs clickable" on:click={acceptInvite}>
-        <img src="{checkIcon}" alt="" draggable="false" >
-    </div>
-    <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-    <div class="imageDivs clickable" on:click={declineInvite}>
+    <div class="imageDivs clickable" on:click={declineOrDeleteInvite}>
         <img class="xImage" src="{deleteIcon}" alt="" draggable="false" >
     </div>
 </div>
