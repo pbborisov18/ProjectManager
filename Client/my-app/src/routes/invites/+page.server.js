@@ -1,13 +1,14 @@
 export async function load({ fetch }) {
     const invitesResult = await fetch(
         'http://localhost:8080/invites?' + new URLSearchParams({inviteState:'PENDING'}), {
-        method: 'GET',
-        headers: {
-            'Content-Type': "application/json",
+            method: 'GET',
+            headers: {
+                'Content-Type': "application/json",
+
+            },
             credentials: "include"
-        }})
-        //TODO: to fix how the frontend handles this
-        .catch(error =>{
+        })
+        .catch(() =>{
             return{
                 error : 500
             };
@@ -19,15 +20,8 @@ export async function load({ fetch }) {
         };
     }
 
-    if(invitesResult.status === 204){
-        return{
-            error: 204
-        };
-    }
-
     if(!invitesResult.status.ok){
         return {
-            //Can be 400, 401, 403, 500
           error: invitesResult.status
         };
     }

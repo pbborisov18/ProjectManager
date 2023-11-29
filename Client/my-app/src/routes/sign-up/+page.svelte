@@ -11,7 +11,6 @@
 
     const requiredMessage = "This field is required";
 
-
     function register(event) {
         event.preventDefault();
 
@@ -22,23 +21,21 @@
         fetch('http://localhost:8080/register', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                // 'X-XSRF-TOKEN': ffs
             },
             body: JSON.stringify({ email, password, confirmPassword }),
             credentials: "include"
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Registration failed');
-                }
-
-            }).then(() => {
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Registration failed');
+            }
+        }).then(() => {
             sendLoginRequestAfterRegister(email, password);
-        })
-            .catch(error => {
-                console.error(error);
-                alert('Failed to register! ' + error);
-            });
+        }).catch(error => {
+            console.error(error);
+            alert('Failed to register! ' + error);
+        });
     }
 
     function sendLoginRequestAfterRegister(email, password){

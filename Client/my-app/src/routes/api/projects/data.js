@@ -1,5 +1,7 @@
 //This should handle stuff on the server side. But how tf do I call it on the client side
 //before the component loads. pretty much useless cuz if I figure that out I ca
+
+//TODO: Don't think anything uses this so might be open for deletion
 export async function post(request) {
     try {
         const data = await request.json(); // get the object from the request body

@@ -5,12 +5,11 @@
     import {Button, Input, Label, Modal} from "flowbite-svelte";
     import loadingGif from "$lib/images/loading.gif";
     import plusIcon from "$lib/images/plus.png";
-    import { Toast } from 'flowbite-svelte';
+    import {userEmail, loggedIn} from "$lib/stores.js";
 
     export let data;
     export let error;
 
-    let user;
     let BURoles;
 
     if(data.BURoles){
@@ -24,28 +23,11 @@
 
     afterNavigate(() => {
         if(data.error === 401){
+            userEmail.set("");
+            loggedIn.set("false");
             goto("/login");
         }
     })
-
-    let notifications = [];
-
-    function addNotification(message) {
-
-        const newNotification = {
-            message
-        };
-
-        notifications = [...notifications, newNotification];
-
-        setTimeout(() => {
-            removeNotification(newNotification);
-        }, 5000); // 5000 milliseconds = 5 seconds
-    }
-
-    function removeNotification(notification) {
-        notifications = notifications.filter(n => n !== notification);
-    }
 
     let createPopup = false;
     let value;
@@ -78,6 +60,8 @@
                 response.text().then(text => {
                     throw new Error(text);
                 });
+                userEmail.set("");
+                loggedIn.set("false");
                 goto("/login");
             } else if(response.status === 500){
                 response.text().then(text => {
@@ -112,6 +96,8 @@
                 response.text().then(text => {
                     throw new Error(text);
                 });
+                userEmail.set("");
+                loggedIn.set("false");
                 goto("/login");
             } else if(response.status === 500){
                 response.text().then(text => {
@@ -122,6 +108,26 @@
         }).catch(error => {
             console.error(error);
         });
+    }
+
+    //Notification stuff
+    let notifications = [];
+
+    function addNotification(message) {
+
+        const newNotification = {
+            message
+        };
+
+        notifications = [...notifications, newNotification];
+
+        setTimeout(() => {
+            removeNotification(newNotification);
+        }, 5000); // 5000 milliseconds = 5 seconds
+    }
+
+    function removeNotification(notification) {
+        notifications = notifications.filter(n => n !== notification);
     }
 
 </script>
