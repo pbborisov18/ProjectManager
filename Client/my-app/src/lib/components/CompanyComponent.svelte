@@ -6,7 +6,7 @@
         Input,
         Label,
         Modal,
-        Listgroup, Toast, CloseButton
+        Listgroup, Toast, CloseButton, Sidebar, SidebarItem, SidebarWrapper, SidebarGroup
     } from 'flowbite-svelte'
     import "../../tailwind.css";
     import { company } from "$lib/stores.js";
@@ -14,7 +14,7 @@
     import leaveIcon from "$lib/images/leave.png";
     import deleteIcon from "$lib/images/delete.png";
     import editIcon from "$lib/images/edit.png";
-    import inviteToCompanyIcon from "$lib/images/invite.png";
+    import settingsIcon from "$lib/images/settings.png";
 
 
     let leavePopup = false;
@@ -293,6 +293,11 @@
         goto('/company/whiteboard');
     }
 
+    function redirectToSettings(){
+        company.set(JSON.stringify(BURole));
+        goto('/company/settings');
+    }
+
 </script>
 
 <!--{#each notifications as notification}-->
@@ -317,7 +322,7 @@
     {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
         <div style="border-left:1px solid #BBBBBB;height:80%"/>
         <div class="imageDivs" on:click={() => editPopup = true}>
-            <img class="clickable not-selectable" src="{editIcon}" alt="" draggable="false" >
+            <img class="clickable not-selectable" src="{settingsIcon}" alt="" draggable="false" >
         </div>
     {/if}
 
@@ -352,63 +357,98 @@
     </div>
 </Modal>
 
-<Modal title="Edit a company" bind:open={editPopup} size="sm" autoclose outsideclose>
-    <div class="bodyPopup">
+<Modal title="Settings for {BURole.businessUnit.name}" bind:open={editPopup} size="xl" autoclose outsideclose>
 
-        <div class="editDiv">
-            <div class="companyNameLabel">
-                <Label for="companyName" class="mb-2">Name of the company</Label>
-                <Input type="text" id="companyName" required >
-                    <input class="text-black inputName" type="text" bind:value={BUEditName} required/>
-                </Input>
+        <div class="sideBySide">
+            <Sidebar class="mr-1 bg-[#F8F8F8]">
+                <SidebarWrapper class="bg-[#F8F8F8]">
+                    <SidebarGroup>
+                        {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
+                            <SidebarItem label="General Settings">
+                                <!--General settings component-->
+                            </SidebarItem>
+                        {/if}
+                        {#if BURole.authorityDTOList.some(authority => authority.name === "SeePermissions")}
+                            <SidebarItem label="Roles">
+                                <!--Manager roles component (Will need further checks inside to see if ChangePermissions exists)-->
+                            </SidebarItem>
+                        {/if}
+                        <!--Might need to update roles for this-->
+                        {#if BURole.authorityDTOList.some(authority => authority.name === "ChangePermissions")}
+                            <SidebarItem label="Users">
+                                <!--User role management component-->
+                            </SidebarItem>
+                        {/if}
+                        {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}
+                            <SidebarItem label="Invites">
+                                <!--Invite component-->
+                            </SidebarItem>
+                        {/if}
+                    </SidebarGroup>
+                </SidebarWrapper>
+            </Sidebar>
+
+            <div class="settingsMain">
+
             </div>
-            {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}
-                <img class="inviteImg clickable not-selectable" src="{inviteToCompanyIcon}" alt="" draggable="false"
-                     on:click={() => {
-                    getAllInvitesByCompany();
-                    inviteToCompanyPopup = true;
-                }}>
-            {/if}
         </div>
-        <div class="flex flex-col">
-            <Button color="blue" type="submit" on:click={editBU}>Edit</Button>
-        </div>
-    </div>
+
+<!--        <div class="editDiv">-->
+<!--            <div class="companyNameLabel">-->
+<!--                <Label for="companyName" class="mb-2">Name of the company</Label>-->
+<!--                <Input type="text" id="companyName" required >-->
+<!--                    <input class="text-black inputName" type="text" bind:value={BUEditName} required/>-->
+<!--                </Input>-->
+<!--            </div>-->
+<!--            {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}-->
+<!--                <img class="inviteImg clickable not-selectable" src="{settingsIcon}" alt="" draggable="false"-->
+<!--                     on:click={() => {-->
+<!--                    getAllInvitesByCompany();-->
+<!--                    inviteToCompanyPopup = true;-->
+<!--                }}>-->
+<!--            {/if}-->
+<!--        </div>-->
+<!--        <div class="flex flex-col">-->
+<!--            <Button color="blue" type="submit" on:click={editBU}>Edit</Button>-->
+<!--        </div>-->
+<!--    </div>-->
 </Modal>
 
-<Modal title="Invite people in {BURole.businessUnit.name}" bind:open={inviteToCompanyPopup} size="sm" outsideclose>
-    <form>
-        <div class="grid gap-6 mb-6 md:grid-cols-1">
-            {#if alreadyInvited.length > 0}
-                <div class="invited text-black">
-                    <span>Invited people</span>
-                    <Listgroup items="{alreadyInvited}" let:item>
-                        <div class="parent text-black">
-                            <div class="text">
-                                {item.receiver.email}
-                            </div>
-                            <CloseButton class="close-button" on:click={() => {
-                                clickedInvite = item;
-                                cancelInvite();
-                            }}/>
-                        </div>
-                    </Listgroup>
-                </div>
-            {/if}
-            <div class="flex flex-col">
-                <Label for="projectName" class="mb-2">Email invite to</Label>
-                <Input type="text" id="projectName" required>
-                    <input type="text" bind:value={inviteeEmail} />
-                </Input>
-            </div>
+<!--TODO: This will be moved to settings-->
+<!--<Modal title="Invite people in {BURole.businessUnit.name}" bind:open={inviteToCompanyPopup} size="sm" outsideclose>-->
+<!--    <form>-->
+<!--        <div class="grid gap-6 mb-6 md:grid-cols-1">-->
+<!--            {#if alreadyInvited.length > 0}-->
+<!--                <div class="invited text-black">-->
+<!--                    <span>Invited people</span>-->
+<!--                    <Listgroup items="{alreadyInvited}" let:item>-->
+<!--                        <div class="parent text-black">-->
+<!--                            <div class="text">-->
+<!--                                {item.receiver.email}-->
+<!--                            </div>-->
+<!--                            <CloseButton class="close-button" on:click={() => {-->
+<!--                                clickedInvite = item;-->
+<!--                                cancelInvite();-->
+<!--                            }}/>-->
+<!--                        </div>-->
+<!--                    </Listgroup>-->
+<!--                </div>-->
+<!--            {/if}-->
+<!--            <div class="flex flex-col">-->
+<!--                <Label for="projectName" class="mb-2">Email invite to</Label>-->
+<!--                <Input type="text" id="projectName" required>-->
+<!--                    <input type="text" bind:value={inviteeEmail} />-->
+<!--                </Input>-->
+<!--            </div>-->
 
 
-            <Button color="blue" type="submit" on:click={invitePersonToCompany}>Send</Button>
-        </div>
-    </form>
-</Modal>
+<!--            <Button color="blue" type="submit" on:click={invitePersonToCompany}>Send</Button>-->
+<!--        </div>-->
+<!--    </form>-->
+<!--</Modal>-->
 
 <style lang="scss">
+
   :root{
     background-color: #F8F8F8;
   }
@@ -460,6 +500,23 @@
           max-height: 35px;
       }
 
+  }
+
+  .settingsMain{
+      border-radius: 2px;
+      background-color: #F8F8F8;
+      width: 85%;
+      min-height: 80vh;
+      border: 0 solid #BBBBBB;
+      font-family: sans-serif;
+      font-weight: lighter;
+      box-shadow: 0 0 1px 1px #BBBBBB;
+      overflow-y: auto;
+      overflow-x: hidden;
+  }
+
+  .sideBySide{
+      display: flex;
   }
 
   .clickable {
