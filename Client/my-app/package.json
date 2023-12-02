@@ -23,6 +23,7 @@
   "type": "module",
   "dependencies": {
     "@popperjs/core": "^2.11.7",
+    "@sveltejs/adapter-netlify": "^2.0.8",
     "classnames": "^2.3.2",
     "flowbite": "^1.6.5",
     "flowbite-svelte": "^0.34.9",
