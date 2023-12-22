@@ -13,7 +13,7 @@ import org.hibernate.annotations.CascadeType;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Invites", uniqueConstraints = {@UniqueConstraint(columnNames = {"ReceiverId", "BusinessUnitsId"})})
+@Table(name = "invites", schema = "v1", uniqueConstraints = {@UniqueConstraint(columnNames = {"receiver_id", "business_units_id"})})
 public class Invite {
 
     @Id
@@ -21,18 +21,18 @@ public class Invite {
     private Long id;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private InviteState state;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "ReceiverId")
+    @JoinColumn(name = "receiver_id")
     @Cascade(CascadeType.MERGE)
     private User receiver;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "BusinessUnitsId")
+    @JoinColumn(name = "business_units_id")
     @Cascade(CascadeType.MERGE)
     private BusinessUnit businessUnit;
 

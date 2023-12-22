@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Roles",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"Name", "BusinessUnitsId"})})
+@Table(name = "roles", schema = "v1",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "business_units_id"})})
 public class Role {
 
     @Id
@@ -27,14 +27,14 @@ public class Role {
     @NotNull
     @ManyToMany
     @JoinTable(
-            name = "RolesAuthorities",
-            joinColumns = @JoinColumn(name = "RolesId"),
-            inverseJoinColumns = @JoinColumn(name = "AuthoritiesId"))
+            name = "roles_authorities", schema = "v1",
+            joinColumns = @JoinColumn(name = "roles_id"),
+            inverseJoinColumns = @JoinColumn(name = "authorities_id"))
     private List<Authority> authorities;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "BusinessUnitsId", referencedColumnName = "Id")
+    @JoinColumn(name = "business_units_id", referencedColumnName = "id")
     @Cascade(CascadeType.MERGE)
     private BusinessUnit businessUnit;
 

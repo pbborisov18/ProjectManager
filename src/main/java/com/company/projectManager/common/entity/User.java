@@ -9,7 +9,7 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Users", uniqueConstraints = {@UniqueConstraint(columnNames = {"Email"})})
+@Table(name = "users", schema = "v1", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
 public class User {
 
     @Id

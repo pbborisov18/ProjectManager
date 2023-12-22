@@ -23,11 +23,11 @@ Inviting employees, managing their roles and permissions. Interacting with white
    1. [Install PostgreSQL](https://www.postgresql.org/download/)
    2. [Create two roles](https://www.postgresql.org/docs/current/sql-createrole.html) - "Admin" and "Backend". 
    Give them at least "Can login" permission.
-   3. (Optional) I recommend using pgAdmin for way easier time doing the next few steps
-   3. [Create a database](https://www.postgresql.org/docs/current/sql-createdatabase.html) called "ProjectManager" (case is important)
-   4. Do one of the two:
+   3. (Optional) I recommend using pgAdmin for way easier time doing the next 2 steps
+   4. [Create a database](https://www.postgresql.org/docs/current/sql-createdatabase.html) called "ProjectManager" (case is important)
+   5. Do one of the two:
       - Execute the StartingPoint.sql file
-      - Use the StartingPointCustom file to [restore the database](https://www.postgresql.org/docs/8.1/backup.html)
+      - Use the StartingPointCustom.sql file to [restore the database](https://www.postgresql.org/docs/8.1/backup.html)
 
 2. Clone the repository
 

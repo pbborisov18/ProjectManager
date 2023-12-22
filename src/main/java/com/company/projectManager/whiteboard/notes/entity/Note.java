@@ -12,7 +12,7 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Notes", uniqueConstraints = {@UniqueConstraint(columnNames = {"ColumnsId", "Position"})})
+@Table(name = "notes", schema = "v1", uniqueConstraints = {@UniqueConstraint(columnNames = {"columns_id", "position"})})
 public class Note {
 
     @Id
@@ -32,7 +32,7 @@ public class Note {
     //You'd wonder why I can't use PERSIST here together with merge? Well JPA considers persist first and
     //throws an exception before it can try merge (so the transaction is rolled back)
     @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "ColumnsId")
+    @JoinColumn(name = "columns_id")
     @Cascade({org.hibernate.annotations.CascadeType.MERGE}) //This isn't substitute (hibernate documentation)
     private Column column;
 

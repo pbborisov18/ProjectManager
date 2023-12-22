@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "UsersBusinessUnits", uniqueConstraints = {@UniqueConstraint(columnNames = {"UsersId", "BusinessUnitsId"})})
+@Table(name = "users_business_units", schema = "v1", uniqueConstraints = {@UniqueConstraint(columnNames = {"users_id", "business_units_id"})})
 public class UserBusinessUnit {
 
     @Id
@@ -17,20 +17,20 @@ public class UserBusinessUnit {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "UsersId", referencedColumnName = "Id")
+    @JoinColumn(name = "users_id", referencedColumnName = "id")
     @Cascade(CascadeType.MERGE)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "BusinessUnitsId", referencedColumnName = "Id")
+    @JoinColumn(name = "business_units_id", referencedColumnName = "id")
     @Cascade(CascadeType.MERGE)
     private BusinessUnit businessUnit;
 
     @ManyToMany
     @JoinTable(
-            name = "UsersBusinessUnitsRoles",
-            joinColumns = @JoinColumn(name = "UsersBusinessUnitsId"),
-            inverseJoinColumns = @JoinColumn(name = "RolesId")
+            name = "users_business_units_roles", schema = "v1",
+            joinColumns = @JoinColumn(name = "users_business_units_id"),
+            inverseJoinColumns = @JoinColumn(name = "roles_id")
     )
     @Cascade(CascadeType.MERGE)
     private List<Role> roles;
