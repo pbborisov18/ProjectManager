@@ -233,6 +233,7 @@
                     <!--User role management component-->
                 {/if}
                 {#if activeNum === 4}
+                    <SettingsInviteComponent BURole={BURole}/>
                 {/if}
             </div>
         </div>
