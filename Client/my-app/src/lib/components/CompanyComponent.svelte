@@ -3,49 +3,45 @@
     import {goto} from "$app/navigation";
     import {
         Button,
-        Input,
-        Label,
         Modal,
-        Listgroup, Toast, CloseButton, Sidebar, SidebarItem, SidebarWrapper, SidebarGroup
+         Sidebar, SidebarItem, SidebarWrapper, SidebarGroup
     } from 'flowbite-svelte'
     import "../../tailwind.css";
     import { company } from "$lib/stores.js";
     import whiteboardIcon from "$lib/images/rectangle.png";
     import leaveIcon from "$lib/images/leave.png";
     import deleteIcon from "$lib/images/delete.png";
-    import editIcon from "$lib/images/edit.png";
     import settingsIcon from "$lib/images/settings.png";
+    import EditBUComponent from "$lib/components/EditBUComponent.svelte";
+    import SettingsInviteComponent from "$lib/components/SettingsInviteComponent.svelte";
+    import RoleSettingsComponent from "$lib/components/RoleSettingsComponent.svelte";
 
 
     let leavePopup = false;
     let deletePopup = false;
     let editPopup = false;
-    let inviteToCompanyPopup = false;
-    let alreadyInvited = [];
 
     export let onDestroy;
     export let BURole;
 
-    let BUEditName = BURole.businessUnit.name;
-
-    let notifications = [];
-
-    function addNotification(message) {
-
-        const newNotification = {
-            message
-        };
-
-        notifications = [...notifications, newNotification];
-
-        setTimeout(() => {
-            removeNotification(newNotification);
-        }, 5000); // 5000 milliseconds = 5 seconds
-    }
-
-    function removeNotification(notification) {
-        notifications = notifications.filter(n => n !== notification);
-    }
+    // let notifications = [];
+    //
+    // function addNotification(message) {
+    //
+    //     const newNotification = {
+    //         message
+    //     };
+    //
+    //     notifications = [...notifications, newNotification];
+    //
+    //     setTimeout(() => {
+    //         removeNotification(newNotification);
+    //     }, 5000); // 5000 milliseconds = 5 seconds
+    // }
+    //
+    // function removeNotification(notification) {
+    //     notifications = notifications.filter(n => n !== notification);
+    // }
 
     function leaveBU(){
         fetch('http://localhost:8080/leaveCompany', {
@@ -126,163 +122,6 @@
         });
     }
 
-    function editBU(){
-        if(!BUEditName){
-            alert("The field can't be empty!");
-        }else {
-            let updatedBURole = {
-                ...BURole.businessUnit,
-                name: BUEditName
-            };
-            fetch('http://localhost:8080/updateCompany', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(updatedBURole),
-                credentials: "include"
-            }).then(response=>{
-                if(response.ok){
-                    onDestroy();
-                } else if (response.status === 201) {
-                    onDestroy();
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
-                } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                    goto("/login");
-                } else if(response.status === 403){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-            }).catch(error => {
-                alert(error);
-            });
-        }
-    }
-
-    let inviteeEmail;
-
-    function invitePersonToCompany(){
-        fetch('http://localhost:8080/company/invite', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({businessUnitDTO: BURole.businessUnit,
-                userNoPassDTO: {id:null, email: inviteeEmail}}),
-            credentials: "include"
-        }).then(response=>{
-            if (response.status === 201) {
-                console.log("success");
-            } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                goto("/login");
-            } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            }
-        }).catch(error => {
-            console.error(error);
-        });
-
-        inviteeEmail = "";
-    }
-
-    function getAllInvitesByCompany(){
-
-        fetch('http://localhost:8080/businessUnit/invites', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(BURole.businessUnit),
-            credentials: "include"
-        }).then(response=>{
-            if (response.status === 200) {
-                response.json().then(data => {
-                    alreadyInvited = data.filter(obj => obj.state === 'PENDING')
-                });
-            } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                goto("/login");
-            } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            }
-        }).catch(error => {
-            console.error(error);
-        });
-    }
-
-    let clickedInvite;
-
-    function cancelInvite(){
-        if(clickedInvite) {
-            clickedInvite = {   ...clickedInvite,
-                                state:"CANCELLED"}
-
-            fetch("http://localhost:8080/invites", {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(clickedInvite),
-                credentials: "include"
-            }).then(response=>{
-                if (response.status === 200) {
-
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
-                } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                    goto("/login");
-                } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-            }).catch(error => {
-                console.error(error);
-            });
-        }
-    }
-
     function redirectToProjects(){
         company.set(JSON.stringify(BURole));
         goto(`/company/projects`);
@@ -293,10 +132,14 @@
         goto('/company/whiteboard');
     }
 
-    function redirectToSettings(){
-        company.set(JSON.stringify(BURole));
-        goto('/company/settings');
+    function nameChange(name){
+        BURole.businessUnit.name = name;
     }
+
+    //Bastards have broken the active attribute on the sidebar.
+    //Don't think they'll fix it. Only way to fix it is finding another one or creating my own
+    let activeNum = 1;
+
 
 </script>
 
@@ -357,32 +200,24 @@
     </div>
 </Modal>
 
-<Modal title="Settings for {BURole.businessUnit.name}" bind:open={editPopup} size="xl" autoclose outsideclose>
+<Modal title="Settings for {BURole.businessUnit.name}" bind:open={editPopup} size="xl" placement="center">
 
         <div class="sideBySide">
             <Sidebar class="mr-1 bg-[#F8F8F8]">
                 <SidebarWrapper class="bg-[#F8F8F8]">
                     <SidebarGroup>
                         {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
-                            <SidebarItem label="General Settings">
-                                <!--General settings component-->
-                            </SidebarItem>
+                            <SidebarItem label="General Settings" active="{activeNum === 1}" on:click={() => activeNum = 1}/>
                         {/if}
                         {#if BURole.authorityDTOList.some(authority => authority.name === "SeePermissions")}
-                            <SidebarItem label="Roles">
-                                <!--Manager roles component (Will need further checks inside to see if ChangePermissions exists)-->
-                            </SidebarItem>
+                            <SidebarItem label="Roles" active="{activeNum === 2}" on:click={() => activeNum = 2}/>
                         {/if}
                         <!--Might need to update roles for this-->
                         {#if BURole.authorityDTOList.some(authority => authority.name === "ChangePermissions")}
-                            <SidebarItem label="Users">
-                                <!--User role management component-->
-                            </SidebarItem>
+                            <SidebarItem label="Users" active="{activeNum === 3}" on:click={() => activeNum = 3}/>
                         {/if}
                         {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}
-                            <SidebarItem label="Invites">
-                                <!--Invite component-->
-                            </SidebarItem>
+                            <SidebarItem label="Invites" active="{activeNum === 4}" on:click={() => activeNum = 4}/>
                         {/if}
                     </SidebarGroup>
                 </SidebarWrapper>
@@ -390,62 +225,19 @@
 
             <div class="settingsMain">
 
+                {#if activeNum === 1}
+                {/if}
+                {#if activeNum === 2}
+                {/if}
+                {#if activeNum === 3}
+                    <!--User role management component-->
+                {/if}
+                {#if activeNum === 4}
+                {/if}
             </div>
         </div>
 
-<!--        <div class="editDiv">-->
-<!--            <div class="companyNameLabel">-->
-<!--                <Label for="companyName" class="mb-2">Name of the company</Label>-->
-<!--                <Input type="text" id="companyName" required >-->
-<!--                    <input class="text-black inputName" type="text" bind:value={BUEditName} required/>-->
-<!--                </Input>-->
-<!--            </div>-->
-<!--            {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}-->
-<!--                <img class="inviteImg clickable not-selectable" src="{settingsIcon}" alt="" draggable="false"-->
-<!--                     on:click={() => {-->
-<!--                    getAllInvitesByCompany();-->
-<!--                    inviteToCompanyPopup = true;-->
-<!--                }}>-->
-<!--            {/if}-->
-<!--        </div>-->
-<!--        <div class="flex flex-col">-->
-<!--            <Button color="blue" type="submit" on:click={editBU}>Edit</Button>-->
-<!--        </div>-->
-<!--    </div>-->
 </Modal>
-
-<!--TODO: This will be moved to settings-->
-<!--<Modal title="Invite people in {BURole.businessUnit.name}" bind:open={inviteToCompanyPopup} size="sm" outsideclose>-->
-<!--    <form>-->
-<!--        <div class="grid gap-6 mb-6 md:grid-cols-1">-->
-<!--            {#if alreadyInvited.length > 0}-->
-<!--                <div class="invited text-black">-->
-<!--                    <span>Invited people</span>-->
-<!--                    <Listgroup items="{alreadyInvited}" let:item>-->
-<!--                        <div class="parent text-black">-->
-<!--                            <div class="text">-->
-<!--                                {item.receiver.email}-->
-<!--                            </div>-->
-<!--                            <CloseButton class="close-button" on:click={() => {-->
-<!--                                clickedInvite = item;-->
-<!--                                cancelInvite();-->
-<!--                            }}/>-->
-<!--                        </div>-->
-<!--                    </Listgroup>-->
-<!--                </div>-->
-<!--            {/if}-->
-<!--            <div class="flex flex-col">-->
-<!--                <Label for="projectName" class="mb-2">Email invite to</Label>-->
-<!--                <Input type="text" id="projectName" required>-->
-<!--                    <input type="text" bind:value={inviteeEmail} />-->
-<!--                </Input>-->
-<!--            </div>-->
-
-
-<!--            <Button color="blue" type="submit" on:click={invitePersonToCompany}>Send</Button>-->
-<!--        </div>-->
-<!--    </form>-->
-<!--</Modal>-->
 
 <style lang="scss">
 
@@ -506,7 +298,7 @@
       border-radius: 2px;
       background-color: #F8F8F8;
       width: 85%;
-      min-height: 80vh;
+      height: 80vh;
       border: 0 solid #BBBBBB;
       font-family: sans-serif;
       font-weight: lighter;
@@ -515,6 +307,10 @@
       overflow-x: hidden;
   }
 
+  .settingsRoles{
+      display: flex;
+      flex-wrap: wrap;
+  }
   .sideBySide{
       display: flex;
   }
@@ -536,15 +332,6 @@
       align-items: center;
   }
 
-  .inputName{
-      margin-bottom: 3vh;
-  }
-
-  .editDiv{
-      display: flex;
-      flex-direction: row;
-  }
-
   .inviteImg{
       height: 40px;
       width: 40px;
@@ -552,40 +339,10 @@
       margin-top: 3vh;
   }
 
-  .companyNameLabel{
-      display: flex;
-      flex-direction: column
-  }
-
-  .close-button{
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 1;
-  }
-
-  .parent{
-      position: relative;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center; /* Align child elements horizontally */
-      min-width: fit-content;
-  }
-
-  .invited{
-      max-height: 40vh;
-      overflow-y: auto;
-  }
-
-  .text{
-      text-align: center;
-  }
-
-  .notificationDiv{
-      position: absolute;
-      height: 80vh;
-      width: 100vw;
-  }
+  //.notificationDiv{
+  //    position: absolute;
+  //    height: 80vh;
+  //    width: 100vw;
+  //}
 
 </style>

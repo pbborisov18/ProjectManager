@@ -4,8 +4,8 @@
 
 //Update: Everything renders on the server and gets sent to the browser the first
 //you access the website. Refreshing counts as "the first time you access the website".
-//This doesn't get triggered unless you aren't on this page
-//when you refresh. if you are this gets executed on the server. that's why a refresh
+//This doesn't get triggered unless you aren't on this page when you refresh.
+//if you are this gets executed on the server. that's why a refresh
 //executes on the server. no fucking idea on how to circumvent that.
 export async function load({fetch}) {
     let company = JSON.parse(sessionStorage.getItem("company")).businessUnit;
