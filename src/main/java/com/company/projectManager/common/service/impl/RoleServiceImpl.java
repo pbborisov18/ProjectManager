@@ -30,6 +30,7 @@ public class RoleServiceImpl implements RoleService {
         this.roleMapper = roleMapper;
     }
 
+    @Transactional
     public List<RoleDTO> findRolesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException {
         try{
             List<Role> roles = roleRepository.findAllByBusinessUnitId(businessUnitDTO.id());
@@ -68,8 +69,7 @@ public class RoleServiceImpl implements RoleService {
             }
 
             //Default and Admin won't be allowed to have name changes
-            if(!foundRole.get().getName().equals("Default") ||
-                !foundRole.get().getName().equals("Admin")) {
+            if(!foundRole.get().getName().equals("Default") || !foundRole.get().getName().equals("Admin")) {
                 foundRole.get().setName(role.name());
             }
 
@@ -106,8 +106,8 @@ public class RoleServiceImpl implements RoleService {
                     //if current user has 1 role in the current bu
                     //that means the user has the role we are trying to delete and it's his last one
                     //so give him the default role of the current bu
-                    if (usersBusinessUnitsRolesRepository.countAllByUserIdAndBusinessUnitId(current.getUser().getId(), current.getBusinessUnit().getId())
-                            == 1L) {
+
+                    if (current.getRoles().size() == 1L) {
                         usersBusinessUnitsRolesRepository.save(
                                 new UserBusinessUnit(
                                         null, current.getUser(), current.getBusinessUnit(),
@@ -116,10 +116,14 @@ public class RoleServiceImpl implements RoleService {
                                                         //This role should always exist for a bu so we can straight up do .get()
                                                         current.getBusinessUnit().getId()).get())));
                     }
+                    //Probably inefficient
+                    current.getRoles().remove(foundRole.get());
                 }
 
                 //Then we just delete the roles after we've made sure no user is left without a role
-                usersBusinessUnitsRolesRepository.deleteAll(uburs);
+                //by using save (remember we removed stuff inside the roles list inside)
+                //(If we had used delete we would just delete the ubur itself which is not what we want)
+                usersBusinessUnitsRolesRepository.saveAll(uburs);
             }
 
             roleRepository.delete(foundRole.get());

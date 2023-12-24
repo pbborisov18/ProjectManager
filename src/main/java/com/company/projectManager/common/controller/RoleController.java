@@ -28,7 +28,7 @@ public class RoleController {
             List<RoleDTO> roles = roleService.findRolesByBusinessUnit(businessUnitDTO);
 
             return new ResponseEntity<>(roles, HttpStatus.OK);
-        } catch (FailedToSelectException e) {
+        } catch (FailedToSelectException | InvalidRoleRequest e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -66,12 +66,10 @@ public class RoleController {
             roleService.deleteRole(role);
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (FailedToDeleteException | EntityNotFoundException e) {
+        } catch (FailedToDeleteException | InvalidRoleRequest | EntityNotFoundException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NoSuchElementException e){
             return new ResponseEntity<>("Error: WTF??? Default role doesn't exist somehow...", HttpStatus.INTERNAL_SERVER_ERROR);
-        }catch (InvalidRoleRequest e) {
-            throw new RuntimeException(e);
         }
     }
 

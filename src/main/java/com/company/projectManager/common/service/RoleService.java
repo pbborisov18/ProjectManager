@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface RoleService {
 
-    List<RoleDTO> findRolesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException;
+    List<RoleDTO> findRolesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException, InvalidRoleRequest;
 
     void saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest;
 
