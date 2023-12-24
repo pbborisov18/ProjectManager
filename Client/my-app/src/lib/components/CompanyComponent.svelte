@@ -224,8 +224,8 @@
             </Sidebar>
 
             <div class="settingsMain">
-
                 {#if activeNum === 1}
+                    <EditBUComponent onChangeName="{(name) => nameChange(name)}" bind:BURole="{BURole}"/>
                 {/if}
                 {#if activeNum === 2}
                 {/if}
