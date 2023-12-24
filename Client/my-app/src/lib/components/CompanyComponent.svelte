@@ -228,6 +228,7 @@
                     <EditBUComponent onChangeName="{(name) => nameChange(name)}" bind:BURole="{BURole}"/>
                 {/if}
                 {#if activeNum === 2}
+                    <RoleSettingsComponent bind:BURole={BURole}/>
                 {/if}
                 {#if activeNum === 3}
                     <!--User role management component-->
