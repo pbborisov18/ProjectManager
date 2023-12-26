@@ -1,7 +1,7 @@
 export async function load({fetch}) {
     let company = JSON.parse(sessionStorage.getItem("company")).businessUnit;
 
-    if(company.whiteboard.id) {
+    if(company.whiteboard) {
         return {whiteboard: company.whiteboard};
     }
 

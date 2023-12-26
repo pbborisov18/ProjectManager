@@ -51,7 +51,7 @@
             headers: {
                 'Content-Type': "application/json",
             },
-            body: JSON.stringify(whiteboard),
+            body: JSON.stringify({whiteboardDTO: whiteboard, businessUnitDTO: companyObj.businessUnit}),
             credentials: "include"
         }).then(response => {
             if (response.status === 200) {
@@ -136,7 +136,7 @@
             headers: {
                 'Content-Type': "application/json",
             },
-            body: JSON.stringify(column),
+            body: JSON.stringify({columnDTO: column, businessUnitDTO: companyObj.businessUnit}),
             credentials: "include"
         }).then(response => {
             if (response.status === 200) {
@@ -214,7 +214,7 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(updatedNotes),
+            body: JSON.stringify({notes: updatedNotes, businessUnitDTO: companyObj.businessUnit}),
             credentials: "include"
         }).then(response=>{
             if (response.status === 200) {
@@ -284,7 +284,7 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(note),
+            body: JSON.stringify({noteDTO: note, businessUnitDTO: companyObj.businessUnit}),
             credentials: "include"
         }).then(response=>{
             if (response.status === 201) {
@@ -315,7 +315,7 @@
 {:then items}
     <Header />
     <div class="lowerMenuDiv">
-        <Breadcrumb >
+        <Breadcrumb>
             <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
         </Breadcrumb>
     </div>
@@ -332,18 +332,16 @@
 
 
 
-<Modal title="Create note" bind:open={createPopup} size="xl" autoclose>
+<Modal title="Create note" bind:open={createPopup} size="xs" autoclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             <div>
                 <Label for="noteName" class="mb-2">Name</Label>
-                <Input type="text" id="noteName" required>
-                    <input type="text" bind:value={noteName} />
-                </Input>
+                <Input type="text" id="noteName" bind:value={noteName} required/>
                 <Label for="noteDescription" class="mb-2">Description</Label>
                 <Textarea id="noteDescription" rows="3" bind:value={noteDescription}/>
             </div>
-            <Button type="submit" on:click={createNote}>Create</Button>
+            <Button type="submit" on:click={createNote} color="blue">Create</Button>
         </div>
     </form>
 </Modal>
@@ -365,7 +363,7 @@
     }
 
     .addNote{
-        margin: 20px 5vh 0px 2vh;
+        margin: 20px 5vh 0 2vh;
         max-height: 85vh;
         width: 3vw;
         display: flex;

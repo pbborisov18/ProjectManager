@@ -4,7 +4,7 @@
     import {afterNavigate, goto} from "$app/navigation";
     import InviteComponent from "$lib/components/InviteComponent.svelte";
     import loadingGif from "$lib/images/loading.gif";
-    import {Button, Dropdown, DropdownItem, Select} from "flowbite-svelte";
+    import {Select} from "flowbite-svelte";
     export let data;
     export let error;
 
@@ -122,8 +122,9 @@
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
-        margin-right: 1.5vw;
+        margin-right: 25px;
         margin-top: 1vh;
+        margin-left: 25px;
     }
 
 </style>

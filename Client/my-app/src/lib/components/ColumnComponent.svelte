@@ -194,27 +194,25 @@
     </div>
 </div>
 
-<Modal title="Edit note" bind:open={editPopup} size="XL" autoclose>
+<Modal title="Edit note" bind:open={editPopup} size="xs" autoclose>
     <div class="grid gap-6 mb-6 md:grid-cols-1">
         <div>
             <Label for="noteName" class="mb-2">Name</Label>
-            <Input type="text" id="noteName" required>
-                <input type="text" bind:value={noteName}/>
-            </Input>
+            <Input type="text" id="noteName" required bind:value={noteName}/>
             <Label for="noteDescription" class="mb-2">Description</Label>
             <Textarea id="noteDescription" rows="3" bind:value={noteDescription}/>
         </div>
-        <Button type="submit" on:click={editNote}>Edit</Button>
+        <Button type="submit" on:click={editNote} color="green">Edit</Button>
     </div>
 </Modal>
 
-<Modal bind:open={deletePopup} size="xs" autoclose>
-    <div class="text-center">
-        <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Are you sure you want to delete the note?
-        <Button color="red" class="mr-2" on:click={deleteNote}>Yes</Button>
-        <Button color='alternative'>No</Button>
-    </div>
+<Modal bind:open={deletePopup} size="xs" autoclose outsideclose>
+        <div class="text-center">
+            <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to delete the note?</h3>
+            <Button color="alternative" class="me-2">No</Button>
+            <Button color="red" on:click={deleteNote}>Yes</Button>
+        </div>
 </Modal>
 
 <style>

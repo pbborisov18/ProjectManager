@@ -85,7 +85,7 @@ function redirectToLastPage(){
 
 
 <Header />
-<div class="lowerMenuDiv">
+<div class="lowerMenuDiv m-3">
     <Breadcrumb >
         <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
         {#if showProjectNav}
@@ -103,8 +103,8 @@ function redirectToLastPage(){
                 <Label for="name" class="mb-2">Name</Label>
                 <Input type="text" id="name" placeholder="Whiteboard name" bind:value={whiteboardName} required />
             </div>
-            <Button on:click={redirectToLastPage}>Cancel</Button>
-            <Button type="submit" class="w-32">Create</Button>
+            <Button on:click={redirectToLastPage} color="red">Cancel</Button>
+            <Button type="submit" class="w-32" color="blue">Create</Button>
 
         </div>
     </form>
@@ -124,7 +124,7 @@ function redirectToLastPage(){
         align-items: center;
         font-family: sans-serif;
         font-weight: lighter;
-        box-shadow: 0px 0px 1px 1px #BBBBBB;
+        box-shadow: 0 0 1px 1px #BBBBBB;
     }
     .lowerMenuDiv{
         display: flex;
