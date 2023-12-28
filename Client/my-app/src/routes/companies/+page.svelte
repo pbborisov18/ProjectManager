@@ -6,76 +6,12 @@
     import loadingGif from "$lib/images/loading.gif";
     import plusIcon from "$lib/images/plus.png";
     import {userEmail, loggedIn} from "$lib/stores.js";
+    import {onMount} from "svelte";
 
-    export let data;
-    export let error;
-
+    let error = 401;
     let BURoles;
 
-    if(data.BURoles){
-        BURoles = data.BURoles.map(({id, businessUnit, authorityDTOList}) => ({id, businessUnit, authorityDTOList}));
-    }
-
-    function handleBUDestroy(BURole) {
-        BURoles = BURoles.filter(deleteThis => deleteThis !== BURole);
-        getCompanies();
-    }
-
-    afterNavigate(() => {
-        if(data.error === 401){
-            userEmail.set("");
-            loggedIn.set("false");
-            goto("/login");
-        }
-    })
-
-    let createPopup = false;
-    let value;
-
-    function createCompany(){
-        let company = {id: null,
-            name: value,
-            type: "COMPANY",
-            whiteboard: null
-        };
-
-        value = "";
-
-        fetch('http://localhost:8080/createCompany', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(company),
-            credentials: "include"
-        }).then(response=>{
-            if (response.status === 201) {
-                getCompanies();
-            } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-                addNotification("Something went wrong!");
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                userEmail.set("");
-                loggedIn.set("false");
-                goto("/login");
-            } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                addNotification("Something went wrong!");
-            }
-        }).catch(error => {
-            console.error(error);
-        });
-
-    }
-
-    function getCompanies(){
+    async function getCompanies()   {
         fetch('http://localhost:8080/companies', {
             method: 'GET',
             headers: {
@@ -86,49 +22,102 @@
             if (response.status === 200) {
                 response.json().then( value =>{
                     BURoles = value.map(({id, businessUnit, authorityDTOList}) => ({id, businessUnit, authorityDTOList}));
+                    error = 200;
                 });
+            } else if(response.status === 204){
+                error = 204;
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                addNotification("Something went wrong!");
+                //notification
+                //U stoopid bad request
             } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                //notification
+                //Bro why you not logged in
+                error = 401;
                 userEmail.set("");
-                loggedIn.set("false");
+                loggedIn.set("");
+                console.log("here");
                 goto("/login");
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                addNotification("Something went wrong!");
+                // notification
+                // addNotification("Something went wrong!");
+                // well my backend died or something
             }
         }).catch(error => {
-            console.error(error);
+            //Server died or something
         });
     }
 
-    //Notification stuff
-    let notifications = [];
-
-    function addNotification(message) {
-
-        const newNotification = {
-            message
+    function createCompany(){
+        let company = {id: null,
+            name: createBUName,
+            type: "COMPANY",
+            whiteboard: null
         };
 
-        notifications = [...notifications, newNotification];
 
-        setTimeout(() => {
-            removeNotification(newNotification);
-        }, 5000); // 5000 milliseconds = 5 seconds
+
+        fetch('http://localhost:8080/createCompany', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(company),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 201) {
+                //TODO: Make the backend return the object cuz this is a waste
+                createBUName = "";
+                getCompanies();
+            } else if(response.status === 400){
+                //No need to set the error here
+                // notification
+                // addNotification("Something went wrong!");
+            } else if(response.status === 401){
+                // notification
+                error = 401;
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 500){
+                //No need to set the error here
+                // notification
+                // addNotification("Something went wrong!");
+            }
+        }).catch(error => {
+            //Server died or something
+        });
     }
 
-    function removeNotification(notification) {
-        notifications = notifications.filter(n => n !== notification);
+    function handleBUDestroy(BURole) {
+        BURoles = BURoles.filter(remove => remove.id !== BURole.id);
     }
+
+    onMount(() => {
+        BURoles = getCompanies();
+    });
+
+    let createPopup = false;
+    let createBUName;
+
+    //Notification stuff
+    // let notifications = [];
+    //
+    // function addNotification(message) {
+    //
+    //     const newNotification = {
+    //         message
+    //     };
+    //
+    //     notifications = [...notifications, newNotification];
+    //
+    //     setTimeout(() => {
+    //         removeNotification(newNotification);
+    //     }, 5000); // 5000 milliseconds = 5 seconds
+    // }
+    //
+    // function removeNotification(notification) {
+    //     notifications = notifications.filter(n => n !== notification);
+    // }
 
 </script>
 
@@ -145,7 +134,7 @@
     <!--    </div>-->
     <!--{/each}-->
 
-    {#if data.error === 204 && BURoles.length === 0}
+    {#if error === 204 && (!BURoles || BURoles.length === 0)}
         <Header/>
         <div class="addCompany">
             <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
@@ -154,10 +143,10 @@
             <h1>You aren't part of any companies.</h1>
             <h1>Wait to be invited or make yourself one by clicking here.</h1>
         </div>
-    {:else if data.error === 500}
+    {:else if error === 500}
         <Header />
         <p>Internal server error!</p>
-    {:else if data.error === 401}
+    {:else if error === 401}
         <!--wait for the page to load and then it will redirect-->
     {:else}
         <Header/>
@@ -167,7 +156,7 @@
 
         <div class="mainDiv">
             {#each BURoles as BURole}
-                <CompanyComponent BURole={BURole}  onDestroy={() => handleBUDestroy(BURole)} />
+                <CompanyComponent BURole={BURole} onDestroy={() => handleBUDestroy(BURole)} />
             {/each}
         </div>
     {/if}
@@ -180,9 +169,7 @@
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             <div class="flex flex-col">
                 <Label for="companyName" class="mb-2">Company name</Label>
-                <Input type="text" id="companyName" required>
-                    <input type="text" bind:value />
-                </Input>
+                <Input type="text" id="companyName" required bind:value={createBUName}/>
             </div>
             <Button color="blue" on:click={createCompany}>Create</Button>
         </div>

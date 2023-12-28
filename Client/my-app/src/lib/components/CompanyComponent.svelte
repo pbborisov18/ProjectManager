@@ -7,7 +7,7 @@
          Sidebar, SidebarItem, SidebarWrapper, SidebarGroup
     } from 'flowbite-svelte'
     import "../../tailwind.css";
-    import { company } from "$lib/stores.js";
+    import {company, loggedIn, userEmail} from "$lib/stores.js";
     import whiteboardIcon from "$lib/images/rectangle.png";
     import leaveIcon from "$lib/images/leave.png";
     import deleteIcon from "$lib/images/delete.png";
@@ -16,10 +16,9 @@
     import SettingsInviteComponent from "$lib/components/SettingsInviteComponent.svelte";
     import RoleSettingsComponent from "$lib/components/RoleSettingsComponent.svelte";
 
-
     let leavePopup = false;
     let deletePopup = false;
-    let editPopup = false;
+    let settingsPopup = false;
 
     export let onDestroy;
     export let BURole;
@@ -52,36 +51,25 @@
             body: JSON.stringify(BURole.businessUnit),
             credentials: "include"
         }).then(response=>{
-        if (response.ok) {
-            onDestroy();
-        } else if(response.status === 204){
-            response.text().then(text => {
+            if (response.ok) {
                 onDestroy();
-            });
-        }else if(response.status === 400){
-            response.text().then(text => {
-                throw new Error(text);
-            });
-            addNotification("Something went wrong!");
-        } else if(response.status === 401){
-            response.text().then(text => {
-                throw new Error(text);
-            });
-            goto("/login");
-        } else if(response.status === 403){
-            response.text().then(text => {
-                throw new Error(text);
-            });
-            addNotification("Something went wrong!");
-        } else if(response.status === 500){
-            response.text().then(text => {
-                throw new Error(text);
-            });
-            addNotification("Something went wrong!");
-        }
-    }).catch(error => {
-        console.error(error);
-    });
+            } else if(response.status === 204){
+                onDestroy();
+            } else if(response.status === 400){
+                // notification
+            } else if(response.status === 401){
+                // notification
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 403){
+                // notification
+            } else if(response.status === 500){
+                // notification
+            }
+        }).catch(error => {
+            //Server died or something
+        });
     }
 
     function deleteBU(){
@@ -96,29 +84,21 @@
             if (response.ok) {
                 onDestroy();
             } else if(response.status === 204){
-                response.text().then(text => {
                     onDestroy();
-                })
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
+                //notification
             } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                //notification
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                //notifcation
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                //notification
             }
         }).catch(error => {
-            alert(error);
+            //Server died or something
         });
     }
 
@@ -153,7 +133,7 @@
 
 <div class="clickable not-selectable BUwindow">
 
-    <span on:click={redirectToProjects}> {BURole.businessUnit.name} </span>
+    <span companyBURole="{BURole}" on:click={redirectToProjects}> {BURole.businessUnit.name} </span>
 
     {#if BURole.authorityDTOList.some(authority => authority.name === "InteractWithWhiteboard")}
         <div style="border-left:1px solid #BBBBBB;height:80%"/>
@@ -164,7 +144,7 @@
 
     {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
         <div style="border-left:1px solid #BBBBBB;height:80%"/>
-        <div class="imageDivs" on:click={() => editPopup = true}>
+        <div class="imageDivs" on:click={() => settingsPopup = true}>
             <img class="clickable not-selectable" src="{settingsIcon}" alt="" draggable="false" >
         </div>
     {/if}
@@ -200,7 +180,7 @@
     </div>
 </Modal>
 
-<Modal title="Settings for {BURole.businessUnit.name}" bind:open={editPopup} size="xl" placement="center">
+<Modal title="Settings for {BURole.businessUnit.name}" bind:open={settingsPopup} size="xl" placement="center">
 
         <div class="sideBySide">
             <Sidebar class="mr-1 bg-[#F8F8F8]">
@@ -243,103 +223,103 @@
 
 <style lang="scss">
 
-  :root{
-    background-color: #F8F8F8;
-  }
+    :root{
+        background-color: #F8F8F8;
+    }
 
-  .BUwindow {
-      background-color: #e7e7e7;
+    .BUwindow {
+        background-color: #e7e7e7;
 
-      width: 97vw;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center; /* align items vertically */
-      border: 1px solid #BBBBBB;
-      min-height: 8vh;
+        width: 97vw;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center; /* align items vertically */
+        border: 1px solid #BBBBBB;
+        min-height: 8vh;
 
-      span {
-          flex-basis: 65%;
-          flex-grow: 1;
-          white-space: nowrap; /* prevent text from wrapping */
-          overflow: hidden; /* hide overflow */
-          text-overflow: ellipsis; /* show ellipsis for truncated text */
-          font-family: Bahnschrift, monospace;
-          height: 100%;
-          font-size: 35px;
-          display: inline-flex;
-          align-items: center;
-          vertical-align: middle;
-          padding-left: 1.5vw;
-      }
+        span {
+            flex-basis: 65%;
+            flex-grow: 1;
+            white-space: nowrap; /* prevent text from wrapping */
+            overflow: hidden; /* hide overflow */
+            text-overflow: ellipsis; /* show ellipsis for truncated text */
+            font-family: Bahnschrift, monospace;
+            height: 100%;
+            font-size: 35px;
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+            padding-left: 1.5vw;
+        }
 
-      .imageDivs {
-          flex-basis: calc((100% - 65%) / 4);
-          flex-grow: 0;
-          max-width: 20%;
-          min-width: 5%;
-          height: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-      }
+        .imageDivs {
+            flex-basis: calc((100% - 65%) / 4);
+            flex-grow: 0;
+            max-width: 20%;
+            min-width: 5%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-      img {
-          max-width: 40px;
-          max-height: 40px;
-      }
+        img {
+            max-width: 40px;
+            max-height: 40px;
+        }
 
-      .xImage{
-          max-width: 35px;
-          max-height: 35px;
-      }
+        .xImage{
+            max-width: 35px;
+            max-height: 35px;
+        }
 
-  }
+    }
 
-  .settingsMain{
-      border-radius: 2px;
-      background-color: #F8F8F8;
-      width: 85%;
-      height: 80vh;
-      border: 0 solid #BBBBBB;
-      font-family: sans-serif;
-      font-weight: lighter;
-      box-shadow: 0 0 1px 1px #BBBBBB;
-      overflow-y: auto;
-      overflow-x: hidden;
-  }
+    .settingsMain{
+        border-radius: 2px;
+        background-color: #F8F8F8;
+        width: 85%;
+        height: 80vh;
+        border: 0 solid #BBBBBB;
+        font-family: sans-serif;
+        font-weight: lighter;
+        box-shadow: 0 0 1px 1px #BBBBBB;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
 
-  .settingsRoles{
-      display: flex;
-      flex-wrap: wrap;
-  }
-  .sideBySide{
-      display: flex;
-  }
+    .settingsRoles{
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .sideBySide{
+        display: flex;
+    }
 
-  .clickable {
-    cursor: pointer;
-  }
+    .clickable {
+        cursor: pointer;
+    }
 
-  .not-selectable {
-    -webkit-user-select: none; /* Chrome, Safari, Opera */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* IE 10+ */
-    user-select: none; /* Standard syntax */
-  }
+    .not-selectable {
+        -webkit-user-select: none; /* Chrome, Safari, Opera */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE 10+ */
+        user-select: none; /* Standard syntax */
+    }
 
-  .bodyPopup{
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-  }
+    .bodyPopup{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-  .inviteImg{
-      height: 40px;
-      width: 40px;
-      margin-left: 1.5vw;
-      margin-top: 3vh;
-  }
+    .inviteImg{
+        height: 40px;
+        width: 40px;
+        margin-left: 1.5vw;
+        margin-top: 3vh;
+    }
 
   //.notificationDiv{
   //    position: absolute;
