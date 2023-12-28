@@ -17,7 +17,9 @@
     import RoleSettingsComponent from "$lib/components/RoleSettingsComponent.svelte";
 
     let leavePopup = false;
+    let leaveButtonDisable = false;
     let deletePopup = false;
+    let deleteButtonDisable = false;
     let settingsPopup = false;
 
     export let onDestroy;
@@ -43,6 +45,7 @@
     // }
 
     function leaveBU(){
+        leaveButtonDisable = true;
         fetch('http://localhost:8080/leaveCompany', {
             method: 'PUT',
             headers: {
@@ -51,9 +54,10 @@
             body: JSON.stringify(BURole.businessUnit),
             credentials: "include"
         }).then(response=>{
-            if (response.ok) {
-                onDestroy();
-            } else if(response.status === 204){
+            leaveButtonDisable = false;
+
+            if (response.status === 200) {
+                leavePopup = false;
                 onDestroy();
             } else if(response.status === 400){
                 // notification
@@ -68,11 +72,13 @@
                 // notification
             }
         }).catch(error => {
+            leaveButtonDisable = false;
             //Server died or something
         });
     }
 
     function deleteBU(){
+        deleteButtonDisable = true;
         fetch('http://localhost:8080/deleteCompany', {
             method: 'DELETE',
             headers: {
@@ -81,10 +87,11 @@
             body: JSON.stringify(BURole.businessUnit),
             credentials: "include"
         }).then(response=>{
-            if (response.ok) {
+            deleteButtonDisable = false;
+
+            if (response.status === 200) {
+                deletePopup = false;
                 onDestroy();
-            } else if(response.status === 204){
-                    onDestroy();
             } else if(response.status === 400){
                 //notification
             } else if(response.status === 401){
@@ -93,11 +100,12 @@
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                //notifcation
+                //notification
             } else if(response.status === 500){
                 //notification
             }
         }).catch(error => {
+            deleteButtonDisable = false;
             //Server died or something
         });
     }
@@ -119,7 +127,6 @@
     //Bastards have broken the active attribute on the sidebar.
     //Don't think they'll fix it. Only way to fix it is finding another one or creating my own
     let activeNum = 1;
-
 
 </script>
 
@@ -162,62 +169,62 @@
     {/if}
 </div>
 
-<Modal bind:open={leavePopup} size="xs" autoclose outsideclose>
+<Modal bind:open={leavePopup} size="xs" outsideclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to leave the company?</h3>
         <Button color="alternative" class="me-2">No</Button>
-        <Button color="red" on:click={leaveBU}>Yes</Button>
+        <Button color="red" on:click={leaveBU} disabled="{leaveButtonDisable}">Yes</Button>
     </div>
 </Modal>
 
-<Modal bind:open={deletePopup} size="xs" autoclose outsideclose>
+<Modal bind:open={deletePopup} size="xs" outsideclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to delete the company?</h3>
         <Button color="alternative" class="me-2">No</Button>
-        <Button color="red" on:click={deleteBU}>Yes</Button>
+        <Button color="red" on:click={deleteBU} disabled="{deleteButtonDisable}">Yes</Button>
     </div>
 </Modal>
 
 <Modal title="Settings for {BURole.businessUnit.name}" bind:open={settingsPopup} size="xl" placement="center">
 
-        <div class="sideBySide">
-            <Sidebar class="mr-1 bg-[#F8F8F8]">
-                <SidebarWrapper class="bg-[#F8F8F8]">
-                    <SidebarGroup>
-                        {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
-                            <SidebarItem label="General Settings" active="{activeNum === 1}" on:click={() => activeNum = 1}/>
-                        {/if}
-                        {#if BURole.authorityDTOList.some(authority => authority.name === "SeePermissions")}
-                            <SidebarItem label="Roles" active="{activeNum === 2}" on:click={() => activeNum = 2}/>
-                        {/if}
-                        <!--Might need to update roles for this-->
-                        {#if BURole.authorityDTOList.some(authority => authority.name === "ChangePermissions")}
-                            <SidebarItem label="Users" active="{activeNum === 3}" on:click={() => activeNum = 3}/>
-                        {/if}
-                        {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}
-                            <SidebarItem label="Invites" active="{activeNum === 4}" on:click={() => activeNum = 4}/>
-                        {/if}
-                    </SidebarGroup>
-                </SidebarWrapper>
-            </Sidebar>
+    <div class="sideBySide">
+        <Sidebar class="mr-1 bg-[#F8F8F8]">
+            <SidebarWrapper class="bg-[#F8F8F8]">
+                <SidebarGroup>
+                    {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
+                        <SidebarItem label="General Settings" active="{activeNum === 1}" on:click={() => activeNum = 1}/>
+                    {/if}
+                    {#if BURole.authorityDTOList.some(authority => authority.name === "SeePermissions")}
+                        <SidebarItem label="Roles" active="{activeNum === 2}" on:click={() => activeNum = 2}/>
+                    {/if}
+                    <!--Might need to update roles for this-->
+                    {#if BURole.authorityDTOList.some(authority => authority.name === "ChangePermissions")}
+                        <SidebarItem label="Users" active="{activeNum === 3}" on:click={() => activeNum = 3}/>
+                    {/if}
+                    {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}
+                        <SidebarItem label="Invites" active="{activeNum === 4}" on:click={() => activeNum = 4}/>
+                    {/if}
+                </SidebarGroup>
+            </SidebarWrapper>
+        </Sidebar>
 
-            <div class="settingsMain">
-                {#if activeNum === 1}
-                    <EditBUComponent onChangeName="{(name) => nameChange(name)}" bind:BURole="{BURole}"/>
-                {/if}
-                {#if activeNum === 2}
-                    <RoleSettingsComponent bind:BURole={BURole}/>
-                {/if}
-                {#if activeNum === 3}
-                    <!--User role management component-->
-                {/if}
-                {#if activeNum === 4}
-                    <SettingsInviteComponent BURole={BURole}/>
-                {/if}
-            </div>
+        <div class="settingsMain">
+            {#if activeNum === 1}
+                <EditBUComponent onChangeName="{(name) => nameChange(name)}" bind:BURole="{BURole}"/>
+            {/if}
+            {#if activeNum === 2}
+                <RoleSettingsComponent bind:BURole={BURole}/>
+            {/if}
+            {#if activeNum === 3}
+                <!--User role management component-->
+            {/if}
+            {#if activeNum === 4}
+                <SettingsInviteComponent BURole={BURole}/>
+            {/if}
         </div>
+    </div>
 
 </Modal>
 
