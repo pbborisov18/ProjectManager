@@ -21,6 +21,8 @@ public class RoleController {
         this.roleService = roleService;
     }
 
+    //TODO: Remove all the endpoints and leave only 1 per method
+
     @PostMapping({"/company/roles", "/company/project/roles", "/company/project/team/roles"})
     @PreAuthorize("authorityCheck(#businessUnitDTO.id(), \"SeePermissions\")")
     public ResponseEntity<Object> getAllRolesOfBusinessUnit(@RequestBody BusinessUnitDTO businessUnitDTO) {

@@ -108,7 +108,11 @@
         setupAllAuthoritiesList();
     }
 
+    //company/roles, company/project/roles and company/project/team/roles are hitting the same method
+    //TODO: remove all the endpoints and leave only 1 per method (in the backend)
+
     function findAllRoles(){
+
         fetch('http://localhost:8080/company/roles', {
             method: 'POST',
             headers: {
@@ -122,25 +126,19 @@
                     roles = data;
                 });
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
+                // notification
             } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
             }
         }).catch(error => {
-            console.error(error);
+            // server died or something
         });
     }
 
@@ -153,29 +151,23 @@
             body: JSON.stringify(role),
             credentials: "include"
         }).then(response=>{
-            if (response.ok) {
+            if (response.status === 200) {
                 roles = roles.filter(r => r.id !== role.id);
                 selectedRole = null;
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
+                // notification
             } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
             }
         }).catch(error => {
-            alert(error);
+            // server died or something
         });
     }
 
@@ -192,25 +184,19 @@
                 //TODO: Make the endpoint return the object instead of calling for all roles again
                 findAllRoles();
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
+                // notification
             } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
             }
         }).catch(error => {
-            console.error(error);
+            // server died or something
         });
     }
 
@@ -227,25 +213,19 @@
                 //TODO: Make the endpoint return the object instead of calling for all roles again
                 findAllRoles();
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
+                // notification
             } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
             }
         }).catch(error => {
-            console.error(error);
+            // server died or something
         });
     }
 
