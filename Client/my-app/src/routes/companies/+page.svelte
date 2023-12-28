@@ -1,6 +1,6 @@
 <script>
     import Header from "$lib/components/Header.svelte";
-    import {goto, afterNavigate} from "$app/navigation";
+    import {goto} from "$app/navigation";
     import CompanyComponent from "$lib/components/CompanyComponent.svelte";
     import {Button, Input, Label, Modal} from "flowbite-svelte";
     import loadingGif from "$lib/images/loading.gif";
@@ -11,7 +11,7 @@
     let error = 401;
     let BURoles;
 
-    async function getCompanies()   {
+    async function getCompanies(){
         fetch('http://localhost:8080/companies', {
             method: 'GET',
             headers: {
@@ -35,7 +35,6 @@
                 error = 401;
                 userEmail.set("");
                 loggedIn.set("");
-                console.log("here");
                 goto("/login");
             } else if(response.status === 500){
                 // notification
@@ -53,8 +52,6 @@
             type: "COMPANY",
             whiteboard: null
         };
-
-
 
         fetch('http://localhost:8080/createCompany', {
             method: 'POST',
