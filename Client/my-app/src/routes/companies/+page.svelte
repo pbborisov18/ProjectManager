@@ -64,6 +64,7 @@
             if (response.status === 201) {
                 //TODO: Make the backend return the object cuz this is a waste
                 createBUName = "";
+                createPopup = false;
                 getCompanies();
             } else if(response.status === 400){
                 //No need to set the error here
@@ -161,7 +162,7 @@
 {/await}
 
 
-<Modal title="Create a company" bind:open={createPopup} size="xs" autoclose outsideclose>
+<Modal title="Create a company" bind:open={createPopup} size="xs" outsideclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             <div class="flex flex-col">
