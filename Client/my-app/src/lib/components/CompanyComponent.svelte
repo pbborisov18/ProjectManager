@@ -140,7 +140,7 @@
 
 <div class="clickable not-selectable BUwindow">
 
-    <span companyBURole="{BURole}" on:click={redirectToProjects}> {BURole.businessUnit.name} </span>
+    <span on:click={redirectToProjects}> {BURole.businessUnit.name} </span>
 
     {#if BURole.authorityDTOList.some(authority => authority.name === "InteractWithWhiteboard")}
         <div style="border-left:1px solid #BBBBBB;height:80%"/>
