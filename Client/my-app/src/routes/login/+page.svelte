@@ -1,20 +1,14 @@
 <script>
     import {goto} from "$app/navigation";
-    import Cookies from 'js-cookie';
     import Header from "$lib/components/Header.svelte";
     import {userEmail, loggedIn} from "$lib/stores.js";
+    import { useForm, Hint, HintGroup, validators, required, email } from "svelte-use-form";
 
     let errorText;
-
-    import { useForm, Hint, HintGroup, validators, required, email } from "svelte-use-form";
 
     const form = useForm();
 
     const requiredMessage = "This field is required";
-
-    Cookies.defaults = {
-        sameSite: 'strict',
-    };
 
     function login(event){
         event.preventDefault();
@@ -33,24 +27,18 @@
             },
             body: formData,
             credentials: "include"
-        })
-            .then(response => {
-                if (response.ok) {
-                    userEmail.set(email);
-                    loggedIn.set("true");
-                    goto("/companies")
-                } else if(response.redirected){
-                    userEmail.set(email);
-                    goto("/companies")
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        errorText = text;
-                        console.log(errorText);
-                        throw new Error('Login failed');
-                    });
-                }
-            }).catch(error => {
-            console.error(error);
+        }).then(response => {
+            if (response.status === 200) {
+                userEmail.set(email);
+                loggedIn.set("true");
+                goto("/companies")
+            } else if(response.status === 400){
+                // Bad request + login doesn't exist
+            } else if(response.status === 500){
+                // Server error
+            }
+        }).catch(error => {
+            // server's dead or something
         });
     }
 
@@ -60,7 +48,7 @@
 
 </script>
 
-<Header />
+<Header/>
 <main>
     <div class="loginPanel">
         {#if (errorText) }
@@ -129,7 +117,7 @@
     align-items: center;
     font-family: Bahnschrift, monospace;
     font-weight: lighter;
-    box-shadow: 0px 0px 1px 1px #BBBBBB;
+    box-shadow: 0 0 1px 1px #BBBBBB;
     height: 270px;
     transform: translateY(-50px);
 

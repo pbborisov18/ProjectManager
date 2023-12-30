@@ -27,14 +27,15 @@
             body: JSON.stringify({ email, password, confirmPassword }),
             credentials: "include"
         }).then(response => {
-            if (!response.ok) {
-                throw new Error('Registration failed');
+            if (response.status === 200) {
+                sendLoginRequestAfterRegister(email, password);
+            } else if(response.status === 400){
+                //notification
+            } else if(response.status === 500){
+                //notification
             }
-        }).then(() => {
-            sendLoginRequestAfterRegister(email, password);
         }).catch(error => {
-            console.error(error);
-            alert('Failed to register! ' + error);
+            //server's dead or something
         });
     }
 
@@ -50,20 +51,18 @@
             },
             body: formData,
             credentials: "include"
-        })
-            .then(response => {
-                if (response.ok) {
-                    userEmail.set(email);
-                    loggedIn.set("true");
-                    goto("/companies")
-                } else if(response.redirected){
-                    goto("/companies")
-                } else if(response.status === 400){
-                    throw new Error('Login failed');
-                }
-            }).catch(error => {
-            console.error(error);
-            alert('Login failed' + error);
+        }).then(response => {
+            if (response.status === 200) {
+                userEmail.set(email);
+                loggedIn.set("true");
+                goto("/companies")
+            } else if(response.status === 400){
+                // Bad request + login doesn't exist
+            } else if(response.status === 500){
+                // Server error
+            }
+        }).catch(error => {
+            // server's dead or something
         });
     }
 
@@ -158,7 +157,7 @@
     align-items: center;
     font-family: sans-serif;
     font-weight: lighter;
-    box-shadow: 0px 0px 1px 1px #BBBBBB;
+    box-shadow: 0 0 1px 1px #BBBBBB;
       height: 400px;
       transform: translateY(-50px);
 
