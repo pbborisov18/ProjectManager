@@ -10,6 +10,7 @@ import com.company.projectManager.whiteboard.notes.service.NoteService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -58,6 +59,8 @@ public class NoteServiceImpl implements NoteService {
         }
     }
 
+    //TODO: Figure out how to tell hibernate to not to try to commit when these are being updated
+    @Transactional
     public void updateNotes(List<NoteDTO> notes) throws FailedToUpdateException {
         try {
 

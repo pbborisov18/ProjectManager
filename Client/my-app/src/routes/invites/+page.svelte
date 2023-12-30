@@ -1,92 +1,89 @@
 <script>
 
     import Header from "$lib/components/Header.svelte";
-    import {afterNavigate, goto} from "$app/navigation";
     import InviteComponent from "$lib/components/InviteComponent.svelte";
     import loadingGif from "$lib/images/loading.gif";
     import {Select} from "flowbite-svelte";
-    export let data;
-    export let error;
+    import {onMount} from "svelte";
+    import {loggedIn, userEmail} from "$lib/stores.js";
+    import {goto} from "$app/navigation";
 
+    let error = 401;
     let invites;
-
-    if(data.invites){
-        invites = data.invites;
-    }
 
     function handleInviteDestroy(inviteToChange){
         invites = invites.filter(invite => invite !== inviteToChange);
-
+        if(invites.length === 0){
+            error = 204;
+        }
     }
 
-    afterNavigate(() => {
-        if(data.error === 401){
-            goto("/login");
-        }
-    })
+    let currentSelection = "PENDING";
+
+    onMount(() => {
+        getInvitesByCurrentSelection();
+    });
 
     let selection = [
         { value: 'PENDING', name: 'Pending' },
         { value: 'DECLINED', name: 'Declined' }
     ];
-    let currentSelection = "PENDING";
 
     function getInvitesByCurrentSelection(){
         fetch('http://localhost:8080/invites?' + new URLSearchParams({inviteState:currentSelection}), {
             method: 'GET',
             headers: {
                 'Content-Type': "application/json",
-
             },
             credentials: "include"
-        })
-            .then(response=>{
+        }).then(response=>{
             if (response.status === 200) {
                 response.json().then( value =>{
+                    error = 200;
                     invites = value;
                 });
+            } else if(response.status === 204){
+                error = 204;
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                //notification
             } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                error = 401;
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
             }
         }).catch(error => {
-            console.error(error);
+            //Server's dead or something
         });
     }
 
 </script>
 
+
 {#await invites}
     <img src="{loadingGif}" alt="">
 {:then invites}
 
-    {#if data.error === 204}
+    {#if error === 204 && (!invites || invites.length === 0)}
         <Header />
         <div class="invitationState">
-            <Select class="mt-2" size="sm" placeholder="" items={selection} bind:value={currentSelection} />
+            <Select class="mt-2" size="sm" placeholder="" items={selection} bind:value={currentSelection} on:change={getInvitesByCurrentSelection}/>
         </div>
 
         <div class="mainDiv">
             <h1>No invites</h1>
         </div>
-    {:else if data.error === 401}
+    {:else if error === 401}
         <!--wait for the page to load and then it will redirect-->
-    {:else if data.error === 500}
+    {:else if error === 500}
         <Header />
         <p>Internal server error!</p>
     {:else }
         <Header/>
         <div class="invitationState">
-            <Select class="max-w-[15vw]" size="sm" placeholder="" items={selection} bind:value={currentSelection} on:change={getInvitesByCurrentSelection}/>
+            <Select class="mt-2" size="sm" placeholder="" items={selection} bind:value={currentSelection} on:change={getInvitesByCurrentSelection}/>
         </div>
         <div class="mainDiv">
             {#each invites as invite}
