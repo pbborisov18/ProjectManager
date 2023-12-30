@@ -3,6 +3,7 @@
     import ColumnComponent from "$lib/components/ColumnComponent.svelte";
 
     const flipDurationMs = 300;
+    export let BURole;
 
     //Gets columns from parent (together with the notes inside)
     export let columns;
@@ -33,7 +34,7 @@
     <section class="board" >
         {#each columns as {id, name, position, items}, idx (id)}
             <div class="column" animate:flip="{{duration: flipDurationMs}}" >
-                <ColumnComponent name={name} items={items} onDrop={(newItems) => handleItemFinalize(idx, newItems)} />
+                <ColumnComponent BURole="{BURole}" name={name} items={items} onDrop={(newItems) => handleItemFinalize(idx, newItems)} />
             </div>
         {/each}
     </section>

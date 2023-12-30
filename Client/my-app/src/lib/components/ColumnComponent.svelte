@@ -2,14 +2,9 @@
     import { flip } from 'svelte/animate';
     import { dndzone } from 'svelte-dnd-action';
     import {Button, Card, Input, Label, Modal, Textarea, CloseButton} from "flowbite-svelte";
-    import {company, project, team} from "$lib/stores.js";
     import {goto} from "$app/navigation";
 
-    let companyObj = JSON.parse($company);
-    let projectObj = JSON.parse($project);
-    let teamObj = JSON.parse($team);
-
-    let currentUrl = window.location.pathname;
+    export let BURole;
 
     const flipDurationMs = 150;
 
@@ -36,104 +31,79 @@
     let noteDescription;
 
     function editNote(){
-        if(clickedNote){
-            clickedNote = {...clickedNote, name: noteName, description: noteDescription};
-
-            let fetchUrl;
-            let bu;
-
-            if(currentUrl === "/company/whiteboard"){
-                fetchUrl = "http://localhost:8080/company/whiteboard/updateNote"
-                bu = companyObj;
-            } else if(currentUrl === "/company/project/whiteboard"){
-                fetchUrl = "http://localhost:8080/company/project/whiteboard/updateNote"
-                bu = projectObj;
-            } else if(currentUrl === "/company/project/team/whiteboard"){
-                fetchUrl = "http://localhost:8080/company/project/team/whiteboard/updateNote"
-                bu = teamObj;
-            }
-
-            fetch(fetchUrl, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(clickedNote),
-                credentials: "include"
-            }).then(response=>{
-                if (response.status === 200) {
-
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
-                } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                    goto("/login");
-                } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-            }).catch(error => {
-                console.error(error);
-            });
-
-            items = items.map(item => {
-                if (item.id === clickedNote.id) {
-                    return clickedNote;
-                } else {
-                    return item;
-                }
-            });
-
+        if(!clickedNote) {
+            return;
         }
+
+        clickedNote = {...clickedNote, name: noteName, description: noteDescription};
+
+        fetch("http://localhost:8080/company/whiteboard/updateNote", {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                noteDTO: clickedNote,
+                businessUnitDTO: BURole.businessUnit
+            }),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 200) {
+                //notification saved or something
+            } else if(response.status === 400){
+                // notification
+            } else if(response.status === 401){
+                // notification
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 500){
+                // notification
+            }
+        }).catch(error => {
+            // Server's dead or something
+        });
+
+        items = items.map(item => {
+            if (item.id === clickedNote.id) {
+                return clickedNote;
+            } else {
+                return item;
+            }
+        });
+
     }
 
     function deleteNote(){
-        if(clickedNote) {
-            let fetchUrl;
-
-            if (currentUrl === "/company/whiteboard") {
-                fetchUrl = "http://localhost:8080/company/whiteboard/deleteNote"
-            } else if (currentUrl === "/company/project/whiteboard") {
-                fetchUrl = "http://localhost:8080/company/project/whiteboard/deleteNote"
-            } else if (currentUrl === "/company/project/team/whiteboard") {
-                fetchUrl = "http://localhost:8080/company/project/team/whiteboard/deleteNote"
-            }
-
-            fetch(fetchUrl, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(clickedNote),
-                credentials: "include"
-            }).then(response=>{
-                if (response.status === 200) {
-
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
-                } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                    goto("/login");
-                } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-            }).catch(error => {
-                console.error(error);
-            });
-
-            items = items.filter(item => item.id !== clickedNote.id);
+        if(!clickedNote) {
+            return;
         }
+
+        fetch("http://localhost:8080/company/whiteboard/deleteNote", {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                noteDTO: clickedNote,
+                businessUnitDTO: BURole.businessUnit
+            }),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 200) {
+                items = items.filter(item => item.id !== clickedNote.id);
+            } else if(response.status === 400){
+                // notification
+            } else if(response.status === 401){
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 500){
+                // notification
+            }
+        }).catch(error => {
+            // Server's dead or something
+        });
     }
 
     let hoveredItem = null;
@@ -152,8 +122,6 @@
             hoveredItem = null;
         }
     }
-
-
 
 </script>
 
@@ -186,7 +154,6 @@
                     </div>
                         <hr>
                         <p class="card font-normal text-gray-700 dark:text-gray-400 leading-tight">{item.description}</p>
-
                 </Card>
             </div>
         {/each}
