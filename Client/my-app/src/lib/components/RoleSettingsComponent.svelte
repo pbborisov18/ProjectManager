@@ -212,6 +212,7 @@
         }).then(response=>{
             if (response.status === 200) {
                 //TODO: Make the endpoint return the object instead of calling for all roles again
+                //and then select it here
                 findAllRoles();
             } else if(response.status === 400){
                 // notification
@@ -278,13 +279,21 @@
             {/each}
 
             <div>
-                {#if !newRoleToggle && selectedRole.name !== "Default" && selectedRole.name !== "Admin"}
+                {#if (selectedRole.name === "Default" || selectedRole.name === "Admin")}
                     <Button class="mt-5 ml-10" color="red" on:click={() => deleteRole(selectedRole)}>Delete</Button>
                 {/if}
+                {#if !newRoleToggle}
+                    <Button disabled="{selectedRole.name === '' || selectedRole.authorities.length < 1}" class="mt-5 ml-10" color="green" on:click={() => {
+                            selectedRole.name = document.getElementById("roleName").value;
+                            editRole(selectedRole);
+                        }}>Save</Button>
+                {:else}
                     <Button disabled="{selectedRole.name === '' || selectedRole.authorities.length < 1}" class="mt-5 ml-10" color="green" on:click={() => {
                         selectedRole.name = document.getElementById("roleName").value;
-                        !newRoleToggle ? editRole(selectedRole) : createRole(selectedRole);
-                    }}>Save</Button>
+                        createRole(selectedRole);
+                    }}>Create</Button>
+                {/if}
+
                 <!--{#if edited === true}-->
                 <!--    <p>Not saved</p>-->
                 <!--{/if}-->

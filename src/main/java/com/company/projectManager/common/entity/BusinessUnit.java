@@ -34,13 +34,11 @@ public class BusinessUnit {
     @Nullable
     @ManyToOne
     @JoinColumn(name = "companies_id", referencedColumnName = "id")
-    @Cascade(CascadeType.MERGE)
     private BusinessUnit company;
 
     @Nullable
     @ManyToOne
     @JoinColumn(name = "projects_id", referencedColumnName = "id")
-    @Cascade(CascadeType.MERGE)
     private BusinessUnit project;
 
     @Nullable

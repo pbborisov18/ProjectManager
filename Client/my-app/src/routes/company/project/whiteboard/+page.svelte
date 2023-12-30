@@ -48,7 +48,7 @@
 </script>
 
 {#if BURole?.businessUnit?.whiteboard}
-    <WhiteboardPageComponent BURole="{BURole}" currentUrl="{'/company/createWhiteboard'}"/>
+    <WhiteboardPageComponent BURole="{BURole}"/>
 {/if}
 
 <style lang="scss">

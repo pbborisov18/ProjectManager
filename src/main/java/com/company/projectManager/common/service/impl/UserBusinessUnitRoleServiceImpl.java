@@ -107,7 +107,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             Role adminRole = new Role(null, "Admin",
                     (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
                     company);
-            //TODO: Fix this up
+            //TODO: Remove all the "unsafe" .get without elseThrow cuz the default exceptions are bad
             //Doesn't trigger roll back for some reason even though method is transactional. wtf?
             Role defaultRole = new Role(null, "Default",
                     List.of(authoritityRepository.findByName("InteractWithWhiteboard").get()),
@@ -248,13 +248,14 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             BusinessUnit project = businessUnitMapper.toBusinessUnitEntity(projectDTO);
             businessUnitRepository.save(project);
 
+            //TODO: Remove all the "unsafe" .get without elseThrow cuz the default exceptions are bad
+            //(Took me way to long to figure out why)
             //Save the two roles every bu comes with
             Role adminRole = new Role(null, "Admin",
                     (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
                     project);
             Role defaultRole = new Role(null, "Default",
-                    List.of(authoritityRepository.findByName("InteractWithWhiteboard").get(),
-                            authoritityRepository.findByName("SeeWhiteboard").get()),
+                    List.of(authoritityRepository.findByName("InteractWithWhiteboard").get()),
                     project);
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
@@ -389,10 +390,10 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             Role adminRole = new Role(null, "Admin",
                     (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
                     team);
+            //TODO: Remove all the "unsafe" .get without elseThrow cuz the default exceptions are bad
             Role defaultRole = new Role(null, "Default",
                     //Probably add support for custom roles in the future
-                    List.of(authoritityRepository.findByName("InteractWithWhiteboard").get(),
-                            authoritityRepository.findByName("SeeWhiteboard").get()),
+                    List.of(authoritityRepository.findByName("InteractWithWhiteboard").get()),
                     team);
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 

@@ -1,45 +1,62 @@
 <script>
 
-    import {company, project} from "$lib/stores.js";
+    import {company, loggedIn, project, userEmail} from "$lib/stores.js";
     import loadingGif from "$lib/images/loading.gif";
     import plusIcon from "$lib/images/plus.png";
     import Header from "$lib/components/Header.svelte";
     import {Breadcrumb, BreadcrumbItem, Button, Input, Label, Modal} from "flowbite-svelte";
     import TeamComponent from "$lib/components/TeamComponent.svelte";
     import {goto} from "$app/navigation";
+    import {onMount} from "svelte";
 
-    let projectObj = JSON.parse($project);
-    let companyObj = JSON.parse($company);
+    let projectBURole = JSON.parse($project);
 
-    export let data;
-
-    export let error;
-
+    let error = 401;
     let BURoles;
 
-    if(data.userBURoles){
-        BURoles = data.userBURoles.map(({ businessUnit, role }) => ({ businessUnit, role }));
-    }
-
-    let createPopup = false;
-    let teamName;
-
-
-    function handleBUDestroy(BURole) {
-        BURoles = BURoles.filter(deleteThis => deleteThis !== BURole);
-        getTeams();
+    async function getTeams(){
+        fetch('http://localhost:8080/company/project/teams', {
+            method: 'POST',
+            headers: {
+                'Content-Type': "application/json",
+            },
+            body: JSON.stringify(projectBURole.businessUnit),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 200) {
+                response.json().then( value =>{
+                    BURoles = value;
+                    error = 200;
+                });
+            } else if(response.status === 204){
+                error = 204;
+            } else if(response.status === 400){
+                //notification
+                //bad request
+            } else if(response.status === 401){
+                //notification
+                error = 401;
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 500){
+                // notification
+                // well my backend did something wrong
+            }
+        }).catch(error => {
+            //Server died or something
+        });
     }
 
     function createTeam(){
-        let team = {id: null,
+        let team = {
+            id: null,
             name: teamName,
             type: "TEAM",
-            company: companyObj.businessUnit,
-            project: projectObj.businessUnit,
+            company: projectBURole.businessUnit.company,
+            project: projectBURole.businessUnit,
             whiteboard:null
         }
-
-        teamName = "";
 
         fetch('http://localhost:8080/company/project/createTeam', {
             method: 'POST',
@@ -50,74 +67,61 @@
             credentials: "include"
         }).then(response=>{
             if (response.status === 201) {
+                teamName = "";
+                createPopup = false;
                 getTeams();
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
+                //No need to set the error here
+                // notification
             } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                // notification
+                error = 401;
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                //No need to set the error here
+                // notification
             }
         }).catch(error => {
-            console.error(error);
+            //Server died or something
         });
     }
 
-    function getTeams(){
-        fetch('http://localhost:8080/company/project/teams', {
-            method: 'POST',
-            headers: {
-                'Content-Type': "application/json",
-            },
-            body: JSON.stringify(projectObj.businessUnit),
-            credentials: "include"
-        }).then(response=>{
-            if (response.status === 200) {
-                response.json().then( value =>{
-                    BURoles = value;
-                    data.error = 200;
-                });
-            } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                goto("/login");
-            } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            }
-        }).catch(error => {
-            console.error(error);
-        });
+    function handleBUDestroy(BURole) {
+        BURoles = BURoles.filter(deleteThis => deleteThis !== BURole);
+        if(BURoles.length === 0){
+            error = 204;
+        }
     }
+
+    onMount(() => {
+        if (projectBURole === null) {
+            error = 401;
+            goto("/company/projects");
+        } else {
+            BURoles = getTeams();
+        }
+    });
+
+    let createPopup = false;
+    let teamName;
 
 
 </script>
-{#await data.userBURoles}
+
+{#await BURoles}
     <img src="{loadingGif}" alt="">
-{:then userBURoles}
+{:then BURoles}
 
-
-    {#if data.error === 204}
+    {#if error === 204 && (!BURoles || BURoles.length === 0)}
         <Header/>
         <div class="lowerMenuDiv">
             <Breadcrumb >
-                <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
-                <BreadcrumbItem href="/company/projects">{projectObj.businessUnit.name}</BreadcrumbItem>
+                <BreadcrumbItem href="/companies" home>{projectBURole?.businessUnit?.company?.name}</BreadcrumbItem>
+                <BreadcrumbItem href="/company/projects">{projectBURole?.businessUnit?.name}</BreadcrumbItem>
             </Breadcrumb>
-            {#if projectObj.role.name === "MANAGER"}
+            {#if projectBURole.authorityDTOList.some(a => a.name === "CreateChildren")}
                 <div class="addTeam">
                     <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
                 </div>
@@ -125,48 +129,25 @@
         </div>
         <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
             <h1>You aren't part of any teams in this project.</h1>
-            {#if projectObj.role.name === "MANAGER"}
+            {#if projectBURole.authorityDTOList.some(a => a.name === "CreateChildren")}
                 <h1>Wait to be invited or make yourself one by clicking here.</h1>
-            {:else if projectObj.role.name === "EMPLOYEE"}
+            {:else}
                 <h1>Wait to be invited.</h1>
             {/if}
         </div>
-    {:else if data.error === 500}
+    {:else if error === 500}
         <Header/>
         <p>Internal server error!</p>
-
-    {:else if data.error === 401}
+    {:else if error === 401}
         <!--wait for the page to load and then it will redirect-->
-
-    {:else if BURoles.length === 0}
-        <Header />
-        <div class="lowerMenuDiv">
-            <Breadcrumb >
-                <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
-                <BreadcrumbItem href="/company/projects">{projectObj.businessUnit.name}</BreadcrumbItem>
-            </Breadcrumb>
-            {#if projectObj.role.name === "MANAGER"}
-                <div class="addTeam">
-                    <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
-                </div>
-            {/if}
-        </div>
-        <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>You aren't part of any teams of this project.</h1>
-            {#if projectObj.role.name === "MANAGER"}
-                <h1>Wait to be invited or make yourself one by clicking here.</h1>
-            {:else if projectObj.role.name === "EMPLOYEE"}
-                <h1>Wait to be invited.</h1>
-            {/if}
-        </div>
     {:else}
         <Header/>
         <div class="lowerMenuDiv">
             <Breadcrumb >
-                <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
-                <BreadcrumbItem href="/company/projects">{projectObj.businessUnit.name}</BreadcrumbItem>
+                <BreadcrumbItem href="/companies" home>{projectBURole?.businessUnit?.company?.name}</BreadcrumbItem>
+                <BreadcrumbItem href="/company/projects">{projectBURole?.businessUnit?.name}</BreadcrumbItem>
             </Breadcrumb>
-            {#if projectObj.role.name === "MANAGER"}
+            {#if projectBURole.authorityDTOList.some(a => a.name === "CreateChildren")}
                 <div class="addTeam">
                     <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
                 </div>
@@ -183,16 +164,14 @@
 
 {/await}
 
-<Modal title="Create team" bind:open={createPopup} size="XL" autoclose>
+<Modal title="Create team" bind:open={createPopup} size="xs" outsideclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
-            <div>
+            <div class="flex flex-col">
                 <Label for="teamName" class="mb-2">Team name</Label>
-                <Input type="text" id="teamName" required>
-                    <input type="text" bind:value={teamName} />
-                </Input>
+                <Input type="text" id="teamName" required bind:value={teamName}/>
             </div>
-            <Button type="submit" on:click={createTeam}>Create</Button>
+            <Button color="blue" type="submit" on:click={createTeam}>Create</Button>
         </div>
     </form>
 </Modal>
