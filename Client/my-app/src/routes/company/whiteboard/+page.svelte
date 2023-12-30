@@ -2,7 +2,7 @@
 
     import WhiteboardPageComponent from "$lib/components/WhiteboardPageComponent.svelte";
     import {goto} from "$app/navigation";
-    import {company} from "$lib/stores.js";
+    import {company, userEmail, loggedIn} from "$lib/stores.js";
     import {onMount} from "svelte";
 
     let BURole;

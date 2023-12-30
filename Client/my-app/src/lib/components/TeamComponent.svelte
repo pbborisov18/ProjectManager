@@ -8,6 +8,7 @@
     import {goto} from "$app/navigation";
     import inviteToCompanyIcon from "$lib/images/invite.png";
     import {Button, Input, Label, Listgroup, Modal} from "flowbite-svelte";
+    import {userEmail, loggedIn} from "$lib/stores";
 
     let buName;
 

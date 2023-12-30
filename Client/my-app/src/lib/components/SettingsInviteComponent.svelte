@@ -2,6 +2,7 @@
     import {Button, CloseButton, Input, Listgroup} from "flowbite-svelte";
     import {goto} from "$app/navigation";
     import {onMount} from "svelte";
+    import {userEmail, loggedIn} from "$lib/stores";
 
     export let BURole;
 

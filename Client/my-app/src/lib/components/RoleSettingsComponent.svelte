@@ -5,6 +5,7 @@
     import plusIcon from "$lib/images/plus.png";
     import CustomBadge from "$lib/components/CustomBadge.svelte";
     import CustomAuthoritySettingsLabel from "$lib/components/CustomAuthoritySettingsLabel.svelte";
+    import {userEmail, loggedIn} from "$lib/stores";
 
     export let BURole;
     let roles = [];

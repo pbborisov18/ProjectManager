@@ -3,6 +3,7 @@
     import { dndzone } from 'svelte-dnd-action';
     import {Button, Card, Input, Label, Modal, Textarea, CloseButton} from "flowbite-svelte";
     import {goto} from "$app/navigation";
+    import {userEmail, loggedIn} from "$lib/stores";
 
     export let BURole;
 

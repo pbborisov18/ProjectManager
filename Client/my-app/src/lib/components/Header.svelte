@@ -30,6 +30,7 @@
             credentials: "include"
         }).then(response => {
                 if (response.status === 200) {
+                    userEmail.set("");
                     loggedIn.set("");
                     goto("/login");
                 } else {

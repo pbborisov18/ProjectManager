@@ -6,20 +6,9 @@
     import {Breadcrumb, BreadcrumbItem, Button, Input, Label, Modal, Textarea} from "flowbite-svelte";
     import plusIcon from "$lib/images/plus.png";
     import {onMount} from "svelte";
+    import {userEmail, loggedIn} from "$lib/stores";
 
     export let BURole;
-    export let currentUrl;
-
-    //For later use
-    function redirectToCreateWhiteboard(){
-        if(currentUrl === "/company/whiteboard"){
-
-        } else if(currentUrl === "/company/project/whiteboard"){
-            goto("/company/project/createWhiteboard");
-        } else if(currentUrl === "/company/project/team/whiteboard"){
-            goto("/company/project/team/createWhiteboard");
-        }
-    }
 
     let createPopup = false;
 
@@ -217,17 +206,7 @@
             position: (items[0].items.length > 0) ? items[0].items.length : 0
         };
 
-        items = [{
-            id: items[0].id,
-            name: items[0].name,
-            items: items[0].items.concat(newNote)
-        },
-            ...items.slice(1) // include the rest of the items array
-        ];
-
         createNoteRequest(newNote);
-        noteName = "";
-        noteDescription = "";
     }
 
     function createNoteRequest(note){
@@ -243,6 +222,16 @@
             credentials: "include"
         }).then(response=>{
             if (response.status === 201) {
+                items = [{
+                    id: items[0].id,
+                    name: items[0].name,
+                    items: items[0].items.concat(note)
+                },
+                    ...items.slice(1) // include the rest of the items array
+                ];
+                noteName = "";
+                noteDescription = "";
+                createPopup = false;
                 makeColumns();
             } else if(response.status === 400){
                 //notification
@@ -266,7 +255,19 @@
     <Header />
     <div class="lowerMenuDiv">
         <Breadcrumb>
-            <BreadcrumbItem href="/companies" home>{BURole.businessUnit.name}</BreadcrumbItem>
+            {#if BURole.businessUnit.type === "COMPANY"}
+                <BreadcrumbItem href="/companies" home>{BURole.businessUnit.name}</BreadcrumbItem>
+            {:else if BURole.businessUnit.type === "PROJECT" || BURole.businessUnit.type === "TEAM"}
+                <BreadcrumbItem href="/companies" home>{BURole.businessUnit.company.name}</BreadcrumbItem>
+            {/if}
+            {#if BURole.businessUnit.type === "PROJECT"}
+                <BreadcrumbItem href="/company/projects">{BURole.businessUnit.name}</BreadcrumbItem>
+            {:else if BURole.businessUnit.type === "TEAM"}
+                <BreadcrumbItem href="/company/projects">{BURole.businessUnit.project.name}</BreadcrumbItem>
+            {/if}
+            {#if BURole.businessUnit.type === "TEAM"}
+                <BreadcrumbItem href="/company/project/teams">{BURole.businessUnit.name}</BreadcrumbItem>
+            {/if}
         </Breadcrumb>
     </div>
 
@@ -281,7 +282,7 @@
 {/await}
 
 
-<Modal title="Create note" bind:open={createPopup} size="xs" autoclose>
+<Modal title="Create note" bind:open={createPopup} size="xs" outsideclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
             <div>

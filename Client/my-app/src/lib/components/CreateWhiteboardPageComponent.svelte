@@ -1,49 +1,22 @@
 <script>
-    //TODO: Pull out into a separate component
     import Header from "$lib/components/Header.svelte";
     import {Label, Input, Button, Breadcrumb, BreadcrumbItem} from 'flowbite-svelte';
-    import {company, project, team} from "$lib/stores.js";
+    import {loggedIn, userEmail} from "$lib/stores.js";
     import {goto} from "$app/navigation";
     import {onMount} from "svelte";
 
-    let companyObj = JSON.parse($company);
-    let projectObj = JSON.parse($project);
-    let teamObj = JSON.parse($team);
+    export let BURole;
 
     let currentUrl;
 
     onMount(() => {
         currentUrl = window.location.pathname;
-        if(currentUrl === "/company/project/createWhiteboard"){
-            showProjectNav = true;
-        }
-
-        if(currentUrl === "/company/project/team/whiteboard"){
-            showTeamNav = true;
-        }
     });
-
-    let showProjectNav = false;
-    let showTeamNav = false;
 
     let whiteboardName;
 
     function handleSubmit(){
-        let fetchUrl;
-        let bu;
-
-        if(currentUrl === "/company/createWhiteboard"){
-            fetchUrl = "http://localhost:8080/company/createWhiteboard";
-            bu = companyObj;
-        } else if(currentUrl === "/company/project/createWhiteboard"){
-            fetchUrl = "http://localhost:8080/company/project/createWhiteboard";
-            bu = projectObj;
-        } else if(currentUrl === "/company/project/team/createWhiteboard"){
-            fetchUrl = "http://localhost:8080/company/project/team/createWhiteboard";
-            bu = teamObj;
-        }
-
-        fetch(fetchUrl, {
+        fetch("http://localhost:8080/company/createWhiteboard", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -53,7 +26,7 @@
                     id: null,
                     name: whiteboardName
                 },
-                businessUnitDTO: bu.businessUnit
+                businessUnitDTO: BURole.businessUnit
             }),
             credentials: "include"
         }).then(response=>{
@@ -90,15 +63,19 @@
 
 <Header />
 <div class="lowerMenuDiv mt-2 ml-[1.5vw]">
-    <Breadcrumb >
-        {#if companyObj}
-            <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
+    <Breadcrumb>
+        {#if BURole?.businessUnit?.type === "COMPANY"}
+            <BreadcrumbItem href="/companies" home>{BURole?.businessUnit?.name}</BreadcrumbItem>
+        {:else if BURole.businessUnit.type === "PROJECT" || BURole.businessUnit.type === "TEAM"}
+            <BreadcrumbItem href="/companies" home>{BURole.businessUnit.company.name}</BreadcrumbItem>
         {/if}
-        {#if projectObj && (showProjectNav || showTeamNav)}
-            <BreadcrumbItem href="/company/projects">{projectObj.businessUnit.name}</BreadcrumbItem>
+        {#if BURole.businessUnit.type === "PROJECT"}
+            <BreadcrumbItem href="/company/projects">{BURole.businessUnit.name}</BreadcrumbItem>
+        {:else if BURole.businessUnit.type === "TEAM"}
+            <BreadcrumbItem href="/company/projects">{BURole.businessUnit.project.name}</BreadcrumbItem>
         {/if}
-        {#if teamObj && showTeamNav}
-            <BreadcrumbItem href="/company/project/teams">{teamObj.businessUnit.name}</BreadcrumbItem>
+        {#if BURole.businessUnit.type === "TEAM"}
+            <BreadcrumbItem href="/company/project/teams">{BURole.businessUnit.name}</BreadcrumbItem>
         {/if}
     </Breadcrumb>
 </div>

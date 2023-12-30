@@ -3,6 +3,8 @@
     import {goto} from "$app/navigation";
     import checkIcon from "$lib/images/check.png";
     import deleteIcon from "$lib/images/delete.png";
+    import {userEmail, loggedIn} from "$lib/stores";
+
     export let invite;
     export let onDestroy;
 
