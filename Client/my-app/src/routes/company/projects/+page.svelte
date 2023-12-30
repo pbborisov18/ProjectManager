@@ -43,7 +43,7 @@
             } else if(response.status === 500){
                 // notification
                 // addNotification("Something went wrong!");
-                // well my backend died or something
+                // well my backend did something wrong
             }
         }).catch(error => {
             //Server died or something
@@ -93,16 +93,21 @@
 
     function handleBUDestroy(BURole) {
         BURoles = BURoles.filter(remove => remove.id !== BURole.id);
+        if(BURoles.length === 0){
+            error = 204;
+        }
     }
 
     onMount(() => {
         //Have to do this cuz in getProjects I try to use companyBURole.
-        //If I don't do this companyBURole won't exist so js will throw an error
+        //That will happen if you think you are funny and access /company/projects without
+        //"selecting" a company (Probably would also happen if you access it from another page cuz
+        //company is in session storage and not local storage).
+        //Pretty much impossible to implement with local storage cuz there will be "funky" behavior if you
+        //have more than 1 page
         if(companyBURole === null){
             error = 401;
-            userEmail.set("");
-            loggedIn.set("");
-            goto("/login");
+            goto("/companies");
         } else {
             BURoles = getProjects();
         }

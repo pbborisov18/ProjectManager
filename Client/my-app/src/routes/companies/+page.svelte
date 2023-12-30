@@ -21,7 +21,7 @@
         }).then(response=>{
             if (response.status === 200) {
                 response.json().then( value =>{
-                    BURoles = value.map(({id, businessUnit, authorityDTOList}) => ({id, businessUnit, authorityDTOList}));
+                    BURoles = value;
                     error = 200;
                 });
             } else if(response.status === 204){
@@ -39,7 +39,7 @@
             } else if(response.status === 500){
                 // notification
                 // addNotification("Something went wrong!");
-                // well my backend died or something
+                // well my backend did something wrong
             }
         }).catch(error => {
             //Server died or something
@@ -220,11 +220,11 @@
         margin-top: 1vh;
     }
 
-    .notificationDiv{
-        position: absolute;
-        height: 100vh;
-        width: 100vw;
-        background-color: red;
-    }
+    //.notificationDiv{
+    //    position: absolute;
+    //    height: 100vh;
+    //    width: 100vw;
+    //    background-color: red;
+    //}
 
 </style>
