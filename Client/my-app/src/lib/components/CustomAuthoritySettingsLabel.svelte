@@ -6,6 +6,7 @@
     export let body;
     export let toggled;
     export let onToggle;
+    export let disabled = false;
 
 </script>
 
@@ -15,7 +16,7 @@
         <p class="text-base">{body}</p>
     </div>
     <div class="mr-5">
-        <Toggle label="" bind:toggled on:toggle={onToggle}/>
+        <Toggle label="" bind:toggled on:toggle={onToggle} disabled="{disabled}"/>
     </div>
 </div>
 

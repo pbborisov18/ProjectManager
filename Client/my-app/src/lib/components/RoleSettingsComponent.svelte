@@ -238,70 +238,87 @@
 
 </script>
 
-
-<div class="mainRoleDiv flex-wrap flex gap-1">
-    <div class="plusDiv clickable not-selectable"
-         on:click="{() => {newRoleToggle = true;
-             selectedRole = {
+{#if BURole.authorityDTOList.some(a => a.name === "ChangePermissions" || a.name === "SeePermissions")}
+    <div class="mainRoleDiv flex-wrap flex gap-1">
+        {#if BURole.authorityDTOList.some(a => a.name === "ChangePermissions")}
+            <div class="plusDiv clickable not-selectable"
+                 on:click="{() => {newRoleToggle = true;
+                    selectedRole = {
                                 'id': null,
                                 'businessUnit': BURole.businessUnit,
                                 'name': '',
                                 'authorities': []
                             };
-             setupAllAuthoritiesList();}}">
-        <img src="{plusIcon}"/>
-    </div>
-    {#each roles as role}
-        <CustomBadge toDisplay="{role.name}"
-                     onClick="{() => selectRole(role)}"
-                     onDestroy="{() => deleteRole(role)}"
-                     deleteButton="{role.name === 'Default' || role.name === 'Admin'}"/>
-    {/each}
-</div>
-
-<form>
-    <div>
-        <hr>
-        {#if selectedRole || newRoleToggle}
-
-            <div class="mt-5 mb-5">
-                <Label for="roleName" class="text-black ml-10">Role name</Label>
-                {#if selectedRole.name === "Default" || selectedRole.name === "Admin"}
-                    <Input class="text-black ml-10 max-w-[250px]" type="text" id="roleName" required disabled bind:value={selectedRole.name}/>
-                {:else}
-                    <Input class="text-black ml-10 max-w-[250px]" type="text" id="roleName" required bind:value={selectedRole.name}/>
-                {/if}
+                    setupAllAuthoritiesList();}}">
+                <img src="{plusIcon}"/>
             </div>
-
-            {#each authoritiesDisplay as authority}
-                <CustomAuthoritySettingsLabel onToggle={(event) => addOrRemoveAuthorities(event, authority)} toggled={authority.checked} title={authority.title} body={authority.body}/>
-                <hr/>
+            {#each roles as role}
+                <CustomBadge toDisplay="{role.name}"
+                             onClick="{() => selectRole(role)}"
+                             onDestroy="{() => deleteRole(role)}"
+                             deleteButton="{role.name === 'Default' || role.name === 'Admin'}"/>
             {/each}
+        {:else}
+            {#each roles as role}
+                <CustomBadge toDisplay="{role.name}"
+                             onClick="{() => selectRole(role)}"
+                             onDestroy="{() => deleteRole(role)}"
+                             deleteButton="{true}"/> <!-- this is backwards for some reason -->
+            {/each}
+        {/if}
+    </div>
 
-            <div>
-                {#if (selectedRole.name === "Default" || selectedRole.name === "Admin")}
-                    <Button class="mt-5 ml-10" color="red" on:click={() => deleteRole(selectedRole)}>Delete</Button>
+    <form>
+        <div>
+            <hr>
+            {#if selectedRole || newRoleToggle}
+                <div class="mt-5 mb-5">
+                    <Label for="roleName" class="text-black ml-10">Role name</Label>
+                    {#if selectedRole.name === "Default" || selectedRole.name === "Admin" || !BURole.authorityDTOList.some(a => a.name === "ChangePermissions")}
+                        <Input class="text-black ml-10 max-w-[250px]" type="text" id="roleName" required disabled bind:value={selectedRole.name}/>
+                    {:else}
+                        <Input class="text-black ml-10 max-w-[250px]" type="text" id="roleName" required bind:value={selectedRole.name}/>
+                    {/if}
+                </div>
+                {#if BURole.authorityDTOList.some(a => a.name === "ChangePermissions")}
+                    {#each authoritiesDisplay as authority}
+                        <CustomAuthoritySettingsLabel onToggle={(event) => addOrRemoveAuthorities(event, authority)} toggled={authority.checked} title={authority.title} body={authority.body}/>
+                        <hr/>
+                    {/each}
+                {:else}
+                    {#each authoritiesDisplay as authority}
+                        <CustomAuthoritySettingsLabel disabled="{true}" onToggle={(event) => addOrRemoveAuthorities(event, authority)} toggled={authority.checked} title={authority.title} body={authority.body}/>
+                        <hr/>
+                    {/each}
                 {/if}
-                {#if !newRoleToggle}
-                    <Button disabled="{selectedRole.name === '' || selectedRole.authorities.length < 1}" class="mt-5 ml-10" color="green" on:click={() => {
+
+                <div>
+                    {#if !newRoleToggle && selectedRole.name !== "Default" && selectedRole.name !== "Admin" && BURole.authorityDTOList.some(a => a.name === "ChangePermissions")}
+                        <Button class="mt-5 ml-10" color="red" on:click={() => deleteRole(selectedRole)}>Delete</Button>
+                    {/if}
+                    {#if !newRoleToggle && BURole.authorityDTOList.some(a => a.name === "ChangePermissions")}
+                        <Button disabled="{selectedRole.name === '' || selectedRole.authorities.length < 1}" class="mt-5 ml-10" color="green" on:click={() => {
                             selectedRole.name = document.getElementById("roleName").value;
                             editRole(selectedRole);
                         }}>Save</Button>
-                {:else}
-                    <Button disabled="{selectedRole.name === '' || selectedRole.authorities.length < 1}" class="mt-5 ml-10" color="green" on:click={() => {
+                    {:else if newRoleToggle}
+                        <Button disabled="{selectedRole.name === '' || selectedRole.authorities.length < 1}" class="mt-5 ml-10" color="green" on:click={() => {
                         selectedRole.name = document.getElementById("roleName").value;
                         createRole(selectedRole);
                     }}>Create</Button>
-                {/if}
+                        {:else}
+                        <Button  class="mt-5 ml-10" color="green" disabled="{true}">Save</Button>
+                    {/if}
 
                 <!--{#if edited === true}-->
                 <!--    <p>Not saved</p>-->
                 <!--{/if}-->
             </div>
 
-        {/if}
-    </div>
-</form>
+            {/if}
+        </div>
+    </form>
+{/if}
 
 
 
