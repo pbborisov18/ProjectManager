@@ -131,14 +131,17 @@
                 </div>
             {/if}
         </div>
-        <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>You aren't part of any teams in this project.</h1>
-            {#if projectBURole.authorityDTOList.some(a => a.name === "CreateChildren")}
+        {#if projectBURole.authorityDTOList.some(a => a.name === "CreateChildren")}
+            <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
+                <h1>You aren't part of any teams in this project.</h1>
                 <h1>Wait to be invited or make yourself one by clicking here.</h1>
-            {:else}
+            </div>
+        {:else}
+            <div class="mainDiv">
+                <h1>You aren't part of any teams in this project.</h1>
                 <h1>Wait to be invited.</h1>
-            {/if}
-        </div>
+            </div>
+        {/if}
     {:else if error === 500}
         <Header/>
         <p>Internal server error!</p>
@@ -195,7 +198,7 @@
         align-items: center;
         font-family: sans-serif;
         font-weight: lighter;
-        box-shadow: 0px 0px 1px 1px #BBBBBB;
+        box-shadow: 0 0 1px 1px #BBBBBB;
         overflow-y: auto;
         overflow-x: hidden;
     }
