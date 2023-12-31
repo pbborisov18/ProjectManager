@@ -90,8 +90,12 @@
                 <Input type="text" id="name" placeholder="Whiteboard name" bind:value={whiteboardName} required />
             </div>
             <Button on:click={redirectToLastPage} color="red">Cancel</Button>
-            <Button type="submit" class="w-32" color="blue">Create</Button>
-
+            {#if BURole?.authorityDTOList.some(a => a.name === "CreateWhiteboard")}
+                <Button type="submit" class="w-32" color="blue">Create</Button>
+            {:else}
+                <Button type="submit" class="w-32" color="blue" disabled>Create</Button>
+                <p class="col-span-2">No permission</p>
+            {/if}
         </div>
     </form>
 </div>
