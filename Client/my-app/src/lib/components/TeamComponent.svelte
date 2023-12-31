@@ -99,7 +99,23 @@
         BURole.businessUnit.name = name;
     }
 
-    let activeNum = 1;
+    function openSettings(){
+        for(const a of BURole.authorityDTOList){
+            if(a.name === "UpdateBU") {
+                activeNum = Math.min(activeNum, 1);
+                break;
+            } else if(a.name === "SeePermissions"){
+                activeNum = Math.min(activeNum, 2);
+            } else if(a.name === "ChangePermissions"){
+                activeNum = Math.min(activeNum, 3);
+            } else if(a.name === "ManageSentInvites"){
+                activeNum = Math.min(activeNum, 4);
+            }
+        }
+        settingsPopup = true;
+    }
+
+    let activeNum = 50;
 
 </script>
 
@@ -113,9 +129,9 @@
         </div>
     {/if}
 
-    {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
+    {#if BURole.authorityDTOList.some(a => a.name === "UpdateBU" || a.name === "SeePermissions" || a.name === "ChangePermissions" || a.name === "ManageSentInvites")}
         <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs"  on:click={() => settingsPopup = true}>
+        <div class="imageDivs" on:click={openSettings}>
             <img class="clickable not-selectable" src="{settingsIcon}" alt="" draggable="false">
         </div>
     {/if}
@@ -165,7 +181,7 @@
                         <SidebarItem label="Roles" active="{activeNum === 2}" on:click={() => activeNum = 2}/>
                     {/if}
                     <!--Might need to update roles for this-->
-                    {#if BURole.authorityDTOList.some(authority => authority.name === "ChangePermissions")}
+                    {#if BURole.authorityDTOList.some(authority => authority.name === "SeePermissions")}
                         <SidebarItem label="Users" active="{activeNum === 3}" on:click={() => activeNum = 3}/>
                     {/if}
                     {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}
