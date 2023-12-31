@@ -44,30 +44,23 @@
             .then(response => {
                 if (response.ok) {
                     //Show the user that everything was successful
-                    //Remove component after is reacted with
                     if(updatedInvite.state === "ACCEPTED"){
                         //Update the screen informing the user that the invite was accepted
                     } else if (updatedInvite.state === "DECLINED"){
                         //Update the screen informing the user that the invite was declined
                     }
+                    //Remove component after is reacted with
                     onDestroy();
                 } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
+                    //notification
                 } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
+                    userEmail.set("");
+                    loggedIn.set("");
                     goto("/login");
                 } else if(response.status === 403){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
+                    alert("No permission");
                 } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
+                    //notification
                 }
             }).catch(error => {
             console.error(error);
@@ -82,32 +75,24 @@
             },
             body: JSON.stringify(invite),
             credentials: "include"
-        })
-            .then(response => {
-                if (response.ok) {
-                    //Show the user that everything was successful
-                    //Remove component after is reacted with
-                    onDestroy();
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
-                } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                    goto("/login");
-                } else if(response.status === 403){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-            }).catch(error => {
-            console.error(error);
+        }).then(response => {
+            if (response.status === 200) {
+                //Show the user that everything was successful
+                //Remove component after is reacted with
+                onDestroy();
+            } else if(response.status === 400){
+                //notification
+            } else if(response.status === 401){
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 403){
+                alert("No permission");
+            } else if(response.status === 500){
+                //notification
+            }
+        }).catch(error => {
+            //Server's dead or something
         });
     }
 

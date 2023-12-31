@@ -40,6 +40,8 @@
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
+            } else if (response.status === 403){
+                alert("No permission");
             } else if(response.status === 500){
                 // notification
                 // addNotification("Something went wrong!");
@@ -81,6 +83,8 @@
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
+            } else if(response.status === 403){
+                alert("No permission");
             } else if(response.status === 500){
                 //No need to set the error here
                 // notification

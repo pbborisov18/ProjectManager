@@ -1,6 +1,6 @@
 <script>
 
-    import {company, loggedIn, project, userEmail} from "$lib/stores.js";
+    import {loggedIn, project, userEmail} from "$lib/stores.js";
     import loadingGif from "$lib/images/loading.gif";
     import plusIcon from "$lib/images/plus.png";
     import Header from "$lib/components/Header.svelte";
@@ -39,6 +39,8 @@
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
+            } else if (response.status === 403){
+                alert("No permission");
             } else if(response.status === 500){
                 // notification
                 // well my backend did something wrong
@@ -79,6 +81,8 @@
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
+            } else if(response.status === 403){
+                alert("No permission");
             } else if(response.status === 500){
                 //No need to set the error here
                 // notification

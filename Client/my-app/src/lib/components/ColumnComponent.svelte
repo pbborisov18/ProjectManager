@@ -58,6 +58,8 @@
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
+            } else if(response.status === 403){
+                alert("No permission");
             } else if(response.status === 500){
                 // notification
             }
@@ -99,6 +101,8 @@
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
+            } else if(response.status === 403){
+                alert("No permission");
             } else if(response.status === 500){
                 // notification
             }

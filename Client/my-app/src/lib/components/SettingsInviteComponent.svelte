@@ -46,7 +46,7 @@
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                // notification
+                alert("No permission");
             } else if(response.status === 500){
                 // notification
             }

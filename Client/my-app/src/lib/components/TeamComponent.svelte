@@ -5,12 +5,8 @@
     import deleteIcon from "$lib/images/delete.png";
     import {team, userEmail, loggedIn} from "$lib/stores.js";
     import {goto} from "$app/navigation";
-    import inviteToCompanyIcon from "$lib/images/invite.png";
     import {
         Button,
-        Input,
-        Label,
-        Listgroup,
         Modal,
         Sidebar,
         SidebarGroup,
@@ -52,7 +48,7 @@
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                // notification
+                alert("No permission");
             } else if(response.status === 500){
                 // notification
             }
@@ -84,7 +80,7 @@
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                // notification
+                alert("No permission");
             } else if(response.status === 500){
                 // notification
             }

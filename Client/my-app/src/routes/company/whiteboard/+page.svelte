@@ -34,10 +34,12 @@
                 //notification
             } else if(response.status === 401){
                 //notification
-                error = 401;
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
+            } else if(response.status === 403){
+                //notification
+                alert("No permission");
             } else if(response.status === 500){
                 //notification
             }
@@ -49,7 +51,7 @@
 </script>
 
 {#if BURole?.businessUnit?.whiteboard}
-    <WhiteboardPageComponent BURole="{BURole}" currentUrl="{'/company/createWhiteboard'}"/>
+    <WhiteboardPageComponent BURole="{BURole}"/>
 {/if}
 
 <style lang="scss">
