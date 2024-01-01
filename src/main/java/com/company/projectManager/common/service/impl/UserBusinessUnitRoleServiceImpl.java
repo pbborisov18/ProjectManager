@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 @Service
 public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleService {
 
-    private final UsersBusinessUnitsRolesRepository userBURoleRepository;
+    private final UsersBusinessUnitsRepository userBURepository;
 
     private final UsersBusinessUnitsMapper userBURoleMapper;
 
@@ -51,9 +51,9 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     private final AuthoritityRepository authoritityRepository;
 
-    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRolesRepository userBURoleRepository, UsersBusinessUnitsMapper userBURoleMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
+    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRepository userBURepository, UsersBusinessUnitsMapper userBURoleMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
                                            RoleRepository roleRepository, AuthoritityRepository authorityRepository) {
-        this.userBURoleRepository = userBURoleRepository;
+        this.userBURepository = userBURepository;
         this.userBURoleMapper = userBURoleMapper;
         this.userRepository = userRepository;
         this.businessUnitMapper = businessUnitMapper;
@@ -73,7 +73,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
             //TODO: This is a n+1 query. Will have to fix in the future
             List<BusinessUnitAuthoritiesDTO> userBURoles = userBURoleMapper.toAuthoritiesDTO(
-                    userBURoleRepository.findAllByUserEmailAndBusinessUnitType(email, TypeName.COMPANY));
+                    userBURepository.findAllByUserEmailAndBusinessUnitType(email, TypeName.COMPANY));
 
             if(userBURoles.isEmpty()){
                 throw new EntityNotFoundException("No UserBusinessUnitRoles found");
@@ -116,7 +116,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
             UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), company, List.of(adminRole));
-            userBURoleRepository.save(userBUrole);
+            userBURepository.save(userBUrole);
 
             //Add the required authorities without needing the user to re-log
             addAuthoritiesToSecurityContext(userBUrole);
@@ -158,19 +158,19 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
             //Delete all userBURole entries
             List<UserBusinessUnit> userBURoles =
-                    userBURoleRepository.findAllByUserEmailAndBusinessUnitId(email, companyDTO.id());
+                    userBURepository.findAllByUserEmailAndBusinessUnitId(email, companyDTO.id());
 
-            userBURoleRepository.deleteAll(userBURoles);
+            userBURepository.deleteAll(userBURoles);
 
             //Delete all child userBURole entries
             List<UserBusinessUnit> childUserBURoles =
-                    userBURoleRepository.findAllByUserEmailAndBusinessUnitCompanyId(email, companyDTO.id());
+                    userBURepository.findAllByUserEmailAndBusinessUnitCompanyId(email, companyDTO.id());
 
             //Delete all
-            userBURoleRepository.deleteAll(childUserBURoles);
+            userBURepository.deleteAll(childUserBURoles);
 
             //if no more users are left in the company delete it (and it's children ofc)
-            if(userBURoleRepository.countAllByBusinessUnitId(companyDTO.id()) == 0){
+            if(userBURepository.countAllByBusinessUnitId(companyDTO.id()) == 0){
                 deleteCompany(companyDTO);
             }
 
@@ -195,7 +195,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             roleRepository.deleteAllByBusinessUnitId(companyDTO.id());
 
             //Delete userBURoles
-            userBURoleRepository.deleteAllByBusinessUnitId(companyDTO.id());
+            userBURepository.deleteAllByBusinessUnitId(companyDTO.id());
 
             //helper method for children deletion
             deleteAllProjects(businessUnitRepository.findAllByCompanyId(companyDTO.id()));
@@ -223,7 +223,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             String email  = SecurityContextHolder.getContext().getAuthentication().getName();
 
             List<BusinessUnitAuthoritiesDTO> userBURoles = userBURoleMapper.toAuthoritiesDTO(
-                    userBURoleRepository.findAllByUserEmailAndBusinessUnitCompanyIdAndBusinessUnitType(email, companyDTO.id(), TypeName.PROJECT));
+                    userBURepository.findAllByUserEmailAndBusinessUnitCompanyIdAndBusinessUnitType(email, companyDTO.id(), TypeName.PROJECT));
 
             if(userBURoles.isEmpty()){
                 throw new EntityNotFoundException("No UserBusinessUnitRoles found");
@@ -266,7 +266,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
             UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), project, List.of(adminRole));
-            userBURoleRepository.save(userBUrole);
+            userBURepository.save(userBUrole);
 
             //Add the required authorities without needing the user to re-log
             addAuthoritiesToSecurityContext(userBUrole);
@@ -308,18 +308,18 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
             //Delete all userBURole entries
             List<UserBusinessUnit> userBURoles =
-                    userBURoleRepository.findAllByUserEmailAndBusinessUnitId(email, projectDTO.id());
+                    userBURepository.findAllByUserEmailAndBusinessUnitId(email, projectDTO.id());
 
-            userBURoleRepository.deleteAll(userBURoles);
+            userBURepository.deleteAll(userBURoles);
 
             //Delete all child userBURole entries
             List<UserBusinessUnit> childUserBURoles =
-                    userBURoleRepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id());
+                    userBURepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id());
 
-            userBURoleRepository.deleteAll(childUserBURoles);
+            userBURepository.deleteAll(childUserBURoles);
 
             //if no more users are left in the project delete it (and it's children ofc)
-            if(userBURoleRepository.countAllByBusinessUnitId(projectDTO.id()) == 0){
+            if(userBURepository.countAllByBusinessUnitId(projectDTO.id()) == 0){
                 deleteProject(projectDTO);
             }
 
@@ -346,7 +346,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             roleRepository.deleteAllByBusinessUnitId(projectDTO.id());
 
             //Delete userBURoles
-            userBURoleRepository.deleteAllByBusinessUnitId(projectDTO.id());
+            userBURepository.deleteAllByBusinessUnitId(projectDTO.id());
 
             //Here's a good idea to call children but they are taking only 1 dto. I'll just make a helper method.
             deleteAllTeams(businessUnitRepository.findAllByCompanyId(projectDTO.id()));
@@ -366,7 +366,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             List<BusinessUnitAuthoritiesDTO> userBURoles = userBURoleMapper.toAuthoritiesDTO(
-                    userBURoleRepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id()));
+                    userBURepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id()));
 
             if(userBURoles.isEmpty()){
                 throw new EntityNotFoundException("No UserBusinessUnitRoles found");
@@ -409,7 +409,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
             UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), team, List.of(adminRole, defaultRole));
-            userBURoleRepository.save(userBUrole);
+            userBURepository.save(userBUrole);
 
             //Add the required authorities without needing the user to re-log
             addAuthoritiesToSecurityContext(userBUrole);
@@ -451,12 +451,12 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
             //Delete all userBURole entries
             List<UserBusinessUnit> userBURoles =
-                    userBURoleRepository.findAllByUserEmailAndBusinessUnitId(email, teamDTO.id());
+                    userBURepository.findAllByUserEmailAndBusinessUnitId(email, teamDTO.id());
 
-            userBURoleRepository.deleteAll(userBURoles);
+            userBURepository.deleteAll(userBURoles);
 
             //if no more users are left in the project delete it (and it's children ofc)
-            if(userBURoleRepository.countAllByBusinessUnitId(teamDTO.id()) == 0){
+            if(userBURepository.countAllByBusinessUnitId(teamDTO.id()) == 0){
                 deleteTeam(teamDTO);
             }
 
@@ -482,7 +482,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             roleRepository.deleteAllByBusinessUnitId(teamDTO.id());
 
             //Delete userBURoles
-            userBURoleRepository.deleteAllByBusinessUnitId(teamDTO.id());
+            userBURepository.deleteAllByBusinessUnitId(teamDTO.id());
 
             //Finally delete team
             businessUnitRepository.deleteById(teamDTO.id());
@@ -543,7 +543,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             projects.forEach(project -> inviteRepository.deleteAllByBusinessUnitId(project.getId()));
 
             //Delete UBURs
-            projects.forEach(project -> userBURoleRepository.deleteAllByBusinessUnitId(project.getId()));
+            projects.forEach(project -> userBURepository.deleteAllByBusinessUnitId(project.getId()));
 
             //Delete Roles
             projects.forEach(project -> roleRepository.deleteAllByBusinessUnitId(project.getId()));
@@ -573,7 +573,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             teams.forEach(team -> inviteRepository.deleteAllByBusinessUnitId(team.getId()));
 
             //Delete UBURs
-            teams.forEach(team -> userBURoleRepository.deleteAllByBusinessUnitId(team.getId()));
+            teams.forEach(team -> userBURepository.deleteAllByBusinessUnitId(team.getId()));
 
             //Delete Roles
             teams.forEach(team -> roleRepository.deleteAllByBusinessUnitId(team.getId()));

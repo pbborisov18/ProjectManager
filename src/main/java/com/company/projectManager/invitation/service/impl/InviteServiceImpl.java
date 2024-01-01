@@ -8,7 +8,7 @@ import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.BusinessUnitMapper;
 import com.company.projectManager.common.repository.RoleRepository;
 import com.company.projectManager.common.repository.UserRepository;
-import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
+import com.company.projectManager.common.repository.UsersBusinessUnitsRepository;
 import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import com.company.projectManager.common.utils.InviteState;
 import com.company.projectManager.invitation.dto.InviteDTONoPass;
@@ -41,17 +41,17 @@ public class InviteServiceImpl implements InviteService {
     private final BusinessUnitMapper businessUnitMapper;
 
     private final UserBusinessUnitRoleService userBURoleService;
-    private final UsersBusinessUnitsRolesRepository usersBURolesRepository;
+    private final UsersBusinessUnitsRepository usersBURepository;
     private final RoleRepository roleRepository;
 
     public InviteServiceImpl(InviteRepository inviteRepository, InviteMapper inviteMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, UserBusinessUnitRoleService userBURoleService,
-                             UsersBusinessUnitsRolesRepository usersBURolesRepository,RoleRepository roleRepository) {
+                             UsersBusinessUnitsRepository usersBURepository, RoleRepository roleRepository) {
         this.inviteRepository = inviteRepository;
         this.inviteMapper = inviteMapper;
         this.userRepository = userRepository;
         this.businessUnitMapper = businessUnitMapper;
         this.userBURoleService = userBURoleService;
-        this.usersBURolesRepository = usersBURolesRepository;
+        this.usersBURepository = usersBURepository;
         this.roleRepository = roleRepository;
     }
 
@@ -101,7 +101,7 @@ public class InviteServiceImpl implements InviteService {
             //Make sure to (manually) cascade delete the invites
             inviteRepository.save(invite.get());
 
-            UserBusinessUnit UBU = usersBURolesRepository.save(
+            UserBusinessUnit UBU = usersBURepository.save(
                     new UserBusinessUnit(null,
                             invite.get().getReceiver(),
                             invite.get().getBusinessUnit(),

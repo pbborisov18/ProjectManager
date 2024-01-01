@@ -8,7 +8,7 @@ import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.repository.UserRepository;
-import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
+import com.company.projectManager.common.repository.UsersBusinessUnitsRepository;
 import com.company.projectManager.common.security.SecurityIds;
 import com.company.projectManager.common.security.SecurityUser;
 import com.company.projectManager.common.service.UserService;
@@ -37,13 +37,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
 
-    private final UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository;
+    private final UsersBusinessUnitsRepository usersBURepository;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, UsersBusinessUnitsRepository usersBURepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
-        this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
+        this.usersBURepository = usersBURepository;
     }
 
 
@@ -144,7 +144,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new UsernameNotFoundException("Email not found " + username);
         }
 
-        List<UserBusinessUnit> userBURole = usersBusinessUnitsRolesRepository.findAllByUserId(user.get().getId());
+        List<UserBusinessUnit> userBURole = usersBURepository.findAllByUserId(user.get().getId());
 
         List<GrantedAuthority> roles = new ArrayList<>();
 

@@ -5,8 +5,8 @@ import com.company.projectManager.common.utils.TypeName;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
-//TODO: To rename to UsersBusinessUnitsRepository
-public interface UsersBusinessUnitsRolesRepository extends CrudRepository<UserBusinessUnit, Long> {
+
+public interface UsersBusinessUnitsRepository extends CrudRepository<UserBusinessUnit, Long> {
 
     List<UserBusinessUnit> findAllByUserId(Long userId);
 

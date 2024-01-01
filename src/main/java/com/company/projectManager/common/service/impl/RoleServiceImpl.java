@@ -7,7 +7,7 @@ import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.RoleMapper;
 import com.company.projectManager.common.repository.RoleRepository;
-import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
+import com.company.projectManager.common.repository.UsersBusinessUnitsRepository;
 import com.company.projectManager.common.service.RoleService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
@@ -19,13 +19,13 @@ import java.util.*;
 @Service
 public class RoleServiceImpl implements RoleService {
 
-    private final UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository;
+    private final UsersBusinessUnitsRepository usersBURepository;
 
     private final RoleRepository roleRepository;
     private final RoleMapper roleMapper;
 
-    public RoleServiceImpl(UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository, RoleRepository roleRepository, RoleMapper roleMapper) {
-        this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
+    public RoleServiceImpl(UsersBusinessUnitsRepository usersBURepository, RoleRepository roleRepository, RoleMapper roleMapper) {
+        this.usersBURepository = usersBURepository;
         this.roleRepository = roleRepository;
         this.roleMapper = roleMapper;
     }
@@ -96,7 +96,7 @@ public class RoleServiceImpl implements RoleService {
 
             //Need check and re-assign roles for all users who have them
             //If the user has no roles left - give him default
-            List<UserBusinessUnit> uburs = usersBusinessUnitsRolesRepository.findAllByBusinessUnitIdAndRolesId(role.businessUnit().id(), role.id());
+            List<UserBusinessUnit> uburs = usersBURepository.findAllByBusinessUnitIdAndRolesId(role.businessUnit().id(), role.id());
 
             //if it's empty means no one has this role
             //so no need to do checks and assign new roles
@@ -108,7 +108,7 @@ public class RoleServiceImpl implements RoleService {
                     //so give him the default role of the current bu
 
                     if (current.getRoles().size() == 1L) {
-                        usersBusinessUnitsRolesRepository.save(
+                        usersBURepository.save(
                                 new UserBusinessUnit(
                                         null, current.getUser(), current.getBusinessUnit(),
                                         List.of(
@@ -123,7 +123,7 @@ public class RoleServiceImpl implements RoleService {
                 //Then we just delete the roles after we've made sure no user is left without a role
                 //by using save (remember we removed stuff inside the roles list inside)
                 //(If we had used delete we would just delete the ubur itself which is not what we want)
-                usersBusinessUnitsRolesRepository.saveAll(uburs);
+                usersBURepository.saveAll(uburs);
             }
 
             roleRepository.delete(foundRole.get());
