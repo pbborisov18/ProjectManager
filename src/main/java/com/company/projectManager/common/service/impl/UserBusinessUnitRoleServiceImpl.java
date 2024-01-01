@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Stream;
 
+//TODO: Rename to UserBusinessUnitServiceImpl
 @Service
 public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleService {
 
@@ -149,6 +150,11 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     public void leaveCompany(CompanyDTO companyDTO) throws FailedToLeaveException, FailedToDeleteException {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            //Delete invite for this user to this company
+            //Probably slow. You can just straight up make a delete method
+            inviteRepository.findInviteByBusinessUnitIdAndReceiverEmail(companyDTO.id(), email)
+                    .ifPresent(inviteRepository::delete);
 
             //Delete all userBURole entries
             List<UserBusinessUnit> userBURoles =
@@ -295,6 +301,11 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
+            //Delete invite for this user to this company
+            //Probably slow. You can just straight up make a delete method
+            inviteRepository.findInviteByBusinessUnitIdAndReceiverEmail(projectDTO.id(), email)
+                    .ifPresent(inviteRepository::delete);
+
             //Delete all userBURole entries
             List<UserBusinessUnit> userBURoles =
                     userBURoleRepository.findAllByUserEmailAndBusinessUnitId(email, projectDTO.id());
@@ -433,6 +444,11 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
+            //Delete invite for this user to this company
+            //Probably slow. You can just straight up make a delete method
+            inviteRepository.findInviteByBusinessUnitIdAndReceiverEmail(teamDTO.id(), email)
+                    .ifPresent(inviteRepository::delete);
+
             //Delete all userBURole entries
             List<UserBusinessUnit> userBURoles =
                     userBURoleRepository.findAllByUserEmailAndBusinessUnitId(email, teamDTO.id());
@@ -500,6 +516,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
         SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
 
+    //TODO: Move this shit in the role service
     public void addAuthoritiesToSecurityContext(UserBusinessUnit userBUrole){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
