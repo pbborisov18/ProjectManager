@@ -9,6 +9,7 @@ import com.company.projectManager.common.mapper.BusinessUnitMapper;
 import com.company.projectManager.common.repository.RoleRepository;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
+import com.company.projectManager.common.service.UserBusinessUnitRoleService;
 import com.company.projectManager.common.utils.InviteState;
 import com.company.projectManager.invitation.dto.InviteDTONoPass;
 import com.company.projectManager.invitation.entity.Invite;
@@ -39,16 +40,18 @@ public class InviteServiceImpl implements InviteService {
 
     private final BusinessUnitMapper businessUnitMapper;
 
-    private final UsersBusinessUnitsRolesRepository userBURoleRepository;
+    private final UserBusinessUnitRoleService userBURoleService;
+    private final UsersBusinessUnitsRolesRepository usersBURolesRepository;
     private final RoleRepository roleRepository;
 
-    public InviteServiceImpl(InviteRepository inviteRepository, InviteMapper inviteMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, UsersBusinessUnitsRolesRepository userBURoleRepository,
-                             RoleRepository roleRepository) {
+    public InviteServiceImpl(InviteRepository inviteRepository, InviteMapper inviteMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, UserBusinessUnitRoleService userBURoleService,
+                             UsersBusinessUnitsRolesRepository usersBURolesRepository,RoleRepository roleRepository) {
         this.inviteRepository = inviteRepository;
         this.inviteMapper = inviteMapper;
         this.userRepository = userRepository;
         this.businessUnitMapper = businessUnitMapper;
-        this.userBURoleRepository = userBURoleRepository;
+        this.userBURoleService = userBURoleService;
+        this.usersBURolesRepository = usersBURolesRepository;
         this.roleRepository = roleRepository;
     }
 
@@ -98,13 +101,16 @@ public class InviteServiceImpl implements InviteService {
             //Make sure to (manually) cascade delete the invites
             inviteRepository.save(invite.get());
 
-            userBURoleRepository.save(
+            UserBusinessUnit UBU = usersBURolesRepository.save(
                     new UserBusinessUnit(null,
                             invite.get().getReceiver(),
                             invite.get().getBusinessUnit(),
                             //Get the default role in the business unit
                             List.of(roleRepository.findByNameAndBusinessUnitId("Default", invite.get().getBusinessUnit().getId())
                                     .get())));
+
+            userBURoleService.addAuthoritiesToSecurityContext(UBU);
+            //Add permission to the current session
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e){
             throw new FailedToUpdateException("Failed to update! " + e.getMessage());
         }

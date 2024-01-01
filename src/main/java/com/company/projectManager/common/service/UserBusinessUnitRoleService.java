@@ -5,12 +5,13 @@ import com.company.projectManager.common.dto.*;
 import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
 import com.company.projectManager.common.dto.businessUnit.ProjectDTO;
 import com.company.projectManager.common.dto.businessUnit.TeamDTO;
+import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 
 
 import java.util.List;
 
-
+//TODO: Fix naming
 public interface UserBusinessUnitRoleService {
 
     //I'd rather leave all those methods instead of having countless `if` checks inside
@@ -53,4 +54,6 @@ public interface UserBusinessUnitRoleService {
     void deleteTeam(TeamDTO teamDTO) throws FailedToDeleteException;
 
     //////////////////////////////////////////////////////////////////////////////////////////
+
+    void addAuthoritiesToSecurityContext(UserBusinessUnit userBU);
 }
