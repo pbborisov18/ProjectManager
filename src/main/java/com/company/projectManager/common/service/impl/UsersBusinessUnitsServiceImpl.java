@@ -10,7 +10,7 @@ import com.company.projectManager.common.mapper.BusinessUnitMapper;
 import com.company.projectManager.common.mapper.UsersBusinessUnitsMapper;
 import com.company.projectManager.common.repository.*;
 import com.company.projectManager.common.security.SecurityIds;
-import com.company.projectManager.common.service.UserBusinessUnitRoleService;
+import com.company.projectManager.common.service.UsersBusinessUnitsService;
 import com.company.projectManager.common.utils.TypeName;
 import com.company.projectManager.invitation.repository.InviteRepository;
 import jakarta.validation.ConstraintViolationException;
@@ -26,9 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Stream;
 
-//TODO: Rename to UserBusinessUnitServiceImpl
 @Service
-public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleService {
+public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService {
 
     private final UsersBusinessUnitsRepository userBURepository;
 
@@ -51,8 +50,8 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     private final AuthoritityRepository authoritityRepository;
 
-    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRepository userBURepository, UsersBusinessUnitsMapper userBUMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
-                                           RoleRepository roleRepository, AuthoritityRepository authorityRepository) {
+    public UsersBusinessUnitsServiceImpl(UsersBusinessUnitsRepository userBURepository, UsersBusinessUnitsMapper userBUMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
+                                         RoleRepository roleRepository, AuthoritityRepository authorityRepository) {
         this.userBURepository = userBURepository;
         this.userBUMapper = userBUMapper;
         this.userRepository = userRepository;

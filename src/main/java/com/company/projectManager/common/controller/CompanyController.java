@@ -3,7 +3,7 @@ package com.company.projectManager.common.controller;
 import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
 import com.company.projectManager.common.dto.BusinessUnitAuthoritiesDTO;
 import com.company.projectManager.common.exception.*;
-import com.company.projectManager.common.service.UserBusinessUnitRoleService;
+import com.company.projectManager.common.service.UsersBusinessUnitsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,17 +14,17 @@ import java.util.List;
 @RestController
 public class CompanyController {
 
-    private final UserBusinessUnitRoleService userBusinessUnitRoleService;
+    private final UsersBusinessUnitsService usersBusinessUnitsService;
 
-    public CompanyController(UserBusinessUnitRoleService userBusinessUnitRoleService) {
-        this.userBusinessUnitRoleService = userBusinessUnitRoleService;
+    public CompanyController(UsersBusinessUnitsService usersBusinessUnitsService) {
+        this.usersBusinessUnitsService = usersBusinessUnitsService;
     }
 
     @GetMapping("/companies")
     public ResponseEntity<Object> getAllCompaniesTheUserIsPartOf(){
         try {
             List<BusinessUnitAuthoritiesDTO> userBusinessUnitRoleDTOs =
-                    userBusinessUnitRoleService.findAllDistinctCompaniesByAuthenticatedUser();
+                    usersBusinessUnitsService.findAllDistinctCompaniesByAuthenticatedUser();
 
             if(userBusinessUnitRoleDTOs.isEmpty()){
                 return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.NO_CONTENT);
@@ -43,7 +43,7 @@ public class CompanyController {
     @PostMapping("/createCompany")
     public ResponseEntity<Object> createCompany(@RequestBody CompanyDTO companyDTO){
         try {
-            userBusinessUnitRoleService.createCompany(companyDTO);
+            usersBusinessUnitsService.createCompany(companyDTO);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (UserUnauthenticatedException e) { //Pretty much useless check as it should never happen
@@ -58,7 +58,7 @@ public class CompanyController {
     @PreAuthorize("authorityCheck(#companyDTO.id(), \"UpdateBU\")")
     public ResponseEntity<Object> updateCompany(@RequestBody CompanyDTO companyDTO){
         try {
-            userBusinessUnitRoleService.updateCompany(companyDTO);
+            usersBusinessUnitsService.updateCompany(companyDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (EntityNotFoundException e){
@@ -72,7 +72,7 @@ public class CompanyController {
     @PreAuthorize("partOfBU(#companyDTO.id())")
     public ResponseEntity<Object> leaveCompany(@RequestBody CompanyDTO companyDTO){
         try {
-            userBusinessUnitRoleService.leaveCompany(companyDTO);
+            usersBusinessUnitsService.leaveCompany(companyDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (FailedToDeleteException | FailedToLeaveException e) {
@@ -84,7 +84,7 @@ public class CompanyController {
     @PreAuthorize("authorityCheck(#companyDTO.id(), \"DeleteBU\")")
     public ResponseEntity<Object> deleteCompany(@RequestBody CompanyDTO companyDTO){
         try {
-            userBusinessUnitRoleService.deleteCompany(companyDTO);
+            usersBusinessUnitsService.deleteCompany(companyDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (FailedToDeleteException e) {

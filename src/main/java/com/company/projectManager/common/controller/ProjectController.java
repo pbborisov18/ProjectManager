@@ -5,7 +5,7 @@ import com.company.projectManager.common.dto.BusinessUnitAuthoritiesDTO;
 import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
 import com.company.projectManager.common.dto.businessUnit.ProjectDTO;
 import com.company.projectManager.common.exception.*;
-import com.company.projectManager.common.service.UserBusinessUnitRoleService;
+import com.company.projectManager.common.service.UsersBusinessUnitsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,10 +16,10 @@ import java.util.List;
 @RestController
 public class ProjectController {
 
-    private final UserBusinessUnitRoleService userBusinessUnitRoleService;
+    private final UsersBusinessUnitsService usersBUService;
 
-    public ProjectController(UserBusinessUnitRoleService userBusinessUnitRoleService) {
-        this.userBusinessUnitRoleService = userBusinessUnitRoleService;
+    public ProjectController(UsersBusinessUnitsService usersBUService) {
+        this.usersBUService = usersBUService;
     }
 
     @PostMapping("/company/projects")
@@ -27,7 +27,7 @@ public class ProjectController {
     public ResponseEntity<Object> getAllProjectsOfCompany(@RequestBody CompanyDTO companyDTO){
         try {
             List<BusinessUnitAuthoritiesDTO> userBusinessUnitRoleDTOs =
-                    userBusinessUnitRoleService.findAllProjectsByAuthenticatedUserAndCompany(companyDTO);
+                    usersBUService.findAllProjectsByAuthenticatedUserAndCompany(companyDTO);
 
             if(userBusinessUnitRoleDTOs.isEmpty()){
                 return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.NO_CONTENT);
@@ -46,7 +46,7 @@ public class ProjectController {
     @PreAuthorize("authorityCheck(#projectDTO.company().id(), \"CreateChildren\")")
     public ResponseEntity<Object> createProject(@RequestBody ProjectDTO projectDTO){
         try {
-            userBusinessUnitRoleService.createProject(projectDTO);
+            usersBUService.createProject(projectDTO);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (UserUnauthenticatedException e) { //Pretty much useless check as it should never happen
@@ -61,7 +61,7 @@ public class ProjectController {
     @PreAuthorize("authorityCheck(#projectDTO.id(), \"UpdateBU\")")
     public ResponseEntity<Object> updateProject(@RequestBody ProjectDTO projectDTO){
         try {
-            userBusinessUnitRoleService.updateProject(projectDTO);
+            usersBUService.updateProject(projectDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (FailedToUpdateException e) {
@@ -75,7 +75,7 @@ public class ProjectController {
     @PreAuthorize("partOfBU(#projectDTO.id())")
     public ResponseEntity<Object> leaveProject(@RequestBody ProjectDTO projectDTO){
         try {
-            userBusinessUnitRoleService.leaveProject(projectDTO);
+            usersBUService.leaveProject(projectDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (FailedToDeleteException | FailedToLeaveException e) {
@@ -87,7 +87,7 @@ public class ProjectController {
     @PreAuthorize("authorityCheck(#projectDTO.id(), \"DeleteBU\")")
     public ResponseEntity<Object> deleteProject(@RequestBody ProjectDTO projectDTO){
         try {
-            userBusinessUnitRoleService.deleteProject(projectDTO);
+            usersBUService.deleteProject(projectDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (FailedToDeleteException e) {

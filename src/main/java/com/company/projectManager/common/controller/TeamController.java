@@ -4,7 +4,7 @@ import com.company.projectManager.common.dto.BusinessUnitAuthoritiesDTO;
 import com.company.projectManager.common.dto.businessUnit.ProjectDTO;
 import com.company.projectManager.common.dto.businessUnit.TeamDTO;
 import com.company.projectManager.common.exception.*;
-import com.company.projectManager.common.service.UserBusinessUnitRoleService;
+import com.company.projectManager.common.service.UsersBusinessUnitsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,10 +15,10 @@ import java.util.List;
 @RestController
 public class TeamController {
 
-    private final UserBusinessUnitRoleService userBusinessUnitRoleService;
+    private final UsersBusinessUnitsService usersBUService;
 
-    public TeamController(UserBusinessUnitRoleService userBusinessUnitRoleService) {
-        this.userBusinessUnitRoleService = userBusinessUnitRoleService;
+    public TeamController(UsersBusinessUnitsService usersBUService) {
+        this.usersBUService = usersBUService;
     }
 
     @PostMapping("/company/project/teams")
@@ -26,7 +26,7 @@ public class TeamController {
     public ResponseEntity<Object> getAllTeamsOfProject(@RequestBody ProjectDTO projectDTO){
         try {
             List<BusinessUnitAuthoritiesDTO> userBusinessUnitRoleDTOs =
-                    userBusinessUnitRoleService.findAllTeamsByAuthenticatedUserAndProject(projectDTO);
+                    usersBUService.findAllTeamsByAuthenticatedUserAndProject(projectDTO);
 
             if(userBusinessUnitRoleDTOs.isEmpty()){
                 return new ResponseEntity<>(userBusinessUnitRoleDTOs, HttpStatus.NO_CONTENT);
@@ -45,7 +45,7 @@ public class TeamController {
     @PreAuthorize("authorityCheck(#teamDTO.project().id(), \"CreateChildren\")")
     public ResponseEntity<Object> createTeam(@RequestBody TeamDTO teamDTO){
         try {
-            userBusinessUnitRoleService.createTeam(teamDTO);
+            usersBUService.createTeam(teamDTO);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (UserUnauthenticatedException e) { //Pretty much useless check as it should never happen
@@ -60,7 +60,7 @@ public class TeamController {
     @PreAuthorize("authorityCheck(#teamDTO.id(), \"UpdateBU\")")
     public ResponseEntity<Object> updateTeam(@RequestBody TeamDTO teamDTO){
         try {
-            userBusinessUnitRoleService.updateTeam(teamDTO);
+            usersBUService.updateTeam(teamDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (FailedToUpdateException e) {
@@ -74,7 +74,7 @@ public class TeamController {
     @PreAuthorize("partOfBU(#teamDTO.id())")
     public ResponseEntity<Object> leaveTeam(@RequestBody TeamDTO teamDTO){
         try {
-            userBusinessUnitRoleService.leaveTeam(teamDTO);
+            usersBUService.leaveTeam(teamDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (FailedToDeleteException | FailedToLeaveException e) {
@@ -87,7 +87,7 @@ public class TeamController {
     @PreAuthorize("authorityCheck(#teamDTO.id(), \"DeleteBU\")")
     public ResponseEntity<Object> deleteTeam(@RequestBody TeamDTO teamDTO){
         try {
-            userBusinessUnitRoleService.deleteTeam(teamDTO);
+            usersBUService.deleteTeam(teamDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (FailedToDeleteException e) {
