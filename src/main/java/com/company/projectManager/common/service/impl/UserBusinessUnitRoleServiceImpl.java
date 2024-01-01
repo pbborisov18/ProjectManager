@@ -32,7 +32,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     private final UsersBusinessUnitsRepository userBURepository;
 
-    private final UsersBusinessUnitsMapper userBURoleMapper;
+    private final UsersBusinessUnitsMapper userBUMapper;
 
 
     private final UserRepository userRepository;
@@ -51,10 +51,10 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
     private final AuthoritityRepository authoritityRepository;
 
-    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRepository userBURepository, UsersBusinessUnitsMapper userBURoleMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
+    public UserBusinessUnitRoleServiceImpl(UsersBusinessUnitsRepository userBURepository, UsersBusinessUnitsMapper userBUMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
                                            RoleRepository roleRepository, AuthoritityRepository authorityRepository) {
         this.userBURepository = userBURepository;
-        this.userBURoleMapper = userBURoleMapper;
+        this.userBUMapper = userBUMapper;
         this.userRepository = userRepository;
         this.businessUnitMapper = businessUnitMapper;
         this.businessUnitRepository = businessUnitRepository;
@@ -72,14 +72,15 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             //TODO: This is a n+1 query. Will have to fix in the future
-            List<BusinessUnitAuthoritiesDTO> userBURoles = userBURoleMapper.toAuthoritiesDTO(
+            //TODO: Better name needed for toAuthoritiesDTO method
+            List<BusinessUnitAuthoritiesDTO> userBUAuthorities = userBUMapper.toAuthoritiesDTO(
                     userBURepository.findAllByUserEmailAndBusinessUnitType(email, TypeName.COMPANY));
 
-            if(userBURoles.isEmpty()){
-                throw new EntityNotFoundException("No UserBusinessUnitRoles found");
+            if(userBUAuthorities.isEmpty()){
+                throw new EntityNotFoundException("No UserBusinessUnitAuthorities found");
             }
 
-            return userBURoles;
+            return userBUAuthorities;
 
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSelectException("Failed to select! " + e.getMessage());
@@ -115,11 +116,11 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                     company);
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
-            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), company, List.of(adminRole));
-            userBURepository.save(userBUrole);
+            UserBusinessUnit userBU = new UserBusinessUnit(null, user.get(), company, List.of(adminRole));
+            userBURepository.save(userBU);
 
             //Add the required authorities without needing the user to re-log
-            addAuthoritiesToSecurityContext(userBUrole);
+            addAuthoritiesToSecurityContext(userBU);
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
@@ -152,22 +153,22 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             //Delete invite for this user to this company
-            //Probably slow. You can just straight up make a delete method
+            //Probably "slow". You can just straight up make a delete method
             inviteRepository.findInviteByBusinessUnitIdAndReceiverEmail(companyDTO.id(), email)
                     .ifPresent(inviteRepository::delete);
 
-            //Delete all userBURole entries
-            List<UserBusinessUnit> userBURoles =
+            //Delete all userBU entries
+            List<UserBusinessUnit> userBUs =
                     userBURepository.findAllByUserEmailAndBusinessUnitId(email, companyDTO.id());
 
-            userBURepository.deleteAll(userBURoles);
+            userBURepository.deleteAll(userBUs);
 
             //Delete all child userBURole entries
-            List<UserBusinessUnit> childUserBURoles =
+            List<UserBusinessUnit> childUserBUs =
                     userBURepository.findAllByUserEmailAndBusinessUnitCompanyId(email, companyDTO.id());
 
             //Delete all
-            userBURepository.deleteAll(childUserBURoles);
+            userBURepository.deleteAll(childUserBUs);
 
             //if no more users are left in the company delete it (and it's children ofc)
             if(userBURepository.countAllByBusinessUnitId(companyDTO.id()) == 0){
@@ -176,7 +177,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
             //Remove the required authorities without needing the user to re-log
             deleteAuthoritiesFromSecurityContext(
-                    Stream.concat(userBURoles.stream(), childUserBURoles.stream()).toList());
+                    Stream.concat(userBUs.stream(), childUserBUs.stream()).toList());
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
@@ -222,14 +223,14 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
         try {
             String email  = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            List<BusinessUnitAuthoritiesDTO> userBURoles = userBURoleMapper.toAuthoritiesDTO(
+            List<BusinessUnitAuthoritiesDTO> userBUAuthorities = userBUMapper.toAuthoritiesDTO(
                     userBURepository.findAllByUserEmailAndBusinessUnitCompanyIdAndBusinessUnitType(email, companyDTO.id(), TypeName.PROJECT));
 
-            if(userBURoles.isEmpty()){
-                throw new EntityNotFoundException("No UserBusinessUnitRoles found");
+            if(userBUAuthorities.isEmpty()){
+                throw new EntityNotFoundException("No UserBusinessUnitAuthorities found");
             }
 
-            return userBURoles;
+            return userBUAuthorities;
 
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSelectException("Failed to select! " + e.getMessage());
@@ -265,11 +266,11 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                     project);
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
-            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), project, List.of(adminRole));
-            userBURepository.save(userBUrole);
+            UserBusinessUnit userBU = new UserBusinessUnit(null, user.get(), project, List.of(adminRole));
+            userBURepository.save(userBU);
 
             //Add the required authorities without needing the user to re-log
-            addAuthoritiesToSecurityContext(userBUrole);
+            addAuthoritiesToSecurityContext(userBU);
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
@@ -307,16 +308,16 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                     .ifPresent(inviteRepository::delete);
 
             //Delete all userBURole entries
-            List<UserBusinessUnit> userBURoles =
+            List<UserBusinessUnit> userBUs =
                     userBURepository.findAllByUserEmailAndBusinessUnitId(email, projectDTO.id());
 
-            userBURepository.deleteAll(userBURoles);
+            userBURepository.deleteAll(userBUs);
 
             //Delete all child userBURole entries
-            List<UserBusinessUnit> childUserBURoles =
+            List<UserBusinessUnit> childUserBUs =
                     userBURepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id());
 
-            userBURepository.deleteAll(childUserBURoles);
+            userBURepository.deleteAll(childUserBUs);
 
             //if no more users are left in the project delete it (and it's children ofc)
             if(userBURepository.countAllByBusinessUnitId(projectDTO.id()) == 0){
@@ -325,7 +326,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
 
             //Remove the required authorities without needing the user to re-log
             deleteAuthoritiesFromSecurityContext(
-                    Stream.concat(userBURoles.stream(), childUserBURoles.stream()).toList());
+                    Stream.concat(userBUs.stream(), childUserBUs.stream()).toList());
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
@@ -365,14 +366,14 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            List<BusinessUnitAuthoritiesDTO> userBURoles = userBURoleMapper.toAuthoritiesDTO(
+            List<BusinessUnitAuthoritiesDTO> userBUAuthorities = userBUMapper.toAuthoritiesDTO(
                     userBURepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id()));
 
-            if(userBURoles.isEmpty()){
+            if(userBUAuthorities.isEmpty()){
                 throw new EntityNotFoundException("No UserBusinessUnitRoles found");
             }
 
-            return userBURoles;
+            return userBUAuthorities;
 
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSelectException("Failed to select! " + e.getMessage());
@@ -408,11 +409,11 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
                     team);
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
-            UserBusinessUnit userBUrole = new UserBusinessUnit(null, user.get(), team, List.of(adminRole, defaultRole));
-            userBURepository.save(userBUrole);
+            UserBusinessUnit userBU = new UserBusinessUnit(null, user.get(), team, List.of(adminRole, defaultRole));
+            userBURepository.save(userBU);
 
             //Add the required authorities without needing the user to re-log
-            addAuthoritiesToSecurityContext(userBUrole);
+            addAuthoritiesToSecurityContext(userBU);
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
@@ -449,11 +450,11 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             inviteRepository.findInviteByBusinessUnitIdAndReceiverEmail(teamDTO.id(), email)
                     .ifPresent(inviteRepository::delete);
 
-            //Delete all userBURole entries
-            List<UserBusinessUnit> userBURoles =
+            //Delete all userBU entries
+            List<UserBusinessUnit> userBUs =
                     userBURepository.findAllByUserEmailAndBusinessUnitId(email, teamDTO.id());
 
-            userBURepository.deleteAll(userBURoles);
+            userBURepository.deleteAll(userBUs);
 
             //if no more users are left in the project delete it (and it's children ofc)
             if(userBURepository.countAllByBusinessUnitId(teamDTO.id()) == 0){
@@ -461,7 +462,7 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
             }
 
             //Remove the required authorities without needing the user to re-log
-            deleteAuthoritiesFromSecurityContext(userBURoles);
+            deleteAuthoritiesFromSecurityContext(userBUs);
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
@@ -495,17 +496,17 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
     //////////////////////////////////////////////////////////////////////////////////////////
 
     //To put it simply I'm not sure if I'm doing something wrong (probably I am)
-    public void deleteAuthoritiesFromSecurityContext(List<UserBusinessUnit> userBURoles) throws NoSuchElementException{
+    public void deleteAuthoritiesFromSecurityContext(List<UserBusinessUnit> userBUs) throws NoSuchElementException{
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
 
         //No way people prefer this rather than 2 for loops. What hell man
-        //Whole point of this monstrosity is to filter out/remove every role that is in childUserBURoles and userBURoles
+        //Whole point of this monstrosity is to filter out/remove every role that is in userBUs
         //from the current session
         updatedAuthorities.addAll(
                 auth.getAuthorities().stream().filter(securityId ->
-                                userBURoles.stream().noneMatch(childUBUR ->
+                                userBUs.stream().noneMatch(childUBUR ->
                                         childUBUR.getId() ==
                                                 Integer.parseInt(
                                                         Arrays.stream(securityId.getAuthority().split(":")).findFirst().get())))
@@ -516,17 +517,18 @@ public class UserBusinessUnitRoleServiceImpl implements UserBusinessUnitRoleServ
         SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
 
-    //TODO: Move this shit in the role service
-    public void addAuthoritiesToSecurityContext(UserBusinessUnit userBUrole){
+    //TODO: Move this shit to the role service
+    //Probably a good idea to modify it to take a list
+    public void addAuthoritiesToSecurityContext(UserBusinessUnit userBU){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
         updatedAuthorities.addAll(auth.getAuthorities());//add the authorities we already had
         updatedAuthorities.add(new SecurityIds( //Add the new authority
-                userBUrole.getId(),
-                userBUrole.getUser().getId(),
-                userBUrole.getBusinessUnit().getId(),
-                userBUrole.getRoles().stream().mapToLong(Role::getId).boxed().toList()
+                userBU.getId(),
+                userBU.getUser().getId(),
+                userBU.getBusinessUnit().getId(),
+                userBU.getRoles().stream().mapToLong(Role::getId).boxed().toList()
         ));
 
         Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(), updatedAuthorities);
