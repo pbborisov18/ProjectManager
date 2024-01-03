@@ -11,11 +11,9 @@ import java.util.List;
 @Repository
 public interface BusinessUnitRepository extends CrudRepository<BusinessUnit, Long> {
 
-//    List<BusinessUnit> findAllByType(TypeName name);
-
     List<BusinessUnit> findAllByCompanyId(Long id);
 
-//    List<BusinessUnit> findAllByCompanyAndType(BusinessUnit businessUnit, TypeName typeName);
+    List<BusinessUnit> findAllByCompanyIdAndType(Long companyId, TypeName typeName);
 
     List<BusinessUnit> findAllByProjectId(Long id);
 }

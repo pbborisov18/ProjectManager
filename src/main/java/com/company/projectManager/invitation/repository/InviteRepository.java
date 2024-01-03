@@ -16,4 +16,11 @@ public interface InviteRepository extends CrudRepository<Invite, Long>{
     List<Invite> findAllByBusinessUnitId(Long businessUnitId);
 
     void deleteAllByBusinessUnitId(Long businessUnitId);
+
+    void deleteAllByReceiverEmailAndBusinessUnitCompanyId(String email, Long businessUnitId);
+
+    void deleteAllByReceiverEmailAndBusinessUnitProjectId(String email, Long businessUnitId);
+
+    void deleteByReceiverEmailAndBusinessUnitId(String email, Long businessUnitId);
+
 }

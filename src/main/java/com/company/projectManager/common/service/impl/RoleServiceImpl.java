@@ -94,7 +94,7 @@ public class RoleServiceImpl implements RoleService {
                 throw new InvalidRoleRequest("These roles aren't allowed to be deleted");
             }
 
-            //Need check and re-assign roles for all users who have them
+            //Need to check and re-assign roles for all users who have them
             //If the user has no roles left - give him default
             List<UserBusinessUnit> uburs = usersBURepository.findAllByBusinessUnitIdAndRolesId(role.businessUnit().id(), role.id());
 
@@ -133,12 +133,4 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
-    @Transactional
-    public List<RoleDTO> findRolesByIds(List<Long> ids) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            return roleMapper.toDTO(roleRepository.findAllById(ids));
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Failed to select!" + e.getMessage());
-        }
-    }
 }

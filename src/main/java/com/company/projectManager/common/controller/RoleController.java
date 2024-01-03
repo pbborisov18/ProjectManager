@@ -30,7 +30,7 @@ public class RoleController {
             List<RoleDTO> roles = roleService.findRolesByBusinessUnit(businessUnitDTO);
 
             return new ResponseEntity<>(roles, HttpStatus.OK);
-        } catch (FailedToSelectException | InvalidRoleRequest e) {
+        } catch (FailedToSelectException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
