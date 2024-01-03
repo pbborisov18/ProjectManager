@@ -62,10 +62,11 @@
             credentials: "include"
         }).then(response=>{
             if (response.status === 201) {
-                //TODO: Make the backend return the object cuz this is a waste
-                createBUName = "";
-                createPopup = false;
-                getCompanies();
+                response.json().then( data => {
+                    createBUName = "";
+                    createPopup = false;
+                    BURoles = [...BURoles, data];
+                });
             } else if(response.status === 400){
                 //No need to set the error here
                 // notification

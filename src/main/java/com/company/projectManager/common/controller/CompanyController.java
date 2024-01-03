@@ -43,9 +43,9 @@ public class CompanyController {
     @PostMapping("/createCompany")
     public ResponseEntity<Object> createCompany(@RequestBody CompanyDTO companyDTO){
         try {
-            usersBusinessUnitsService.createCompany(companyDTO);
+            BusinessUnitAuthoritiesDTO useBusinessUnitAuthoritiesDTO =  usersBusinessUnitsService.createCompany(companyDTO);
 
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(useBusinessUnitAuthoritiesDTO, HttpStatus.CREATED);
         } catch (UserUnauthenticatedException e) { //Pretty much useless check as it should never happen
             //If it is triggerred I guess the security is down. very bad...
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);

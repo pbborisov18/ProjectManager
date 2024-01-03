@@ -25,7 +25,7 @@ public interface UsersBusinessUnitsService {
 
     List<BusinessUnitAuthoritiesDTO> findAllDistinctCompaniesByAuthenticatedUser() throws FailedToSelectException, EntityNotFoundException;
 
-    void createCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSaveException;
+    BusinessUnitAuthoritiesDTO createCompany(CompanyDTO companyDTO) throws UserUnauthenticatedException, FailedToSaveException;
 
     void updateCompany(CompanyDTO companyDTO) throws FailedToUpdateException, EntityNotFoundException;
 
