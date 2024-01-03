@@ -15,6 +15,7 @@
     import EditBUComponent from "$lib/components/EditBUComponent.svelte";
     import SettingsInviteComponent from "$lib/components/SettingsInviteComponent.svelte";
     import RoleSettingsComponent from "$lib/components/RoleSettingsComponent.svelte";
+    import SettingsUsersComponent from "$lib/components/SettingsUsersComponent.svelte";
 
     let leavePopup = false;
     let leaveButtonDisable = false;
@@ -236,7 +237,7 @@
                 <RoleSettingsComponent bind:BURole={BURole}/>
             {/if}
             {#if activeNum === 3}
-                <!--User role management component-->
+                <SettingsUsersComponent BURole={BURole}/>
             {/if}
             {#if activeNum === 4}
                 <SettingsInviteComponent BURole={BURole}/>
