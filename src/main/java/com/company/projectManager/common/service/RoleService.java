@@ -10,7 +10,7 @@ public interface RoleService {
 
     List<RoleDTO> findRolesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException;
 
-    void saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest;
+    RoleDTO saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest;
 
     void updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException;
 

@@ -39,9 +39,9 @@ public class RoleController {
     @PreAuthorize("authorityCheck(#role.businessUnit().id(), \"ChangePermissions\")") //Hopefully nobody sends an empty list...
     public ResponseEntity<Object> createPermissions(@RequestBody RoleDTO role){
         try {
-            roleService.saveRole(role);
+            RoleDTO roleDTO = roleService.saveRole(role);
 
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(roleDTO, HttpStatus.OK);
         } catch (FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (InvalidRoleRequest e) {

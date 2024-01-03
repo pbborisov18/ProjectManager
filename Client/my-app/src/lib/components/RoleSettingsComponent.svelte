@@ -15,7 +15,6 @@
     let authoritiesDisplay = [];
 
     let selectedRole;
-
     let newRoleToggle = false;
 
     function addOrRemoveAuthorities(event, authority) {
@@ -211,9 +210,11 @@
             credentials: "include"
         }).then(response=>{
             if (response.status === 200) {
-                //TODO: Make the endpoint return the object instead of calling for all roles again
-                //and then select it here
-                findAllRoles();
+                response.json().then(data => {
+                    roles = [...roles, data];
+                    selectedRole = data;
+                    newRoleToggle = false;
+                });
             } else if(response.status === 400){
                 // notification
             } else if(response.status === 401){
@@ -242,14 +243,16 @@
     <div class="mainRoleDiv flex-wrap flex gap-1">
         {#if BURole.authorityDTOList.some(a => a.name === "ChangePermissions")}
             <div class="plusDiv clickable not-selectable"
-                 on:click="{() => {newRoleToggle = true;
-                    selectedRole = {
+                 on:click="{() => {
+                        newRoleToggle = true;
+                        selectedRole = {
                                 'id': null,
                                 'businessUnit': BURole.businessUnit,
                                 'name': '',
                                 'authorities': []
                             };
-                    setupAllAuthoritiesList();}}">
+                        setupAllAuthoritiesList();
+                 }}">
                 <img src="{plusIcon}"/>
             </div>
             {#each roles as role}

@@ -45,13 +45,14 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
-    public void saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest {
+    public RoleDTO saveRole(RoleDTO roleDTO) throws FailedToSaveException, InvalidRoleRequest {
         try {
-            if(roleRepository.countAllByBusinessUnitId(role.businessUnit().id()) > 50){
+            if(roleRepository.countAllByBusinessUnitId(roleDTO.businessUnit().id()) > 50){
                 throw new InvalidRoleRequest("Too many roles!");
             }
 
-            roleRepository.save(roleMapper.toEntity(role));
+            Role role = roleRepository.save(roleMapper.toEntity(roleDTO));
+            return roleMapper.toDTO(role);
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSaveException("Failed to save!" + e.getMessage());
         }
