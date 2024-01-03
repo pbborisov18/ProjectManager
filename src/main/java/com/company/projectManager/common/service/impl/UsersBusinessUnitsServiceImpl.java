@@ -4,37 +4,37 @@ import com.company.projectManager.common.dto.*;
 import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
 import com.company.projectManager.common.dto.businessUnit.ProjectDTO;
 import com.company.projectManager.common.dto.businessUnit.TeamDTO;
+import com.company.projectManager.common.dto.user.UserNoPassDTO;
 import com.company.projectManager.common.entity.*;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.BusinessUnitMapper;
+import com.company.projectManager.common.mapper.RoleMapper;
+import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.mapper.UsersBusinessUnitsMapper;
 import com.company.projectManager.common.repository.*;
-import com.company.projectManager.common.security.SecurityIds;
 import com.company.projectManager.common.service.UsersBusinessUnitsService;
 import com.company.projectManager.common.utils.TypeName;
 import com.company.projectManager.invitation.repository.InviteRepository;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService {
 
-    private final UsersBusinessUnitsRepository userBURepository;
+    private final UsersBusinessUnitsRepository usersBURepository;
 
-    private final UsersBusinessUnitsMapper userBUMapper;
+    private final UsersBusinessUnitsMapper usersBUMapper;
 
 
     private final UserRepository userRepository;
+
+    private final UserMapper userMapper;
 
 
     private final BusinessUnitRepository businessUnitRepository;
@@ -47,25 +47,29 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
 
     private final RoleRepository roleRepository;
 
+    private final RoleMapper roleMapper;
+
 
     private final AuthoritityRepository authoritityRepository;
 
-    public UsersBusinessUnitsServiceImpl(UsersBusinessUnitsRepository userBURepository, UsersBusinessUnitsMapper userBUMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
-                                         RoleRepository roleRepository, AuthoritityRepository authorityRepository) {
-        this.userBURepository = userBURepository;
-        this.userBUMapper = userBUMapper;
+    public UsersBusinessUnitsServiceImpl(UsersBusinessUnitsRepository usersBURepository, UsersBusinessUnitsMapper usersBUMapper, UserRepository userRepository, UserMapper userMapper, BusinessUnitMapper businessUnitMapper, BusinessUnitRepository businessUnitRepository, InviteRepository inviteRepository,
+                                         RoleRepository roleRepository, RoleMapper roleMapper, AuthoritityRepository authorityRepository) {
+        this.usersBURepository = usersBURepository;
+        this.usersBUMapper = usersBUMapper;
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
         this.businessUnitMapper = businessUnitMapper;
         this.businessUnitRepository = businessUnitRepository;
         this.inviteRepository = inviteRepository;
         this.roleRepository = roleRepository;
+        this.roleMapper = roleMapper;
         this.authoritityRepository = authorityRepository;
     }
 
     @Transactional
     public List<BusinessUnitAuthoritiesDTO> findAllDistinctCompaniesByAuthenticatedUser() throws FailedToSelectException, EntityNotFoundException {
         try {
-            //It's safe to use the id here for it to be more performant. You can get it from the authorities, 2nd "id" (Check out the class SecurityIds)
+            //It's safe to use the id here for it to be more performant
             //Will do if more perf is needed but I doubt it would make a big difference for the life of this
             //This is for every single method here that needs to do something using the authenticated user
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -105,21 +109,17 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             businessUnitRepository.save(company);
 
             //Save the two roles every bu comes with
+            //TODO: Remove all the "unsafe" .get without elseThrow. (Pain in the ass to debug later)
             Role adminRole = new Role(null, "Admin",
                     (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
                     company);
-            //TODO: Remove all the "unsafe" .get without elseThrow cuz the default exceptions are bad
-            //Doesn't trigger roll back for some reason even though method is transactional. wtf?
             Role defaultRole = new Role(null, "Default",
                     List.of(authoritityRepository.findByName("InteractWithWhiteboard").get()),
                     company);
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
             UserBusinessUnit userBU = new UserBusinessUnit(null, user.get(), company, List.of(adminRole));
-            userBURepository.save(userBU);
-
-            //Add the required authorities without needing the user to re-log
-            addAuthoritiesToSecurityContext(userBU);
+            usersBURepository.save(userBU);
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
@@ -174,10 +174,6 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
                 deleteCompany(companyDTO);
             }
 
-            //Remove the required authorities without needing the user to re-log
-            deleteAuthoritiesFromSecurityContext(
-                    Stream.concat(userBUs.stream(), childUserBUs.stream()).toList());
-
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
         }
@@ -203,13 +199,6 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             //Finally delete company
             businessUnitRepository.deleteById(companyDTO.id());
 
-            //Not 100% necessary
-            //cuz in authorization I need to get values from the db. We just deleted the them.
-            //So they won't get through the authorization
-            //MAYBE TODO: Delete/remove the role from the SecurityContext
-//            SessionRegistry sessionRegistry = new SessionRegistryImpl();
-//
-//            sessionRegistry.getAllPrincipals();
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
         }
@@ -254,9 +243,8 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             BusinessUnit project = businessUnitMapper.toBusinessUnitEntity(projectDTO);
             businessUnitRepository.save(project);
 
-            //TODO: Remove all the "unsafe" .get without elseThrow cuz the default exceptions are bad
-            //(Took me way to long to figure out why)
             //Save the two roles every bu comes with
+            //TODO: Remove all the "unsafe" .get without elseThrow. (Pain in the ass to debug later)
             Role adminRole = new Role(null, "Admin",
                     (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
                     project);
@@ -266,10 +254,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
             UserBusinessUnit userBU = new UserBusinessUnit(null, user.get(), project, List.of(adminRole));
-            userBURepository.save(userBU);
-
-            //Add the required authorities without needing the user to re-log
-            addAuthoritiesToSecurityContext(userBU);
+            usersBURepository.save(userBU);
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
@@ -285,7 +270,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             Optional<BusinessUnit> bu = businessUnitRepository.findById(projectDTO.id());
 
             if(bu.isEmpty()){
-                throw new EntityNotFoundException("You can't update a company without id");
+                throw new EntityNotFoundException("You can't update a project without id");
             }
 
             bu.get().setName(projectDTO.name());
@@ -323,10 +308,6 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
                 deleteProject(projectDTO);
             }
 
-            //Remove the required authorities without needing the user to re-log
-            deleteAuthoritiesFromSecurityContext(
-                    Stream.concat(userBUs.stream(), childUserBUs.stream()).toList());
-
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
         }
@@ -336,12 +317,11 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
     public void deleteProject(ProjectDTO projectDTO) throws FailedToDeleteException {
         try {
             //If these are slow. Look into batch delete. Should be an ez change as I don't rely on cascading for deletion
-            //But isn't worth the extra effort for this project
+            //Worth a look in the future
 
             //Delete all invites for the project
             inviteRepository.deleteAllByBusinessUnitId(projectDTO.id());
 
-            //TODO: think about this more (prob will need a rework)
             //Delete all roles in the project
             roleRepository.deleteAllByBusinessUnitId(projectDTO.id());
 
@@ -398,21 +378,17 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             businessUnitRepository.save(team);
 
             //Save the two roles every bu comes with
+            //TODO: Remove all the "unsafe" .get without elseThrow. (Pain in the ass to debug later)
             Role adminRole = new Role(null, "Admin",
                     (List<Authority>) authoritityRepository.findAll(),//Get all authorities from the db
                     team);
-            //TODO: Remove all the "unsafe" .get without elseThrow cuz the default exceptions are bad
             Role defaultRole = new Role(null, "Default",
-                    //Probably add support for custom roles in the future
                     List.of(authoritityRepository.findByName("InteractWithWhiteboard").get()),
                     team);
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
             UserBusinessUnit userBU = new UserBusinessUnit(null, user.get(), team, List.of(adminRole, defaultRole));
-            userBURepository.save(userBU);
-
-            //Add the required authorities without needing the user to re-log
-            addAuthoritiesToSecurityContext(userBU);
+            usersBURepository.save(userBU);
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
@@ -460,9 +436,6 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
                 deleteTeam(teamDTO);
             }
 
-            //Remove the required authorities without needing the user to re-log
-            deleteAuthoritiesFromSecurityContext(userBUs);
-
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToLeaveException("Failed to leave! " + e.getMessage());
         }
@@ -477,7 +450,6 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             //Delete all invites for the team
             inviteRepository.deleteAllByBusinessUnitId(teamDTO.id());
 
-            //TODO: think about this more (prob will need a rework)
             //Delete all roles in the team
             roleRepository.deleteAllByBusinessUnitId(teamDTO.id());
 
@@ -540,11 +512,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
     @Transactional(propagation = Propagation.MANDATORY)
     public void deleteAllProjects(List<BusinessUnit> projects) throws FailedToDeleteException {
         try{
-            //Delete Invites
-            projects.forEach(project -> inviteRepository.deleteAllByBusinessUnitId(project.getId()));
-
-            //Delete UBURs
-            projects.forEach(project -> userBURepository.deleteAllByBusinessUnitId(project.getId()));
+            deleteAllUserBUsAndInvites(projects);
 
             //Delete Roles
             projects.forEach(project -> roleRepository.deleteAllByBusinessUnitId(project.getId()));
@@ -570,17 +538,27 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
     @Transactional(propagation = Propagation.MANDATORY)
     public void deleteAllTeams(List<BusinessUnit> teams) throws FailedToDeleteException {
         try{
-            //Delete Invites
-            teams.forEach(team -> inviteRepository.deleteAllByBusinessUnitId(team.getId()));
-
-            //Delete UBURs
-            teams.forEach(team -> userBURepository.deleteAllByBusinessUnitId(team.getId()));
+            deleteAllUserBUsAndInvites(teams);
 
             //Delete Roles
             teams.forEach(team -> roleRepository.deleteAllByBusinessUnitId(team.getId()));
 
             //Delete all teams
             businessUnitRepository.deleteAll(teams);
+
+        } catch (ConstraintViolationException | DataAccessException e){
+            throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
+        }
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void deleteAllUserBUsAndInvites(List<BusinessUnit> businessUnits) throws FailedToDeleteException {
+        try{
+            //Delete Invites
+            businessUnits.forEach(bu -> inviteRepository.deleteAllByBusinessUnitId(bu.getId()));
+
+            //Delete UBURs
+            businessUnits.forEach(bu -> usersBURepository.deleteAllByBusinessUnitId(bu.getId()));
 
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToDeleteException("Failed to delete! " + e.getMessage());
