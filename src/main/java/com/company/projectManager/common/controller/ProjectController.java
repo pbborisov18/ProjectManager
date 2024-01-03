@@ -46,9 +46,9 @@ public class ProjectController {
     @PreAuthorize("authorityCheck(#projectDTO.company().id(), \"CreateChildren\")")
     public ResponseEntity<Object> createProject(@RequestBody ProjectDTO projectDTO){
         try {
-            usersBUService.createProject(projectDTO);
+            BusinessUnitAuthoritiesDTO userBusinessUnitAuthoritiesDTO = usersBUService.createProject(projectDTO);
 
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(userBusinessUnitAuthoritiesDTO, HttpStatus.CREATED);
         } catch (UserUnauthenticatedException e) { //Pretty much useless check as it should never happen
             //If it is triggerred I guess the security is down. very bad...
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);

@@ -37,7 +37,7 @@ public interface UsersBusinessUnitsService {
 
     List<BusinessUnitAuthoritiesDTO> findAllProjectsByAuthenticatedUserAndCompany(CompanyDTO companyDTO) throws FailedToSelectException, EntityNotFoundException;
 
-    void createProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, FailedToSaveException;
+    BusinessUnitAuthoritiesDTO createProject(ProjectDTO projectDTO) throws UserUnauthenticatedException, FailedToSaveException;
 
     void updateProject(ProjectDTO projectDTO) throws EntityNotFoundException, FailedToUpdateException;
 
