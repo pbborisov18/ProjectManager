@@ -5,11 +5,16 @@ import com.company.projectManager.common.dto.*;
 import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
 import com.company.projectManager.common.dto.businessUnit.ProjectDTO;
 import com.company.projectManager.common.dto.businessUnit.TeamDTO;
-import com.company.projectManager.common.entity.UserBusinessUnit;
+import com.company.projectManager.common.dto.user.UserNoPassDTO;
 import com.company.projectManager.common.exception.*;
 
 
 import java.util.List;
+
+//TODO: I feel like this interface has way too many responsibilities
+// and way too many things rely on it. Might need to look into a rework in the future
+// Maybe split into company, project, team interfaces?
+// And the "random" methods bellow
 
 public interface UsersBusinessUnitsService {
 
@@ -54,6 +59,11 @@ public interface UsersBusinessUnitsService {
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    //TODO: Move to roles service
-    void addAuthoritiesToSecurityContext(UserBusinessUnit userBU);
+    List<UserNoPassDTO> findTheLast30UsersWhoJoinedBU(Long businessUnitId) throws FailedToSelectException;
+
+    UserNoPassBusinessUnitRoleDTO findUserRoles(Long businessUnitId, String email) throws FailedToSelectException, EntityNotFoundException;
+
+    void saveUserRoles(UserNoPassBusinessUnitRoleDTO ubuDTO) throws FailedToSaveException, EntityNotFoundException;
+
+    void kickFromBU(String email, Long businessUnitId) throws EntityNotFoundException, FailedToDeleteException;
 }

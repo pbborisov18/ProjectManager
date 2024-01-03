@@ -1,8 +1,6 @@
 package com.company.projectManager.common.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.List;
@@ -18,12 +16,10 @@ public class UserBusinessUnit {
 
     @ManyToOne
     @JoinColumn(name = "users_id", referencedColumnName = "id")
-    @Cascade(CascadeType.MERGE)
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "business_units_id", referencedColumnName = "id")
-    @Cascade(CascadeType.MERGE)
     private BusinessUnit businessUnit;
 
     @ManyToMany
@@ -32,7 +28,6 @@ public class UserBusinessUnit {
             joinColumns = @JoinColumn(name = "users_business_units_id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id")
     )
-    @Cascade(CascadeType.MERGE)
     private List<Role> roles;
 
     public UserBusinessUnit() {

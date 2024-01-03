@@ -5,10 +5,9 @@ import com.company.projectManager.common.utils.TypeName;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UsersBusinessUnitsRepository extends CrudRepository<UserBusinessUnit, Long> {
-
-    List<UserBusinessUnit> findAllByUserId(Long userId);
 
     List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitType(String email, TypeName typeName);
 
@@ -18,11 +17,14 @@ public interface UsersBusinessUnitsRepository extends CrudRepository<UserBusines
 
     List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitCompanyId(String email, Long companyId);
 
-    List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitId(String email, Long businessUnitId);
+    Optional<UserBusinessUnit> findByUserEmailAndBusinessUnitId(String email, Long businessUnitId);
 
     List<UserBusinessUnit> findAllByBusinessUnitIdAndRolesId(Long businessUnitId, Long roleId);
+
+    List<UserBusinessUnit> findTop30ByBusinessUnitIdOrderByIdDesc(Long businessUnitId);
 
     Long countAllByBusinessUnitId(Long businessUnitId);
 
     void deleteAllByBusinessUnitId(Long businessUnitId);
+
 }
