@@ -1,6 +1,6 @@
 package com.company.projectManager.common.security.config;
 
-import com.company.projectManager.common.service.RoleService;
+import com.company.projectManager.common.service.UsersBusinessUnitsService;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -12,10 +12,10 @@ import java.util.function.Supplier;
 
 public class CustomMethodSecurityExpressionHandler extends DefaultMethodSecurityExpressionHandler {
 
-    private final RoleService roleService;
+    private final UsersBusinessUnitsService usersBusinessUnitsService;
 
-    public CustomMethodSecurityExpressionHandler(RoleService roleService) {
-        this.roleService = roleService;
+    public CustomMethodSecurityExpressionHandler(UsersBusinessUnitsService usersBusinessUnitsService) {
+        this.usersBusinessUnitsService = usersBusinessUnitsService;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class CustomMethodSecurityExpressionHandler extends DefaultMethodSecurity
         //delegate.getAuthentication() should never be null as the authentication filter is before the authorization one
         CustomMethodSecurityExpressionRoot root = new CustomMethodSecurityExpressionRoot(delegate.getAuthentication());
 
-        root.setRoleService(roleService);
+        root.setUsersBusinessUnitsService(usersBusinessUnitsService);
 
         context.setRootObject(root);
 

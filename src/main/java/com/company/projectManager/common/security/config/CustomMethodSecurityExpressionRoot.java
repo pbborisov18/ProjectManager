@@ -1,24 +1,21 @@
 package com.company.projectManager.common.security.config;
 
 import com.company.projectManager.common.dto.RoleDTO;
+import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
 import com.company.projectManager.common.entity.Authority;
 import com.company.projectManager.common.exception.EntityNotFoundException;
 import com.company.projectManager.common.exception.FailedToSelectException;
-import com.company.projectManager.common.service.RoleService;
+import com.company.projectManager.common.service.UsersBusinessUnitsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot implements MethodSecurityExpressionOperations {
 
-    private RoleService roleService;
+    private UsersBusinessUnitsService usersBusinessUnitsService;
     private HttpServletRequest request;
     private Object filterObject;
     private Object returnObject;
@@ -28,48 +25,38 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot i
         super(authentication);
     }
 
+    //Hitting the db each time is kinda my only solution for now
     public boolean partOfBU(Long buIdToCheck){
-        for (GrantedAuthority userAuthorities : SecurityContextHolder.getContext().getAuthentication().getAuthorities()){
-            String[] userAuthoritiesId = userAuthorities.getAuthority().split(":");
-
-            if(userAuthoritiesId[2].equals(String.valueOf(buIdToCheck))){
-                return true;
-            }
+        try {
+            //This will throw a EntityNotFoundException if no entry is found
+            //meaning user isn't part of the BU
+            usersBusinessUnitsService.findUserRoles(buIdToCheck, SecurityContextHolder.getContext().getAuthentication().getName());
+            return true;
+        } catch (FailedToSelectException | EntityNotFoundException e) {
+            return false;
         }
-
-        return false;
     }
 
+    //Hitting the db twice
+    //(sike...way to many times cuz hibernate queries are cool. If there's one place where optimization is a good idea it's here)
+    //Once to get all the roles of the user in the BU
+    //Then for every role, get all the authorities and check if the one we need is present
     public boolean authorityCheck(Long buIdToCheck, String authorityToCheck){
-        List<Long> roleIdsToSearchFor = new ArrayList<>();
-        //Loop through every securityId
-        for (GrantedAuthority userAuthorities : SecurityContextHolder.getContext().getAuthentication().getAuthorities()){
-            //"Decode" each securityId
-            //0. UserBusinessUnitRole id
-            //1. User id
-            //2. BusinessUnit id
-            //3. Role ids
-            String[] userAuthoritiesId = userAuthorities.getAuthority().split(":");
+        UserNoPassBusinessUnitRoleDTO uburDTO;
 
-            //if the correct BU is found that means the user is in the BU
-            if(userAuthoritiesId[2].equals(String.valueOf(buIdToCheck))){
-                //That's all the role ids the user has in that BU
-                roleIdsToSearchFor.addAll(Arrays.stream(
-                        userAuthoritiesId[3].substring(1, userAuthoritiesId[3].length() - 1).split(", "))
-                                .mapToLong(Long::parseLong).boxed().toList());
-            }
-        }
-
-        //Get all the role objects by Id
-        List<RoleDTO> roles = null;
         try {
-            roles = roleService.findRolesByIds(roleIdsToSearchFor);
+            //This will throw a EntityNotFoundException if no entry is found
+            //meaning user isn't part of the BU
+            //Since hibernate is "fancy" (I'm an idiot who hasn't optimized it) it hits the db for the authorities of each role as well
+            //so we can skip hitting the db again for the authorities of each role
+            uburDTO = usersBusinessUnitsService.findUserRoles(buIdToCheck, SecurityContextHolder.getContext().getAuthentication().getName());
+
         } catch (FailedToSelectException | EntityNotFoundException e) {
             return false;
         }
 
         //Loop through each role checking if the authority we need is present
-        for(RoleDTO role : roles){
+        for(RoleDTO role : uburDTO.roles()){
             for(Authority authority : role.authorities()) {
                 if(authority.getName().equals(authorityToCheck)){
                     return true;
@@ -80,8 +67,8 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot i
         return false;
     }
 
-    public void setRoleService(RoleService roleService){
-        this.roleService = roleService;
+    public void setUsersBusinessUnitsService(UsersBusinessUnitsService usersBusinessUnitsService){
+        this.usersBusinessUnitsService = usersBusinessUnitsService;
     }
 
     @Override

@@ -2,19 +2,15 @@ package com.company.projectManager.common.service.impl;
 
 import com.company.projectManager.common.dto.user.UserDTO;
 import com.company.projectManager.common.dto.user.UserNoPassDTO;
-import com.company.projectManager.common.entity.Role;
 import com.company.projectManager.common.entity.User;
-import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRepository;
-import com.company.projectManager.common.security.SecurityIds;
 import com.company.projectManager.common.security.SecurityUser;
 import com.company.projectManager.common.service.UserService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,13 +32,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
 
-    private final UsersBusinessUnitsRepository usersBURepository;
-
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, UsersBusinessUnitsRepository usersBURepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
-        this.usersBURepository = usersBURepository;
     }
 
 
@@ -144,21 +136,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new UsernameNotFoundException("Email not found " + username);
         }
 
-        List<UserBusinessUnit> userBURole = usersBURepository.findAllByUserId(user.get().getId());
-
-        List<GrantedAuthority> roles = new ArrayList<>();
-
-        for (UserBusinessUnit ubr : userBURole) {
-            SecurityIds securityRole = new SecurityIds(
-                    ubr.getId(),
-                    ubr.getUser().getId(),
-                    ubr.getBusinessUnit().getId(),
-                    ubr.getRoles().stream().mapToLong(Role::getId).boxed().toList()
-            );
-            roles.add(securityRole);
-        }
-
-        return new SecurityUser(user.get(), roles);
+        return new SecurityUser(user.get(), new ArrayList<>());
     }
 
 }

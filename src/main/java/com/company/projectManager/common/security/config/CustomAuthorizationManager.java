@@ -1,7 +1,8 @@
 package com.company.projectManager.common.security.config;
 
-import com.company.projectManager.common.service.RoleService;
+import com.company.projectManager.common.service.UsersBusinessUnitsService;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -17,10 +18,11 @@ import java.util.function.Supplier;
 @Component("customAuthorizationManager")
 public class CustomAuthorizationManager implements AuthorizationManager<MethodInvocation> {
 
-    private final RoleService roleService;
+    private final UsersBusinessUnitsService usersBusinessUnitsService;
 
-    public CustomAuthorizationManager(RoleService roleService) {
-        this.roleService = roleService;
+    @Autowired
+    public CustomAuthorizationManager(UsersBusinessUnitsService usersBusinessUnitsService) {
+        this.usersBusinessUnitsService = usersBusinessUnitsService;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class CustomAuthorizationManager implements AuthorizationManager<MethodIn
         ExpressionParser parser = new SpelExpressionParser();
         Expression expression = parser.parseExpression(invocation.getMethod().getAnnotation(PreAuthorize.class).value());
 
-        CustomMethodSecurityExpressionHandler c = new CustomMethodSecurityExpressionHandler(roleService);
+        CustomMethodSecurityExpressionHandler c = new CustomMethodSecurityExpressionHandler(usersBusinessUnitsService);
         EvaluationContext ec = c.createEvaluationContext(authentication,invocation);
         boolean granted = Boolean.TRUE.equals(expression.getValue(ec, Boolean.class));
 
