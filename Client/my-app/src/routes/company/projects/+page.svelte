@@ -29,6 +29,9 @@
                     error = 200;
                 });
             } else if(response.status === 204){
+                //WTF SVELTEEEE
+                //WHY TF ARE YOU TOUCHING BUROLES AND SETTING IT TO UNDEFINED
+                BURoles = [];
                 error = 204;
             } else if(response.status === 400){
                 //notification
@@ -72,7 +75,8 @@
                 response.json().then( data => {
                     projectName = "";
                     createPopup = false;
-                    BURoles = [data];
+                    BURoles = [...BURoles, data];
+                    error = 200;
                 });
             } else if(response.status === 400){
                 //No need to set the error here
