@@ -351,7 +351,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
     }
 
     @Transactional
-    public void createTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, FailedToSaveException {
+    public BusinessUnitAuthoritiesDTO createTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, FailedToSaveException {
         try {
             //You can get the user id from the authorities in case you need extra perf
             //This is just more readable
@@ -379,8 +379,9 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             roleRepository.saveAll(List.of(adminRole, defaultRole));
 
             UserBusinessUnit userBU = new UserBusinessUnit(null, user.get(), team, List.of(adminRole, defaultRole));
-            usersBURepository.save(userBU);
+            UserBusinessUnit ubur = usersBURepository.save(userBU);
 
+            return usersBUMapper.toAuthoritiesDTO(ubur);
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e) {
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }

@@ -43,7 +43,7 @@ public class CompanyController {
     @PostMapping("/createCompany")
     public ResponseEntity<Object> createCompany(@RequestBody CompanyDTO companyDTO){
         try {
-            BusinessUnitAuthoritiesDTO useBusinessUnitAuthoritiesDTO =  usersBusinessUnitsService.createCompany(companyDTO);
+            BusinessUnitAuthoritiesDTO useBusinessUnitAuthoritiesDTO = usersBusinessUnitsService.createCompany(companyDTO);
 
             return new ResponseEntity<>(useBusinessUnitAuthoritiesDTO, HttpStatus.CREATED);
         } catch (UserUnauthenticatedException e) { //Pretty much useless check as it should never happen

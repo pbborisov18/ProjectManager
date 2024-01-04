@@ -70,10 +70,9 @@
         }).then(response=>{
             if (response.status === 201){
                 response.json().then( data => {
-                    console.log(data);
                     projectName = "";
                     createPopup = false;
-                    BURoles = [...BURoles, data];
+                    BURoles = [data];
                 });
             } else if(response.status === 400){
                 //No need to set the error here

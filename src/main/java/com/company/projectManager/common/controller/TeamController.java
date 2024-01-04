@@ -45,9 +45,9 @@ public class TeamController {
     @PreAuthorize("authorityCheck(#teamDTO.project().id(), \"CreateChildren\")")
     public ResponseEntity<Object> createTeam(@RequestBody TeamDTO teamDTO){
         try {
-            usersBUService.createTeam(teamDTO);
+            BusinessUnitAuthoritiesDTO useBusinessUnitAuthoritiesDTO = usersBUService.createTeam(teamDTO);
 
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(useBusinessUnitAuthoritiesDTO, HttpStatus.CREATED);
         } catch (UserUnauthenticatedException e) { //Pretty much useless check as it should never happen
             //If it is triggerred I guess the security is down. very bad...
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.UNAUTHORIZED);

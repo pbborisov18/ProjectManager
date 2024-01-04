@@ -12,7 +12,7 @@
     let projectBURole = JSON.parse($project);
 
     let error = 401;
-    let BURoles;
+    let BURoles = [];
 
     async function getTeams(){
         fetch('http://localhost:8080/company/project/teams', {
@@ -69,9 +69,11 @@
             credentials: "include"
         }).then(response=>{
             if (response.status === 201) {
-                teamName = "";
-                createPopup = false;
-                getTeams();
+                response.json().then( data => {
+                    teamName = "";
+                    createPopup = false;
+                    BURoles = [data];
+                });
             } else if(response.status === 400){
                 //No need to set the error here
                 // notification

@@ -65,7 +65,7 @@
                 response.json().then( data => {
                     createBUName = "";
                     createPopup = false;
-                    BURoles = [...BURoles, data];
+                    BURoles = [data];
                 });
             } else if(response.status === 400){
                 //No need to set the error here
