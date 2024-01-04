@@ -1,15 +1,13 @@
 <script>
-    import {initializeStores, Toast} from '@skeletonlabs/skeleton';
     import "../app.postcss";
+    import {Toaster} from "svelte-french-toast";
 
     let title = "AgileAce";
 
-    initializeStores();
 
 </script>
 
-<Toast position="br" class="rounded-lg"/>
-
+<Toaster position="bottom-right"/>
 
 <head>
     <title>{title}</title>

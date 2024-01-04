@@ -3,10 +3,9 @@
     import Header from "$lib/components/Header.svelte";
     import {userEmail, loggedIn} from "$lib/stores.js";
     import { useForm, Hint, HintGroup, validators, required, email } from "svelte-use-form";
-    import {getToastStore} from "@skeletonlabs/skeleton";
+    import toast from "svelte-french-toast";
 
     let errorText;
-    const toastStore = getToastStore();
 
     const form = useForm();
 
@@ -36,30 +35,15 @@
                 goto("/companies")
             } else if(response.status === 400){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: data,
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error(data);
                 });
             } else if(response.status === 500){
                 response.json().then(data => {
-                    toastStore.trigger({
-                        message: data.message,
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Server failed!");
                 });
             }
         }).catch(error => {
-            toastStore.trigger({
-                message: "Server is offline!",
-                timeout: 3000,
-                hoverable: true,
-                background: 'bg-red-200 rounded-lg border-2 border-red-300'
-            });
+            toast.error("Something went wrong!");
         });
     }
 

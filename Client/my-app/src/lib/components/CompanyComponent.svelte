@@ -16,7 +16,7 @@
     import SettingsInviteComponent from "$lib/components/SettingsInviteComponent.svelte";
     import RoleSettingsComponent from "$lib/components/RoleSettingsComponent.svelte";
     import SettingsUsersComponent from "$lib/components/SettingsUsersComponent.svelte";
-    import {getToastStore} from "@skeletonlabs/skeleton";
+    import toast from "svelte-french-toast";
 
     let leavePopup = false;
     let leaveButtonDisable = false;
@@ -26,7 +26,6 @@
 
     export let onDestroy;
     export let BURole;
-    const toastStore = getToastStore();
 
     function leaveBU(){
         leaveButtonDisable = true;
@@ -47,42 +46,22 @@
                 //No idea in what scenario that would trigger
                 //fed up json probably
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Bad request!",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Bad request!");
                 });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                toastStore.trigger({
-                    message: "No permission! Not a part of the company",
-                    timeout: 3000,
-                    hoverable: true,
-                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                });
+                toast.error("No permission! Not a part of the company");
             } else if(response.status === 500){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Something went wrong",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Something went wrong");
                 });
             }
         }).catch(error => {
             leaveButtonDisable = false;
-            toastStore.trigger({
-                message: "Server is offline!",
-                timeout: 3000,
-                hoverable: true,
-                background: 'bg-red-200 rounded-lg border-2 border-red-300'
-            });
+            toast.error("Server is offline!");
         });
     }
 
@@ -103,42 +82,22 @@
                 onDestroy();
             } else if(response.status === 400){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Bad request!",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Bad request!");
                 });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                toastStore.trigger({
-                    message: "No permission!",
-                    timeout: 3000,
-                    hoverable: true,
-                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                });
+                toast.error("No permission!");
             } else if(response.status === 500){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Something went wrong",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Something went wrong");
                 });
             }
         }).catch(error => {
             deleteButtonDisable = false;
-            toastStore.trigger({
-                message: "Server is offline!",
-                timeout: 3000,
-                hoverable: true,
-                background: 'bg-red-200 rounded-lg border-2 border-red-300'
-            });
+            toast.error("Server is offline!");
         });
     }
 

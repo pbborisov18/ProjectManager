@@ -7,11 +7,10 @@
     import {onMount} from "svelte";
     import {loggedIn, userEmail} from "$lib/stores.js";
     import {goto} from "$app/navigation";
-    import {getToastStore} from "@skeletonlabs/skeleton";
+    import toast from "svelte-french-toast";
 
     let error = 401;
     let invites;
-    const toastStore = getToastStore();
 
     function handleInviteDestroy(inviteToChange){
         invites = invites.filter(invite => invite !== inviteToChange);
@@ -48,12 +47,7 @@
                 error = 204;
             } else if(response.status === 400){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Bad request!",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Bad request!");
                 });
             } else if(response.status === 401){
                 error = 401;
@@ -62,21 +56,11 @@
                 goto("/login");
             } else if(response.status === 500){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Something went wrong",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Something went wrong!");
                 });
             }
         }).catch(error => {
-            toastStore.trigger({
-                message: "Server is offline!",
-                timeout: 3000,
-                hoverable: true,
-                background: 'bg-red-200 rounded-lg border-2 border-red-300'
-            });
+            toast.error("Server is offline!");
         });
     }
 

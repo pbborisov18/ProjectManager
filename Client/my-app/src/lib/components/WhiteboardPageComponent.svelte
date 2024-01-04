@@ -7,10 +7,9 @@
     import plusIcon from "$lib/images/plus.png";
     import {onMount} from "svelte";
     import {userEmail, loggedIn} from "$lib/stores";
-    import {getToastStore} from "@skeletonlabs/skeleton";
+    import toast from "svelte-french-toast";
 
     export let BURole;
-    const toastStore = getToastStore();
 
     let createPopup = false;
 
@@ -39,49 +38,24 @@
                     return data;
                 });
             } else if (response.status === 204) {
-                toastStore.trigger({
-                    message: "No columns found!",
-                    timeout: 3000,
-                    hoverable: true,
-                    background: 'bg-yellow-200 rounded-lg border-2 border-yellow-300'
-                });
+                toast.error("No columns found!");
             } else if (response.status === 400) {
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Bad request!",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Bad request!");
                 });
             } else if (response.status === 401) {
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403){
-                toastStore.trigger({
-                    message: "No permission!",
-                    timeout: 3000,
-                    hoverable: true,
-                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                });
+                toast.error("No permission!");
             } else if (response.status === 500) {
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Something went wrong",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Something went wrong");
                 });
             }
         }).catch(error => {
-            toastStore.trigger({
-                message: "Server is offline!",
-                timeout: 3000,
-                hoverable: true,
-                background: 'bg-red-200 rounded-lg border-2 border-red-300'
-            });
+            toast.error("Server is offline!");
         });
 
         promise.then(data => {
@@ -140,41 +114,21 @@
                 return response.json();
             } else if (response.status === 400) {
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Bad request!",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Bad request!");
                 });
             } else if (response.status === 401) {
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403){
-                toastStore.trigger({
-                    message: "No permission!",
-                    timeout: 3000,
-                    hoverable: true,
-                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                });
+                toast.error("No permission!");
             } else if (response.status === 500) {
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Something went wrong",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Something went wrong");
                 });
             }
         }).catch(error => {
-            toastStore.trigger({
-                message: "Server is offline!",
-                timeout: 3000,
-                hoverable: true,
-                background: 'bg-red-200 rounded-lg border-2 border-red-300'
-            });
+            toast.error("Server is offline!");
         });
 
 
@@ -232,41 +186,21 @@
                 //nothing I guess
             } else if(response.status === 400){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Bad request!",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Bad request!");
                 });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403){
-                toastStore.trigger({
-                    message: "No permission!",
-                    timeout: 3000,
-                    hoverable: true,
-                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                });
+                toast.error("No permission!");
             } else if(response.status === 500){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Something went wrong",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Something went wrong");
                 });
             }
         }).catch(error => {
-            toastStore.trigger({
-                message: "Server is offline!",
-                timeout: 3000,
-                hoverable: true,
-                background: 'bg-red-200 rounded-lg border-2 border-red-300'
-            });
+            toast.error("Server is offline!");
         });
     }
 
@@ -316,41 +250,21 @@
                 makeColumns();
             } else if(response.status === 400){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Bad request!",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Bad request!");
                 });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403){
-                toastStore.trigger({
-                    message: "No permission!",
-                    timeout: 3000,
-                    hoverable: true,
-                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                });
+                toast.error("No permission!");
             } else if(response.status === 500){
                 response.text().then(data => {
-                    toastStore.trigger({
-                        message: "Something went wrong",
-                        timeout: 3000,
-                        hoverable: true,
-                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
-                    });
+                    toast.error("Something went wrong");
                 });
             }
         }).catch(error => {
-            toastStore.trigger({
-                message: "Server is offline!",
-                timeout: 3000,
-                hoverable: true,
-                background: 'bg-red-200 rounded-lg border-2 border-red-300'
-            });
+            toast.error("Server is offline!");
         });
     }
 
