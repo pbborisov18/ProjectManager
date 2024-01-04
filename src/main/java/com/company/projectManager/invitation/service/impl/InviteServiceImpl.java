@@ -174,7 +174,7 @@ public class InviteServiceImpl implements InviteService {
     }
 
 
-    public void createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws InvalidInvitationException, FailedToSaveException {
+    public InviteDTONoPass createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws InvalidInvitationException, FailedToSaveException {
         try {
             Optional<User> receiverEntity = userRepository.findUserByEmail(receiver.email());
 
@@ -195,8 +195,9 @@ public class InviteServiceImpl implements InviteService {
                     receiverEntity.get(),
                     businessUnitMapper.toBusinessUnitEntity(businessUnitDTO));
 
-            inviteRepository.save(invite);
+            Invite i = inviteRepository.save(invite);
 
+            return inviteMapper.toDTO(i);
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }

@@ -22,6 +22,6 @@ public interface InviteService {
 
     void cancelInvite(InviteDTONoPass inviteDTONoPass) throws EntityNotFoundException, FailedToDeleteException;
 
-    void createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws InvalidInvitationException, FailedToSaveException;
+    InviteDTONoPass createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws InvalidInvitationException, FailedToSaveException;
 
 }

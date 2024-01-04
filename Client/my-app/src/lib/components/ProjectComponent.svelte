@@ -122,6 +122,8 @@
 
     //Bastards have broken the active attribute on the sidebar.
     //Don't think they'll fix it. Only way to fix it is finding another one or creating my own
+    //Active num is 50 cuz I'm trying to show the top menu based on the user authorities
+    //(check openSettings function)
     let activeNum = 50;
 
 </script>

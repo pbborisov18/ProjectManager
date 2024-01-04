@@ -98,9 +98,9 @@ public class InviteController {
     @PreAuthorize("authorityCheck(#buUserDTO.businessUnitDTO().id(), \"ManageSentInvites\")")
     public ResponseEntity<Object> createInviteForCompany(@RequestBody BusinessUnitUserNoPassDTO buUserDTO){
         try {
-            inviteService.createInvite(buUserDTO.businessUnitDTO(), buUserDTO.userNoPassDTO());
+            InviteDTONoPass invite = inviteService.createInvite(buUserDTO.businessUnitDTO(), buUserDTO.userNoPassDTO());
 
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(invite, HttpStatus.CREATED);
         }  catch (InvalidInvitationException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (FailedToSaveException e) {

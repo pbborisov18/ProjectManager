@@ -36,9 +36,10 @@
             credentials: "include"
         }).then(response=>{
             if (response.status === 201) {
-                //TODO: Bad idea. Should just return the value from the backend when it's created
-                getAllInvitesByBU();
-                inviteeEmail = "";
+                response.json().then(data => {
+                    alreadyInvited = [...alreadyInvited, data];
+                    inviteeEmail = "";
+                });
             } else if(response.status === 400){
                 // notification
             } else if(response.status === 401){
