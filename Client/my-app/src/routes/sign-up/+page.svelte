@@ -2,11 +2,11 @@
     import {goto} from "$app/navigation";
     import Header from "$lib/components/Header.svelte";
     import {userEmail, loggedIn} from "$lib/stores.js";
-
-
     import { useForm, Hint, HintGroup, validators, required, minLength, email } from "svelte-use-form";
     import { passwordMatch, containNumbers } from "./customValidators.js";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
+    const toastStore = getToastStore();
     const form = useForm();
 
     const requiredMessage = "This field is required";
@@ -30,12 +30,31 @@
             if (response.status === 200) {
                 sendLoginRequestAfterRegister(email, password);
             } else if(response.status === 400){
-                //notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 500){
-                //notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            //server's dead or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -57,12 +76,31 @@
                 loggedIn.set("true");
                 goto("/companies")
             } else if(response.status === 400){
-                // Bad request + login doesn't exist
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: data,
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 500){
-                // Server error
+                response.json().then(data => {
+                    toastStore.trigger({
+                        message: data.message,
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            // server's dead or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 

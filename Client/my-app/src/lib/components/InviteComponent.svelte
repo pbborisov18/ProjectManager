@@ -4,9 +4,11 @@
     import checkIcon from "$lib/images/check.png";
     import deleteIcon from "$lib/images/delete.png";
     import {userEmail, loggedIn} from "$lib/stores";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     export let invite;
     export let onDestroy;
+    const toastStore = getToastStore();
 
     function declineOrDeleteInvite() {
         if(invite.state === "PENDING") {
@@ -40,30 +42,61 @@
             },
             body: JSON.stringify(updatedInvite),
             credentials: "include"
-        })
-            .then(response => {
-                if (response.ok) {
-                    //Show the user that everything was successful
-                    if(updatedInvite.state === "ACCEPTED"){
-                        //Update the screen informing the user that the invite was accepted
-                    } else if (updatedInvite.state === "DECLINED"){
-                        //Update the screen informing the user that the invite was declined
-                    }
-                    //Remove component after is reacted with
-                    onDestroy();
-                } else if(response.status === 400){
-                    //notification
-                } else if(response.status === 401){
-                    userEmail.set("");
-                    loggedIn.set("");
-                    goto("/login");
-                } else if(response.status === 403){
-                    alert("No permission");
-                } else if(response.status === 500){
-                    //notification
+        }).then(response => {
+            if (response.status === 200) {
+                if(updatedInvite.state === "ACCEPTED"){
+                    toastStore.trigger({
+                        message: "Invite accepted!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-green-200 rounded-lg border-2 border-green-300'
+                    });
+                } else if (updatedInvite.state === "DECLINED"){
+                    toastStore.trigger({
+                        message: "Invite declined!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-yellow-200 rounded-lg border-2 border-yellow-300'
+                    });
                 }
-            }).catch(error => {
-            console.error(error);
+                onDestroy();
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
+            } else if(response.status === 401){
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 403){
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
+            } else if(response.status === 500){
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
+            }
+        }).catch(error => {
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -77,22 +110,50 @@
             credentials: "include"
         }).then(response => {
             if (response.status === 200) {
-                //Show the user that everything was successful
-                //Remove component after is reacted with
+                toastStore.trigger({
+                    message: "Invite deleted!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-green-200 rounded-lg border-2 border-green-300'
+                });
                 onDestroy();
             } else if(response.status === 400){
-                //notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                //notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            //Server's dead or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 

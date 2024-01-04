@@ -8,11 +8,13 @@
     import TeamComponent from "$lib/components/TeamComponent.svelte";
     import {goto} from "$app/navigation";
     import {onMount} from "svelte";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     let projectBURole = JSON.parse($project);
 
     let error = 401;
     let BURoles = [];
+    const toastStore = getToastStore();
 
     async function getTeams(){
         fetch('http://localhost:8080/company/project/teams', {
@@ -32,22 +34,41 @@
                 BURoles = [];
                 error = 204;
             } else if(response.status === 400){
-                //notification
-                //bad request
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                //notification
                 error = 401;
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                // notification
-                // well my backend did something wrong
+                toastStore.trigger({
+                    message: "Something went wrong",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             }
         }).catch(error => {
-            //Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -77,22 +98,43 @@
                     error = 200;
                 });
             } else if(response.status === 400){
-                //No need to set the error here
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                // notification
                 error = 401;
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                //No need to set the error here
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            //Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 

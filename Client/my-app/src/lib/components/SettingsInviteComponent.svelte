@@ -3,8 +3,10 @@
     import {goto} from "$app/navigation";
     import {onMount} from "svelte";
     import {userEmail, loggedIn} from "$lib/stores";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     export let BURole;
+    const toastStore = getToastStore();
 
     let inviteeEmail;
     let alreadyInvited = [];
@@ -41,18 +43,42 @@
                     inviteeEmail = "";
                 });
             } else if(response.status === 400){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            // server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -70,18 +96,42 @@
                     alreadyInvited = data.filter(obj => obj.state === 'PENDING')
                 });
             } else if(response.status === 400){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                // notification
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            // server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -92,6 +142,12 @@
 
     function cancelInvite(clickedInvite){
         if(!clickedInvite) {
+            toastStore.trigger({
+                message: "Haven't selected an invite!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
             return;
         }
 
@@ -109,16 +165,42 @@
             if (response.status === 200) {
                 alreadyInvited = alreadyInvited.filter(invite => invite.id !== clickedInvite.id);
             } else if(response.status === 400){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
+            } else if(response.status === 403){
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            // server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
 
     }

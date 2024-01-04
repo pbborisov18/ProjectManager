@@ -53,9 +53,9 @@ public class RoleController {
     @PreAuthorize("authorityCheck(#role.businessUnit().id(), \"ChangePermissions\")") //Hopefully nobody sends an empty list...
     public ResponseEntity<Object> updatePermissions(@RequestBody RoleDTO role){
         try {
-            roleService.updateRole(role);
+            RoleDTO roleDTO = roleService.updateRole(role);
 
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(roleDTO, HttpStatus.OK);
         } catch (FailedToUpdateException | EntityNotFoundException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

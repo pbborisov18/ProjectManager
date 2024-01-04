@@ -61,7 +61,7 @@ public class RoleServiceImpl implements RoleService {
     //As much as I want to just do .save() (or call saveRole())
     //I can't. I have to make sure that nobody is playing funny here
     //Performance will be worse but it has to happen
-    public void updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException {
+    public RoleDTO updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException {
         try {
             Optional<Role> foundRole = roleRepository.findById(role.id());
 
@@ -79,6 +79,8 @@ public class RoleServiceImpl implements RoleService {
             //Id is already the same
 
             roleRepository.save(foundRole.get());
+
+            return roleMapper.toDTO(foundRole.get());
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToUpdateException("Failed to update!" + e.getMessage());
         }

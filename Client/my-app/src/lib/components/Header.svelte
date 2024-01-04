@@ -7,7 +7,10 @@
     } from 'flowbite-svelte'
     import AgileAceLogo from "$lib/images/AlignLogo.png";
     import inviteIcon from "$lib/images/invite.png";
+    import {getToastStore} from "@skeletonlabs/skeleton";
+
     export let homePage = false;
+    const toastStore = getToastStore();
 
     function redirectToHomepage() {
         if($loggedIn){
@@ -34,10 +37,22 @@
                     loggedIn.set("");
                     goto("/login");
                 } else {
-                    // notification
+                    response.text().then(data => {
+                        toastStore.trigger({
+                            message: "Something went wrong!",
+                            timeout: 3000,
+                            hoverable: true,
+                            background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                        });
+                    });
                 }
         }).catch(error => {
-            // Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         })
 
     }

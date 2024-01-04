@@ -16,6 +16,7 @@
     import SettingsInviteComponent from "$lib/components/SettingsInviteComponent.svelte";
     import RoleSettingsComponent from "$lib/components/RoleSettingsComponent.svelte";
     import SettingsUsersComponent from "$lib/components/SettingsUsersComponent.svelte";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     let leavePopup = false;
     let leaveButtonDisable = false;
@@ -25,25 +26,7 @@
 
     export let onDestroy;
     export let BURole;
-
-    // let notifications = [];
-    //
-    // function addNotification(message) {
-    //
-    //     const newNotification = {
-    //         message
-    //     };
-    //
-    //     notifications = [...notifications, newNotification];
-    //
-    //     setTimeout(() => {
-    //         removeNotification(newNotification);
-    //     }, 5000); // 5000 milliseconds = 5 seconds
-    // }
-    //
-    // function removeNotification(notification) {
-    //     notifications = notifications.filter(n => n !== notification);
-    // }
+    const toastStore = getToastStore();
 
     function leaveBU(){
         leaveButtonDisable = true;
@@ -61,21 +44,45 @@
                 leavePopup = false;
                 onDestroy();
             } else if(response.status === 400){
-                // notification
+                //No idea in what scenario that would trigger
+                //fed up json probably
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                // notification
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                // notification
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission! Not a part of the company",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
             leaveButtonDisable = false;
-            //Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -95,21 +102,43 @@
                 deletePopup = false;
                 onDestroy();
             } else if(response.status === 400){
-                //notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                //notification
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                //notification
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                //notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
             deleteButtonDisable = false;
-            //Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -150,14 +179,6 @@
     let activeNum = 50;
 
 </script>
-
-<!--{#each notifications as notification}-->
-<!--    <div class="notificationDiv">-->
-<!--        <Toast simple position="bottom-right">-->
-<!--            {notification.message}-->
-<!--        </Toast>-->
-<!--    </div>-->
-<!--{/each}-->
 
 <div class="clickable not-selectable BUwindow">
 
@@ -348,11 +369,5 @@
         margin-left: 1.5vw;
         margin-top: 3vh;
     }
-
-  //.notificationDiv{
-  //    position: absolute;
-  //    height: 80vh;
-  //    width: 100vw;
-  //}
 
 </style>

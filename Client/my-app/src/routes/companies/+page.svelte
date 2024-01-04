@@ -7,9 +7,11 @@
     import plusIcon from "$lib/images/plus.png";
     import {userEmail, loggedIn} from "$lib/stores.js";
     import {onMount} from "svelte";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     let error = 401;
     let BURoles;
+    const toastStore = getToastStore();
 
     async function getCompanies(){
         fetch('http://localhost:8080/companies', {
@@ -28,27 +30,42 @@
                 BURoles = [];
                 error = 204;
             } else if(response.status === 400){
-                //notification
-                //U stoopid bad request
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                //notification
-                //Bro why you not logged in
                 error = 401;
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 500){
-                // notification
-                // addNotification("Something went wrong!");
-                // well my backend did something wrong
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            //Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
     function createCompany(){
-        let company = {id: null,
+        let company = {
+            id: null,
             name: createBUName,
             type: "COMPANY",
             whiteboard: null
@@ -70,22 +87,36 @@
                     error = 200;
                 });
             } else if(response.status === 400){
-                //No need to set the error here
-                // notification
-                // addNotification("Something went wrong!");
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                // notification
                 error = 401;
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 500){
-                //No need to set the error here
-                // notification
-                // addNotification("Something went wrong!");
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            //Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -103,40 +134,11 @@
     let createPopup = false;
     let createBUName;
 
-    //Notification stuff
-    // let notifications = [];
-    //
-    // function addNotification(message) {
-    //
-    //     const newNotification = {
-    //         message
-    //     };
-    //
-    //     notifications = [...notifications, newNotification];
-    //
-    //     setTimeout(() => {
-    //         removeNotification(newNotification);
-    //     }, 5000); // 5000 milliseconds = 5 seconds
-    // }
-    //
-    // function removeNotification(notification) {
-    //     notifications = notifications.filter(n => n !== notification);
-    // }
-
 </script>
 
 {#await BURoles}
     <img src="{loadingGif}" alt="">
 {:then BURoles}
-    <!--TODO: Fix the notifications-->
-    <!--In the future. A lot of complex shit on how to handle them all coming from different places/pages/files-->
-    <!--{#each notifications as notification}-->
-    <!--    <div class="notificationDiv">-->
-    <!--        <Toast simple position="bottom-right">-->
-    <!--            {notification.message}-->
-    <!--        </Toast>-->
-    <!--    </div>-->
-    <!--{/each}-->
 
     {#if error === 204 && (!BURoles || BURoles.length === 0)}
         <Header/>
@@ -222,12 +224,5 @@
         margin-right: 1.5vw;
         margin-top: 1vh;
     }
-
-    //.notificationDiv{
-    //    position: absolute;
-    //    height: 100vh;
-    //    width: 100vw;
-    //    background-color: red;
-    //}
 
 </style>

@@ -3,8 +3,10 @@
     import {project, userEmail, loggedIn} from "$lib/stores.js";
     import {goto} from "$app/navigation";
     import WhiteboardPageComponent from "$lib/components/WhiteboardPageComponent.svelte";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     let BURole;
+    const toastStore = getToastStore();
 
     onMount(() => {
         BURole = JSON.parse($project);
@@ -27,22 +29,50 @@
                     BURole.businessUnit.whiteboard = w;
                 });
             } else if(response.status === 204){
-                //notification
+                toastStore.trigger({
+                    message: "No whiteboard found!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-yellow-200 rounded-lg border-2 border-yellow-300'
+                });
                 goto("/company/project/createWhiteboard");
             } else if(response.status === 400){
-                //notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                //notification
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                //notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            //server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 

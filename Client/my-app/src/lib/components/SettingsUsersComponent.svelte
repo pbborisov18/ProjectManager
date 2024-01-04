@@ -14,8 +14,11 @@
     } from "flowbite-svelte";
     import { slide } from 'svelte/transition';
     import CustomBadge from "$lib/components/CustomBadge.svelte";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     export let BURole;
+    const toastStore = getToastStore();
+
     let youSure = false;
     let searchTerm = '';
     let usersList = [];
@@ -48,19 +51,42 @@
                     usersList = data;
                 });
             } else if(response.status === 400){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                // notification
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            // server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -82,20 +108,43 @@
                         resolve(data);
                     });
                 } else if (response.status === 400) {
-                    // notification
+                    response.text().then(data => {
+                        toastStore.trigger({
+                            message: "Bad request!",
+                            timeout: 3000,
+                            hoverable: true,
+                            background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                        });
+                    });
                 } else if (response.status === 401) {
-                    // notification
                     userEmail.set("");
                     loggedIn.set("");
                     goto("/login");
                 } else if (response.status === 403) {
-                    alert("No permission");
+                    toastStore.trigger({
+                        message: "No permission!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
                 } else if (response.status === 500) {
-                    // notification
+                    response.text().then(data => {
+                        toastStore.trigger({
+                            message: "Something went wrong",
+                            timeout: 3000,
+                            hoverable: true,
+                            background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                        });
+                    });
                 }
             }).catch(error => {
+                toastStore.trigger({
+                    message: "Server is offline!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
                 reject();
-                // server died or something
             });
         });
     }
@@ -128,20 +177,42 @@
                     lastOpenRow = 0;
                 });
             } else if (response.status === 400) {
-                // notification
-                alert("User not found");
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "User not found!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if (response.status === 401) {
-                // notification
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403) {
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if (response.status === 500) {
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            // server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -158,22 +229,48 @@
         }).then(response => {
             if (response.status === 200) {
                 originalRolesOnSelectedUser = rolesOnSelectedUser;
-                // notification
+                toastStore.trigger({
+                    message: "Roles saved!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-green-200 rounded-lg border-2 border-green-300'
+                });
             } else if (response.status === 400) {
-                // notification
+                toastStore.trigger({
+                    message: "Bad request!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
                 alert("User not found");
             } else if (response.status === 401) {
-                // notification
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403) {
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if (response.status === 500) {
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            // server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -190,6 +287,12 @@
             credentials: "include"
         }).then(response => {
             if (response.status === 200) {
+                toastStore.trigger({
+                    message: "User kicked!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-green-200 rounded-lg border-2 border-green-300'
+                });
                 searchTerm = "";
 
                 usersList = usersList.filter(u => u.email !== user.email);
@@ -200,20 +303,40 @@
                 openRow = null;
                 lastOpenRow = null;
             } else if (response.status === 400) {
-                // notification
-                alert("User not found");
+                toastStore.trigger({
+                    message: "User not found!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if (response.status === 401) {
-                // notification
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403) {
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if (response.status === 500) {
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            // server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 

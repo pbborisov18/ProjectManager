@@ -17,6 +17,7 @@
     import EditBUComponent from "$lib/components/EditBUComponent.svelte";
     import RoleSettingsComponent from "$lib/components/RoleSettingsComponent.svelte";
     import SettingsInviteComponent from "$lib/components/SettingsInviteComponent.svelte";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     let leavePopup = false;
     let leaveButtonDisable = false;
@@ -26,6 +27,7 @@
 
     export let onDestroy;
     export let BURole;
+    const toastStore = getToastStore();
 
     function leaveBU(){
         leaveButtonDisable = true;
@@ -38,23 +40,48 @@
             credentials: "include"
         }).then(response=>{
             leaveButtonDisable = false;
-            if (response.ok) {
+
+            if (response.status === 200) {
                 leavePopup = false;
                 onDestroy();
             } else if(response.status === 400){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission! Not a part of the team",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
             leaveButtonDisable = false;
-            // Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -74,19 +101,43 @@
                 deletePopup = false;
                 onDestroy();
             } else if(response.status === 400){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                // notification
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
             deleteButtonDisable = false;
-            // Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 

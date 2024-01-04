@@ -8,11 +8,13 @@
     import {company, loggedIn, userEmail} from "$lib/stores.js";
     import ProjectComponent from "$lib/components/ProjectComponent.svelte";
     import {onMount} from "svelte";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     let companyBURole = JSON.parse($company);
 
     let error = 401;
     let BURoles = [];
+    const toastStore = getToastStore();
 
     async function getProjects(){
         fetch('http://localhost:8080/company/projects', {
@@ -34,24 +36,43 @@
                 BURoles = [];
                 error = 204;
             } else if(response.status === 400){
-                //notification
-                //U stoopid bad request
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                //notification
-                //Bro why you not logged in
                 error = 401;
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if (response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                // notification
-                // addNotification("Something went wrong!");
-                // well my backend did something wrong
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            //Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -79,24 +100,43 @@
                     error = 200;
                 });
             } else if(response.status === 400){
-                //No need to set the error here
-                // notification
-                // addNotification("Something went wrong!");
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Bad request!",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 401){
-                // notification
                 error = 401;
                 userEmail.set("");
                 loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                alert("No permission");
+                toastStore.trigger({
+                    message: "No permission!",
+                    timeout: 3000,
+                    hoverable: true,
+                    background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                });
             } else if(response.status === 500){
-                //No need to set the error here
-                // notification
-                // addNotification("Something went wrong!");
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: "Something went wrong",
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            //Server died or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 

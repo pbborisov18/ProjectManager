@@ -12,7 +12,7 @@ public interface RoleService {
 
     RoleDTO saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest;
 
-    void updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException;
+    RoleDTO updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException;
 
     void deleteRole(RoleDTO role) throws FailedToDeleteException, EntityNotFoundException, InvalidRoleRequest;
 

@@ -3,8 +3,10 @@
     import Header from "$lib/components/Header.svelte";
     import {userEmail, loggedIn} from "$lib/stores.js";
     import { useForm, Hint, HintGroup, validators, required, email } from "svelte-use-form";
+    import {getToastStore} from "@skeletonlabs/skeleton";
 
     let errorText;
+    const toastStore = getToastStore();
 
     const form = useForm();
 
@@ -33,12 +35,31 @@
                 loggedIn.set("true");
                 goto("/companies")
             } else if(response.status === 400){
-                // Bad request + login doesn't exist
+                response.text().then(data => {
+                    toastStore.trigger({
+                        message: data,
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             } else if(response.status === 500){
-                // Server error
+                response.json().then(data => {
+                    toastStore.trigger({
+                        message: data.message,
+                        timeout: 3000,
+                        hoverable: true,
+                        background: 'bg-red-200 rounded-lg border-2 border-red-300'
+                    });
+                });
             }
         }).catch(error => {
-            // server's dead or something
+            toastStore.trigger({
+                message: "Server is offline!",
+                timeout: 3000,
+                hoverable: true,
+                background: 'bg-red-200 rounded-lg border-2 border-red-300'
+            });
         });
     }
 
@@ -63,7 +84,7 @@
                 <input type="text" name="email" placeholder="Email" use:validators={[required, email]}/>
             </label>
             <label>
-                <input type="password" name="password" placeholder="Login" />
+                <input type="password" name="password" placeholder="Password" />
             </label>
             <button disabled={!$form.valid} on:click|preventDefault={login}>Login</button>
         </form>
