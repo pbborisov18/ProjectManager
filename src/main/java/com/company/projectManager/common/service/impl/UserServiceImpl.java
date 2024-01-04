@@ -6,7 +6,6 @@ import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.repository.UserRepository;
-import com.company.projectManager.common.repository.UsersBusinessUnitsRepository;
 import com.company.projectManager.common.security.SecurityUser;
 import com.company.projectManager.common.service.UserService;
 import jakarta.validation.ConstraintViolationException;
@@ -81,7 +80,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void deleteAuthenticatedUser() throws FailedToDeleteException, EntityNotFoundException {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            Optional<User> existingUser = userRepository.findUserByEmail(email);
+            Optional<User> existingUser = userRepository.findUserByEmailIgnoreCase(email);
 
             if(existingUser.isEmpty()){
                 throw new EntityNotFoundException("User not found!");
@@ -96,7 +95,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     public UserNoPassDTO findUserByEmail(String email) throws FailedToSelectException, EntityNotFoundException {
         try {
-            Optional<User> existingUser = userRepository.findUserByEmail(email);
+            Optional<User> existingUser = userRepository.findUserByEmailIgnoreCase(email);
 
             if(existingUser.isEmpty()){
                 throw new EntityNotFoundException("User not found!");
@@ -124,13 +123,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     private boolean checkIfUserExists(String email){
-        return userRepository.findUserByEmail(email).isPresent();
+        return userRepository.findUserByEmailIgnoreCase(email).isPresent();
     }
 
     @Override
     @Transactional //Transactional so I can get the role ids
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findUserByEmail(username);
+        Optional<User> user = userRepository.findUserByEmailIgnoreCase(username);
 
         if(user.isEmpty()) {
             throw new UsernameNotFoundException("Email not found " + username);

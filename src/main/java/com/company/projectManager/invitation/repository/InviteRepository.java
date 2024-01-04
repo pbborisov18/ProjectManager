@@ -9,18 +9,18 @@ import java.util.Optional;
 
 public interface InviteRepository extends CrudRepository<Invite, Long>{
 
-    Optional<Invite> findInviteByBusinessUnitIdAndReceiverEmail(Long id, String email);
+    Optional<Invite> findByReceiverEmailIgnoreCaseAndBusinessUnitId(String email, Long id);
 
-    List<Invite> findByReceiverEmailAndState(String email, InviteState state);
+    List<Invite> findByReceiverEmailIgnoreCaseAndState(String email, InviteState state);
 
     List<Invite> findAllByBusinessUnitId(Long businessUnitId);
 
     void deleteAllByBusinessUnitId(Long businessUnitId);
 
-    void deleteAllByReceiverEmailAndBusinessUnitCompanyId(String email, Long businessUnitId);
+    void deleteAllByReceiverEmailIgnoreCaseAndBusinessUnitCompanyId(String email, Long businessUnitId);
 
-    void deleteAllByReceiverEmailAndBusinessUnitProjectId(String email, Long businessUnitId);
+    void deleteAllByReceiverEmailIgnoreCaseAndBusinessUnitProjectId(String email, Long businessUnitId);
 
-    void deleteByReceiverEmailAndBusinessUnitId(String email, Long businessUnitId);
+    void deleteByReceiverEmailIgnoreCaseAndBusinessUnitId(String email, Long businessUnitId);
 
 }

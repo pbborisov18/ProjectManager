@@ -49,7 +49,7 @@ public interface UsersBusinessUnitsService {
 
     List<BusinessUnitAuthoritiesDTO> findAllTeamsByAuthenticatedUserAndProject(ProjectDTO projectDTO) throws FailedToSelectException, EntityNotFoundException;
 
-    void createTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, FailedToSaveException;
+    BusinessUnitAuthoritiesDTO createTeam(TeamDTO teamDTO) throws UserUnauthenticatedException, FailedToSaveException;
 
     void updateTeam(TeamDTO teamDTO) throws EntityNotFoundException, FailedToUpdateException;
 

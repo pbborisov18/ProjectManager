@@ -57,7 +57,7 @@ public class InviteServiceImpl implements InviteService {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             return inviteMapper.toDTO(
-                    inviteRepository.findByReceiverEmailAndState(email, inviteState));
+                    inviteRepository.findByReceiverEmailIgnoreCaseAndState(email, inviteState));
 
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToSelectException("Failed to select! " + e.getMessage());
@@ -176,13 +176,13 @@ public class InviteServiceImpl implements InviteService {
 
     public InviteDTONoPass createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws InvalidInvitationException, FailedToSaveException {
         try {
-            Optional<User> receiverEntity = userRepository.findUserByEmail(receiver.email());
+            Optional<User> receiverEntity = userRepository.findUserByEmailIgnoreCase(receiver.email());
 
             if(receiverEntity.isEmpty()){
                 throw new InvalidInvitationException("User doesn't exist");
             }
 
-            Optional<Invite> inviteExists = inviteRepository.findInviteByBusinessUnitIdAndReceiverEmail(businessUnitDTO.id(), receiver.email());
+            Optional<Invite> inviteExists = inviteRepository.findByReceiverEmailIgnoreCaseAndBusinessUnitId(receiver.email(), businessUnitDTO.id());
 
             //Checks if invite already exists. Or the user is being a smartass trying to invite themselves
             if(inviteExists.isPresent() ||

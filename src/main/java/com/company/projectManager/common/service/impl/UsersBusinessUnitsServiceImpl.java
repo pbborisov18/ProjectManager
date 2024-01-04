@@ -76,7 +76,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
 
             //TODO: This is a n+1 query. Will have to fix in the future
             List<UserBusinessUnit> userBUs =
-                    usersBURepository.findAllByUserEmailAndBusinessUnitType(email, TypeName.COMPANY);
+                    usersBURepository.findAllByUserEmailIgnoreCaseAndBusinessUnitType(email, TypeName.COMPANY);
 
             if(userBUs.isEmpty()){
                 throw new EntityNotFoundException("No UserBusinessUnits found");
@@ -95,7 +95,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
         try {
             //You can get the user id from the authorities in case you need extra perf
             //This is just more readable
-            Optional<User> user = userRepository.findUserByEmail(
+            Optional<User> user = userRepository.findUserByEmailIgnoreCase(
                     SecurityContextHolder.getContext().getAuthentication().getName());
 
             if(user.isEmpty()) {
@@ -153,16 +153,16 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             //Delete invite for this user to this company
-            inviteRepository.deleteByReceiverEmailAndBusinessUnitId(email, companyDTO.id());
+            inviteRepository.deleteByReceiverEmailIgnoreCaseAndBusinessUnitId(email, companyDTO.id());
             //Delete all invites for the children of this company
-            inviteRepository.deleteAllByReceiverEmailAndBusinessUnitCompanyId(email, companyDTO.id());
+            inviteRepository.deleteAllByReceiverEmailIgnoreCaseAndBusinessUnitCompanyId(email, companyDTO.id());
 
             //Delete userBU entry
-            usersBURepository.findByUserEmailAndBusinessUnitId(email, companyDTO.id())
+            usersBURepository.findByUserEmailIgnoreCaseAndBusinessUnitId(email, companyDTO.id())
                     .ifPresent(usersBURepository::delete);
             //Delete all child userBURole entries
             List<UserBusinessUnit> childUserBUs =
-                    usersBURepository.findAllByUserEmailAndBusinessUnitCompanyId(email, companyDTO.id());
+                    usersBURepository.findAllByUserEmailIgnoreCaseAndBusinessUnitCompanyId(email, companyDTO.id());
 
             usersBURepository.deleteAll(childUserBUs);
 
@@ -208,7 +208,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            List<UserBusinessUnit> userBUs = usersBURepository.findAllByUserEmailAndBusinessUnitCompanyIdAndBusinessUnitType(email, companyDTO.id(), TypeName.PROJECT);
+            List<UserBusinessUnit> userBUs = usersBURepository.findAllByUserEmailIgnoreCaseAndBusinessUnitCompanyIdAndBusinessUnitType(email, companyDTO.id(), TypeName.PROJECT);
 
             if(userBUs.isEmpty()){
                 throw new EntityNotFoundException("No UserBusinessUnits found");
@@ -226,7 +226,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
         try {
             //You can get the user id from the authorities in case you need extra perf
             //This is just more readable
-            Optional<User> user = userRepository.findUserByEmail(
+            Optional<User> user = userRepository.findUserByEmailIgnoreCase(
                     SecurityContextHolder.getContext().getAuthentication().getName());
 
             if(user.isEmpty()) {
@@ -284,16 +284,16 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             //Delete invite for this user to this project
-            inviteRepository.deleteByReceiverEmailAndBusinessUnitId(email, projectDTO.id());
+            inviteRepository.deleteByReceiverEmailIgnoreCaseAndBusinessUnitId(email, projectDTO.id());
             //Delete all invites for the children of this project
-            inviteRepository.deleteAllByReceiverEmailAndBusinessUnitProjectId(email, projectDTO.id());
+            inviteRepository.deleteAllByReceiverEmailIgnoreCaseAndBusinessUnitProjectId(email, projectDTO.id());
 
             //Delete userBU entry
-            usersBURepository.findByUserEmailAndBusinessUnitId(email, projectDTO.id())
+            usersBURepository.findByUserEmailIgnoreCaseAndBusinessUnitId(email, projectDTO.id())
                     .ifPresent(usersBURepository::delete);
             //Delete all child userBU entries
             List<UserBusinessUnit> childUserBUs =
-                    usersBURepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id());
+                    usersBURepository.findAllByUserEmailIgnoreCaseAndBusinessUnitProjectId(email, projectDTO.id());
             usersBURepository.deleteAll(childUserBUs);
 
             //if no more users are left in the project delete it (and it's children ofc)
@@ -337,7 +337,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            List<UserBusinessUnit> userBUs = usersBURepository.findAllByUserEmailAndBusinessUnitProjectId(email, projectDTO.id());
+            List<UserBusinessUnit> userBUs = usersBURepository.findAllByUserEmailIgnoreCaseAndBusinessUnitProjectId(email, projectDTO.id());
 
             if(userBUs.isEmpty()){
                 throw new EntityNotFoundException("No UserBusinessUnits found");
@@ -355,7 +355,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
         try {
             //You can get the user id from the authorities in case you need extra perf
             //This is just more readable
-            Optional<User> user = userRepository.findUserByEmail(
+            Optional<User> user = userRepository.findUserByEmailIgnoreCase(
                     SecurityContextHolder.getContext().getAuthentication().getName());
 
             if(user.isEmpty()) {
@@ -414,10 +414,10 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
 
             //Delete invite for this user to this company
             //Probably slow. You can just straight up make a delete method
-            inviteRepository.deleteByReceiverEmailAndBusinessUnitId(email, teamDTO.id());
+            inviteRepository.deleteByReceiverEmailIgnoreCaseAndBusinessUnitId(email, teamDTO.id());
 
             //Delete userBU entry
-            usersBURepository.findByUserEmailAndBusinessUnitId(email, teamDTO.id())
+            usersBURepository.findByUserEmailIgnoreCaseAndBusinessUnitId(email, teamDTO.id())
                     .ifPresent(usersBURepository::delete);
 
             //if no more users are left in the project delete it (and it's children ofc)
@@ -473,7 +473,7 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
     @Transactional
     public UserNoPassBusinessUnitRoleDTO findUserRoles(Long businessUnitId, String email) throws FailedToSelectException, EntityNotFoundException {
         try {
-            Optional<UserBusinessUnit> ubu = usersBURepository.findByUserEmailAndBusinessUnitId(email, businessUnitId);
+            Optional<UserBusinessUnit> ubu = usersBURepository.findByUserEmailIgnoreCaseAndBusinessUnitId(email, businessUnitId);
 
             if(ubu.isEmpty()){
                 throw new EntityNotFoundException("UserBusinessUnit not found!");
@@ -508,14 +508,14 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
     @Transactional
     public void kickFromBU(String email, Long businessUnitId) throws EntityNotFoundException, FailedToDeleteException {
         try {
-            Optional<UserBusinessUnit> ubu = usersBURepository.findByUserEmailAndBusinessUnitId(email, businessUnitId);
+            Optional<UserBusinessUnit> ubu = usersBURepository.findByUserEmailIgnoreCaseAndBusinessUnitId(email, businessUnitId);
 
             if(ubu.isEmpty()){
                 throw new EntityNotFoundException("UserBusinessUnit not found! (User isn't part of the BU)");
             }
 
             //Delete invite for this user to this bu
-            inviteRepository.deleteByReceiverEmailAndBusinessUnitId(email, businessUnitId);
+            inviteRepository.deleteByReceiverEmailIgnoreCaseAndBusinessUnitId(email, businessUnitId);
 
             //Delete userBU entry
             usersBURepository.delete(ubu.get());

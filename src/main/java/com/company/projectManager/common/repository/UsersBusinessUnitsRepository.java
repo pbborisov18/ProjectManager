@@ -9,15 +9,15 @@ import java.util.Optional;
 
 public interface UsersBusinessUnitsRepository extends CrudRepository<UserBusinessUnit, Long> {
 
-    List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitType(String email, TypeName typeName);
+    List<UserBusinessUnit> findAllByUserEmailIgnoreCaseAndBusinessUnitType(String email, TypeName typeName);
 
-    List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitCompanyIdAndBusinessUnitType(String email, Long companyId, TypeName type);
+    List<UserBusinessUnit> findAllByUserEmailIgnoreCaseAndBusinessUnitCompanyIdAndBusinessUnitType(String email, Long companyId, TypeName type);
 
-    List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitProjectId(String email, Long projectId);
+    List<UserBusinessUnit> findAllByUserEmailIgnoreCaseAndBusinessUnitProjectId(String email, Long projectId);
 
-    List<UserBusinessUnit> findAllByUserEmailAndBusinessUnitCompanyId(String email, Long companyId);
+    List<UserBusinessUnit> findAllByUserEmailIgnoreCaseAndBusinessUnitCompanyId(String email, Long companyId);
 
-    Optional<UserBusinessUnit> findByUserEmailAndBusinessUnitId(String email, Long businessUnitId);
+    Optional<UserBusinessUnit> findByUserEmailIgnoreCaseAndBusinessUnitId(String email, Long businessUnitId);
 
     List<UserBusinessUnit> findAllByBusinessUnitIdAndRolesId(Long businessUnitId, Long roleId);
 
