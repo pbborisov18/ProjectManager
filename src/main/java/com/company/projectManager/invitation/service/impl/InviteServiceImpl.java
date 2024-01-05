@@ -2,6 +2,7 @@ package com.company.projectManager.invitation.service.impl;
 
 import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
 import com.company.projectManager.common.dto.user.UserNoPassDTO;
+import com.company.projectManager.common.entity.BusinessUnit;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
@@ -10,17 +11,19 @@ import com.company.projectManager.common.repository.RoleRepository;
 import com.company.projectManager.common.repository.UserRepository;
 import com.company.projectManager.common.repository.UsersBusinessUnitsRepository;
 import com.company.projectManager.common.utils.InviteState;
+import com.company.projectManager.common.utils.TypeName;
 import com.company.projectManager.invitation.dto.InviteDTONoPass;
 import com.company.projectManager.invitation.entity.Invite;
 import com.company.projectManager.invitation.mapper.InviteMapper;
 import com.company.projectManager.invitation.repository.InviteRepository;
 import com.company.projectManager.invitation.service.InviteService;
-import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -104,6 +107,37 @@ public class InviteServiceImpl implements InviteService {
                             invite.get().getBusinessUnit(),
                             //Get the default role in the business unit
                             List.of(roleRepository.findByNameAndBusinessUnitId("Default", invite.get().getBusinessUnit().getId())
+                                    .get())));
+
+            if(invite.get().getBusinessUnit().getType() == TypeName.TEAM){
+                acceptInvitesToParents(invite.get().getReceiver(), invite.get().getBusinessUnit().getCompany());
+                acceptInvitesToParents(invite.get().getReceiver(), invite.get().getBusinessUnit().getProject());
+            } else if (invite.get().getBusinessUnit().getType() == TypeName.PROJECT){
+                acceptInvitesToParents(invite.get().getReceiver(), invite.get().getBusinessUnit().getCompany());
+            }
+
+
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e){
+            throw new FailedToUpdateException("Failed to update! " + e.getMessage());
+        }
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void acceptInvitesToParents(User user, BusinessUnit businessUnit) throws FailedToUpdateException {
+        try {
+
+            Invite invite = new Invite(null, InviteState.ACCEPTED, user, businessUnit);
+
+            //Keep the invite in the db so a user can't be invited to the same BU that they are already in
+            //Make sure to (manually) cascade delete the invites
+            inviteRepository.save(invite);
+
+            usersBURepository.save(
+                    new UserBusinessUnit(null,
+                            invite.getReceiver(),
+                            invite.getBusinessUnit(),
+                            //Get the default role in the business unit
+                            List.of(roleRepository.findByNameAndBusinessUnitId("Default", invite.getBusinessUnit().getId())
                                     .get())));
 
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e){
