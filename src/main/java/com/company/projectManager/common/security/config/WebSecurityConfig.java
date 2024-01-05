@@ -4,8 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -14,6 +13,12 @@ import java.util.List;
 
 @Configuration
 public class WebSecurityConfig {
+
+    private final UserDetailsService userDetailsService;
+
+    public WebSecurityConfig(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,75 +37,72 @@ public class WebSecurityConfig {
                 //I can't figure out how to get the csrf token in the frontend
                 //I'm not looking to do the "send a request on x endpoint which exposes the token before the actual request"
                 //And I couldn't find a better solution
-                .csrf(c ->c.disable())
+                .csrf(c -> c.disable())
 //                        ( c ->  c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) //this puts the csrf token in the cookies
 //                                // no idea wtf this does. Can't read the X-XSRF-TOKEN header in the request without it
 //                                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
 
-                .cors( c -> c.configurationSource(
-                            r -> {
-                                CorsConfiguration configuration = new CorsConfiguration();
+                .cors(c -> c.configurationSource(
+                        r -> {
+                            CorsConfiguration configuration = new CorsConfiguration();
 
-                                configuration.applyPermitDefaultValues();
-                                //Letting the frontend do whatever types of methods it wants
-                                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
-                                configuration.setAllowedOriginPatterns(List.of("http://localhost:5173*"));
-                                configuration.setAllowCredentials(true);
+                            configuration.applyPermitDefaultValues();
+                            //Letting the frontend do whatever types of methods it wants
+                            configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
+                            configuration.setAllowedOriginPatterns(List.of("http://localhost:5173*"));
+                            configuration.setAllowCredentials(true);
 //                                configuration.setAllowedHeaders(List.of("Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "content-type", "x-xsrf-token"));
 //                                configuration.setExposedHeaders(List.of("Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"));
 
-                                return configuration;
-                            }
+                            return configuration;
+                        }
                 ))
 
-                .formLogin(login -> {
-                    login.loginPage("http://localhost:5176/login")
-                            .loginProcessingUrl("/login")
-                            .successHandler((request, response, authentication) -> {
-                                response.setStatus(HttpStatus.OK.value());
-                                response.getWriter().flush();
-                            })
-                            .failureHandler((request, response, exception) -> {
-                                response.setStatus(HttpStatus.BAD_REQUEST.value());
-                                response.setContentType("text/plain");
-                                response.getWriter().write("Incorrect email or password!");
-                            })
-                            .usernameParameter("email");
-                })
+                .formLogin(login -> login
+                        .loginPage("http://localhost:5176/login")
+                        .loginProcessingUrl("/login")
+                        .usernameParameter("email")
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(HttpStatus.OK.value());
+                            response.getWriter().flush();
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpStatus.BAD_REQUEST.value());
+                            response.setContentType("text/plain");
+                            response.getWriter().write("Incorrect email or password!");
+                        }))
+
+                .rememberMe(me -> me
+                        .key("RandomAssPrivateKey")
+                        .rememberMeParameter("rememberme")
+                        .userDetailsService(userDetailsService)
+                )
+//                .rememberMe(remember -> {
+//                    remember.rememberMeServices(rememberMeServices).rememberMeCookieDomain("http://localhost:5176*").tokenValiditySeconds(60 * 60 * 24 * 7).alwaysRemember(true);
+//                })
+
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/", "/login", "/register", "/*.html", "/style/**", "/error", "/favicon").permitAll()
+                        .anyRequest().authenticated())
+
+                .exceptionHandling(eh -> eh
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.setContentType("text/plain");
+                            response.getWriter().write("Unauthenticated!");
+                        }))
 
 
-
-
-                .authorizeHttpRequests(requests -> {
-                    requests.requestMatchers("/", "/login", "/register", "/*.html", "/style/**","/error", "/favicon").permitAll()
-                            .anyRequest().authenticated();
-                })
-
-                .exceptionHandling(eh -> {
-                    eh.authenticationEntryPoint((request, response, authException) -> {
-                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                        response.setContentType("text/plain");
-                        response.getWriter().write("Unauthenticated!");
-                    });
-                })
-
-
-                .logout(logout -> {
-                    logout.logoutSuccessHandler((request, response, authentication) -> {
-                                response.setStatus(HttpStatus.OK.value());
-                                response.getWriter().flush();
-                            })
-                            .logoutSuccessUrl("http://localhost:5176/login")
-                            .invalidateHttpSession(true)
-                            .deleteCookies("JSESSIONID");
-                })
+                .logout(logout -> logout.
+                        logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpStatus.OK.value());
+                            response.getWriter().flush();
+                        })
+                        .logoutSuccessUrl("http://localhost:5176/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID"))
 
                 .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
 }

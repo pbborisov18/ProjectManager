@@ -47,8 +47,11 @@
 
     function sendLoginRequestAfterRegister(email, password){
         const formData = new URLSearchParams();
+
         formData.append('email', email);
         formData.append('password', password);
+        //We'll assume that the user wants to have a remember me token
+        formData.append('rememberme', checkBox);
 
         fetch('http://localhost:8080/login', {
             method: 'POST',

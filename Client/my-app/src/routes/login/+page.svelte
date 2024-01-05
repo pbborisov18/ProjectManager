@@ -3,8 +3,10 @@
     import Header from "$lib/components/Header.svelte";
     import {userEmail, loggedIn} from "$lib/stores.js";
     import toast from "svelte-french-toast";
-    import {Button, Input} from "flowbite-svelte";
+    import {Button, Checkbox, Input} from "flowbite-svelte";
     import logo from "$lib/images/AlignLogo.png";
+
+    let checkBox = false;
 
     function login(event){
         event.preventDefault();
@@ -15,6 +17,7 @@
         const formData = new URLSearchParams();
         formData.append('email', email);
         formData.append('password', password);
+        formData.append('rememberme', checkBox);
 
         fetch('http://localhost:8080/login', {
             method: 'POST',
@@ -57,8 +60,12 @@
 
         <form on:submit={e => login(e)}>
             <Input class="mb-3" type="email" name="email" placeholder="Email" required/>
-            <Input class="mb-8" type="password" name="password" placeholder="Password" required/>
+            <Input class="mb-3" type="password" name="password" placeholder="Password" required/>
+            <div class="w-[100%] mb-3">
+                <Checkbox bind:checked={checkBox}>Remember me</Checkbox>
+            </div>
             <Button type="submit" color="blue">Login</Button>
+
         </form>
         <h3 class="not-selectable clickable" on:click={goToRegisterPage}>No account?</h3>
     </div>
@@ -127,8 +134,9 @@
         width: 100%;
         flex-direction: column;
         align-items: center;
-        padding: 30px 50px;
+        padding: 20px 50px;
         font-weight: lighter;
     }
+
 </style>
 
