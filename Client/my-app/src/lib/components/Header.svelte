@@ -97,6 +97,8 @@
         align-items: center;
         box-shadow: rgba(0, 0, 0, 0.12) 0 1px 1px;
         background-color: #eae9ea;
+        height: 7vh;
+        min-height: 69px;
     }
 
     img {
