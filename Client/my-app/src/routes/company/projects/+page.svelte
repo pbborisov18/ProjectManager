@@ -130,11 +130,10 @@
 {#await BURoles}
     <img src="{loadingGif}" alt="">
 {:then BURoles}
-
     {#if error === 204 && (!BURoles || BURoles.length === 0)}
         <Header/>
         <div class="lowerMenuDiv">
-            <Breadcrumb >
+            <Breadcrumb>
                 <BreadcrumbItem href="/companies" home>{companyBURole.businessUnit.name}</BreadcrumbItem>
             </Breadcrumb>
             {#if companyBURole.authorityDTOList.some(a => a.name === "CreateChildren")}
