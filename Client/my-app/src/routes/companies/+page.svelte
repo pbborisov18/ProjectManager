@@ -8,12 +8,13 @@
     import {userEmail, loggedIn} from "$lib/stores.js";
     import {onMount} from "svelte";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     let error = 401;
     let BURoles;
 
     async function getCompanies(){
-        fetch('http://localhost:8080/companies', {
+        fetch(PUBLIC_BACKEND_URL + '/companies', {
             method: 'GET',
             headers: {
                 'Content-Type': "application/json",
@@ -55,7 +56,7 @@
             whiteboard: null
         };
 
-        fetch('http://localhost:8080/createCompany', {
+        fetch(PUBLIC_BACKEND_URL + '/createCompany', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

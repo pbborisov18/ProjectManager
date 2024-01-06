@@ -4,6 +4,7 @@
     import {goto} from "$app/navigation";
     import WhiteboardPageComponent from "$lib/components/WhiteboardPageComponent.svelte";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     let BURole;
 
@@ -15,7 +16,7 @@
     });
 
     async function getWhiteboard(){
-        fetch('http://localhost:8080/company/project/whiteboard', {
+        fetch(PUBLIC_BACKEND_URL + '/company/project/whiteboard', {
             method: 'POST',
             headers: {
                 'Content-Type': "application/json",
