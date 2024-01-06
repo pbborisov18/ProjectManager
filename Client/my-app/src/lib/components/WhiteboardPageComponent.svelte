@@ -330,12 +330,15 @@
     .row {
         display: flex;
         flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
     }
 
     .addNote{
         margin: 20px 5vh 0 2vh;
         max-height: 85vh;
         width: 3vw;
+        min-width: 40px;
         display: flex;
         justify-content: center;
         align-items: center;

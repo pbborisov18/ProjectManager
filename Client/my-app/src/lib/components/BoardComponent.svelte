@@ -50,8 +50,9 @@
         display: flex;
 
     }
+
     .column {
-        height: 100%;
+        height: 99%;
         padding: 0.5em;
         margin: 10px;
 
@@ -61,6 +62,7 @@
         max-width: 22%;
         overflow-x: hidden;
         justify-content: space-between;
+        min-width: 250px;
     }
 
 </style>

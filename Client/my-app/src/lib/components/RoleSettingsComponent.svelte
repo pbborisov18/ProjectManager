@@ -375,7 +375,7 @@
             border: 2px solid black;
             align-items: center;
             justify-content: center;
-            min-width: 47px;
+            padding: 1vh;
         }
 
         hr {

@@ -325,7 +325,7 @@
                                     {/if}
                                 </div>
                                 <p>All other roles</p>
-                                <div class="flex-wrap flex gap-1">
+                                <div class="flex-wrap flex gap-1 mb-5">
                                     {#if BURole.authorityDTOList.some(a => a.name === "ChangePermissions")}
                                         {#each allRoles as role}
                                             <CustomBadge onClick={() => moveToRolesOnSelectedUser(role)} deleteButton="{true}" toDisplay="{role.name}"/>

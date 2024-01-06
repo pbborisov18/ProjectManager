@@ -157,7 +157,7 @@
                     editPopup = true;
                  }}
                  on:mouseenter={handleHover(item)} on:mouseleave={handleHoverEnd}>
-                <Card>
+                <Card class="min-w-full">
                     <div class="parent">
                         <h5 class="card mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{item.name}</h5>
                         {#if hoveredItem === item}
@@ -224,6 +224,7 @@
         overflow-wrap: anywhere;
         max-height: 20vh;
         line-height: normal;
+        white-space: pre-line;
     }
 
     img{

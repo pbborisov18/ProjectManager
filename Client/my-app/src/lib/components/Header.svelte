@@ -52,30 +52,15 @@
         goto("/login");
     }
 
-    function redirectToRegister(){
-        goto("/sign-up");
-    }
-
 </script>
 
 <header>
     <img class="not-selectable clickable logo" src="{AgileAceLogo}" alt="logo" on:click={redirectToHomepage} draggable="false">
-    <span class="not-selectable clickable" on:click={redirectToHomepage}>AgileAce</span>
+    <p class="not-selectable clickable text-[2vh] font-medium" on:click={redirectToHomepage}>AgileAce</p>
 
     {#if homePage && $loggedIn !== "true"}
         <div class="landingPage-section">
-            <Button color="blue" on:click={redirectToLogin}>Login</Button>
-            <Button color="blue" on:click={redirectToRegister}>Register</Button>
-<!--            <a on:click={redirectToLogin}-->
-<!--               class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blue-700 active:bg-blue-800 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"-->
-<!--            >-->
-<!--                Login-->
-<!--            </a>-->
-<!--            <a on:click={redirectToRegister}-->
-<!--               class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blue-700 active:bg-blue-800 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"-->
-<!--            >-->
-<!--                Register-->
-<!--            </a>-->
+            <Button class="bg-blue-500 mr-[1.5vw] rounded-md font-bold" size="lg" on:click={redirectToLogin}>Login</Button>
         </div>
     {/if}
 
@@ -84,7 +69,7 @@
             <img class="clickable" src="{inviteIcon}" alt="invite button" draggable="false" on:click={redirectToInvitesPage}>
 
             <div class="emailDivBox not-selectable" >
-                <span class="clickable">{$userEmail}</span>
+                <p class="clickable text-[1.5vh] font-semibold">{$userEmail}</p>
                 <Dropdown >
                     <DropdownItem on:click={logout}>Logout</DropdownItem>
                 </Dropdown>
@@ -106,7 +91,7 @@
     }
 
     img {
-        width: 50px;
+        width: 5vh;
     }
 
     span {
@@ -147,8 +132,8 @@
         height: 7vh;
 
         img {
-            width: 30px;
-            height: 30px;
+            width: 3vh;
+            height: 3vh;
             margin-right: 3vw;
         }
 
