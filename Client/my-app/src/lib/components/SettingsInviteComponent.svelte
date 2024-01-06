@@ -4,6 +4,7 @@
     import {onMount} from "svelte";
     import {userEmail, loggedIn} from "$lib/stores";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     export let BURole;
 
@@ -22,7 +23,7 @@
     }
 
     function invitePersonToBU(){
-        fetch('http://localhost:8080' + fetchUrl + '/invite', {
+        fetch(PUBLIC_BACKEND_URL + fetchUrl + '/invite', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -62,7 +63,7 @@
     }
 
     function getAllInvitesByBU(){
-        fetch('http://localhost:8080/businessUnit/invites', {
+        fetch(PUBLIC_BACKEND_URL + '/businessUnit/invites', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -108,7 +109,7 @@
         clickedInvite = {   ...clickedInvite,
             state:"CANCELLED"}
 
-        fetch("http://localhost:8080/invites", {
+        fetch(PUBLIC_BACKEND_URL + "/invites", {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'

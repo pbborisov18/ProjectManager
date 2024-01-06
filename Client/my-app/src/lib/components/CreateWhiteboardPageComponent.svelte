@@ -5,13 +5,14 @@
     import {goto} from "$app/navigation";
     import {onMount} from "svelte";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     export let BURole;
 
     let whiteboardName;
 
     function handleSubmit(){
-        fetch("http://localhost:8080/company/createWhiteboard", {
+        fetch(PUBLIC_BACKEND_URL + "/company/createWhiteboard", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -9,6 +9,7 @@
     import ProjectComponent from "$lib/components/ProjectComponent.svelte";
     import {onMount} from "svelte";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     let companyBURole = JSON.parse($company);
 
@@ -16,7 +17,7 @@
     let BURoles = [];
 
     async function getProjects(){
-        fetch('http://localhost:8080/company/projects', {
+        fetch(PUBLIC_BACKEND_URL + '/company/projects', {
             method: 'POST',
             headers: {
                 'Content-Type': "application/json",
@@ -63,7 +64,7 @@
             whiteboard:null
         }
 
-        fetch('http://localhost:8080/company/createProject', {
+        fetch(PUBLIC_BACKEND_URL + '/company/createProject', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -3,6 +3,7 @@
     import {goto} from "$app/navigation";
     import {loggedIn, userEmail} from "$lib/stores.js";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     export let BURole;
     export let onChangeName;
@@ -31,7 +32,7 @@
             name: BUEditName
         };
 
-        fetch('http://localhost:8080' + fetchUrl, {
+        fetch(PUBLIC_BACKEND_URL + fetchUrl, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'

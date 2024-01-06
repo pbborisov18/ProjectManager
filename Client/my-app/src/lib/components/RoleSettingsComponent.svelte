@@ -7,6 +7,7 @@
     import CustomAuthoritySettingsLabel from "$lib/components/CustomAuthoritySettingsLabel.svelte";
     import {userEmail, loggedIn} from "$lib/stores";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     export let BURole;
 
@@ -115,7 +116,7 @@
 
     function findAllRoles(){
 
-        fetch('http://localhost:8080/company/roles', {
+        fetch(PUBLIC_BACKEND_URL + '/company/roles', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -148,7 +149,7 @@
     }
 
     function deleteRole(role){
-        fetch('http://localhost:8080/company/deleteRole', {
+        fetch(PUBLIC_BACKEND_URL + '/company/deleteRole', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -179,7 +180,7 @@
     }
 
     function editRole(role){
-        fetch('http://localhost:8080/company/updateRole', {
+        fetch(PUBLIC_BACKEND_URL + '/company/updateRole', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -215,7 +216,7 @@
     }
 
     function createRole(role){
-        fetch('http://localhost:8080/company/createRole', {
+        fetch(PUBLIC_BACKEND_URL + '/company/createRole', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

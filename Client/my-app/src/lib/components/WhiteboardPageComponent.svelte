@@ -8,6 +8,7 @@
     import {onMount} from "svelte";
     import {userEmail, loggedIn} from "$lib/stores";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     export let BURole;
 
@@ -22,7 +23,7 @@
     });
 
     function getColumns(whiteboard) {
-        let promise = fetch("http://localhost:8080/company/columns", {
+        let promise = fetch(PUBLIC_BACKEND_URL + "/company/columns", {
             method: 'POST',
             headers: {
                 'Content-Type': "application/json",
@@ -99,7 +100,7 @@
     }
 
     function getNotes(column) {
-        let promise = fetch("http://localhost:8080/company/whiteboard/notes", {
+        let promise = fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/notes", {
             method: 'POST',
             headers: {
                 'Content-Type': "application/json",
@@ -171,7 +172,7 @@
 
     //TODO: Update the place after 200ok
     function updateNotes(updatedNotes){
-        fetch("http://localhost:8080/company/whiteboard/updateNotes", {
+        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/updateNotes", {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -225,7 +226,7 @@
     }
 
     function createNoteRequest(note){
-        fetch("http://localhost:8080/company/whiteboard/createNote", {
+        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/createNote", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

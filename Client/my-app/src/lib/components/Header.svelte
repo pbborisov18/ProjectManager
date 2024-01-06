@@ -2,12 +2,14 @@
     import {goto} from "$app/navigation";
     import {userEmail, loggedIn} from "$lib/stores.js";
     import {
+        Button,
         Dropdown,
         DropdownItem
     } from 'flowbite-svelte'
     import AgileAceLogo from "$lib/images/AlignLogo.png";
     import inviteIcon from "$lib/images/invite.png";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     export let homePage = false;
 
@@ -24,7 +26,7 @@
     }
 
     function logout() {
-        fetch('http://localhost:8080/logout', {
+        fetch(PUBLIC_BACKEND_URL + '/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -62,16 +64,18 @@
 
     {#if homePage && $loggedIn !== "true"}
         <div class="landingPage-section">
-            <a on:click={redirectToLogin}
-               class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blue-700 active:bg-blue-800 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"
-            >
-                Login
-            </a>
-            <a on:click={redirectToRegister}
-               class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blue-700 active:bg-blue-800 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"
-            >
-                Register
-            </a>
+            <Button color="blue" on:click={redirectToLogin}>Login</Button>
+            <Button color="blue" on:click={redirectToRegister}>Register</Button>
+<!--            <a on:click={redirectToLogin}-->
+<!--               class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blue-700 active:bg-blue-800 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"-->
+<!--            >-->
+<!--                Login-->
+<!--            </a>-->
+<!--            <a on:click={redirectToRegister}-->
+<!--               class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blue-700 active:bg-blue-800 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"-->
+<!--            >-->
+<!--                Register-->
+<!--            </a>-->
         </div>
     {/if}
 

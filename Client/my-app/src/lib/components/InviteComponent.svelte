@@ -5,6 +5,7 @@
     import deleteIcon from "$lib/images/delete.png";
     import {userEmail, loggedIn} from "$lib/stores";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     export let invite;
     export let onDestroy;
@@ -34,7 +35,7 @@
     }
 
     function sendRequest(updatedInvite){
-        fetch('http://localhost:8080/invites', {
+        fetch(PUBLIC_BACKEND_URL + '/invites', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -70,7 +71,7 @@
     }
 
     function deleteInvite() {
-        fetch('http://localhost:8080/invites', {
+        fetch(PUBLIC_BACKEND_URL + '/invites', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

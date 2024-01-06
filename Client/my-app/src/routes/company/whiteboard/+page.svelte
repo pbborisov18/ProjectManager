@@ -5,6 +5,7 @@
     import {company, userEmail, loggedIn} from "$lib/stores.js";
     import {onMount} from "svelte";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     let BURole;
 
@@ -16,7 +17,7 @@
     });
 
     async function getWhiteboard(){
-        fetch('http://localhost:8080/company/whiteboard', {
+        fetch(PUBLIC_BACKEND_URL + '/company/whiteboard', {
             method: 'POST',
             headers: {
                 'Content-Type': "application/json",

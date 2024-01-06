@@ -8,6 +8,7 @@
     import {loggedIn, userEmail} from "$lib/stores.js";
     import {goto} from "$app/navigation";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     let error = 401;
     let invites;
@@ -31,7 +32,7 @@
     ];
 
     function getInvitesByCurrentSelection(){
-        fetch('http://localhost:8080/invites?' + new URLSearchParams({inviteState:currentSelection}), {
+        fetch(PUBLIC_BACKEND_URL + '/invites?' + new URLSearchParams({inviteState:currentSelection}), {
             method: 'GET',
             headers: {
                 'Content-Type': "application/json",

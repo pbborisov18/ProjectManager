@@ -15,6 +15,7 @@
     import { slide } from 'svelte/transition';
     import CustomBadge from "$lib/components/CustomBadge.svelte";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     export let BURole;
 
@@ -37,7 +38,7 @@
     let selectedUser;
 
     function getLast30UsersWhoJoinedBU(){
-        fetch('http://localhost:8080/bu/getLast30Users', {
+        fetch(PUBLIC_BACKEND_URL + '/bu/getLast30Users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -71,7 +72,7 @@
 
     function getRoles(user){
         return new Promise((resolve, reject) => {
-            fetch('http://localhost:8080/bu/getUserRoles', {
+            fetch(PUBLIC_BACKEND_URL + '/bu/getUserRoles', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -110,7 +111,7 @@
 
     //Practically copypaste to the above function. Just easier to do this instead of figuring out how to use the above
     function searchForUserInBU(user){
-        fetch('http://localhost:8080/bu/getUserRoles', {
+        fetch(PUBLIC_BACKEND_URL + '/bu/getUserRoles', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -158,7 +159,7 @@
     function saveRoles() {
         selectedUser = {...selectedUser, userBusinessUnit: {...selectedUser.userBusinessUnit, roles: rolesOnSelectedUser}};
 
-        fetch('http://localhost:8080/bu/changeUserRoles', {
+        fetch(PUBLIC_BACKEND_URL + '/bu/changeUserRoles', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -188,7 +189,7 @@
     }
 
     function kickUser(user) {
-        fetch('http://localhost:8080/bu/kickUser', {
+        fetch(PUBLIC_BACKEND_URL + '/bu/kickUser', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

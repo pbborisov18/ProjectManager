@@ -5,6 +5,7 @@
     import {goto} from "$app/navigation";
     import {userEmail, loggedIn} from "$lib/stores";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     export let BURole;
 
@@ -40,7 +41,7 @@
 
         clickedNote = {...clickedNote, name: noteName, description: noteDescription};
 
-        fetch("http://localhost:8080/company/whiteboard/updateNote", {
+        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/updateNote", {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -87,7 +88,7 @@
             return;
         }
 
-        fetch("http://localhost:8080/company/whiteboard/deleteNote", {
+        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/deleteNote", {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

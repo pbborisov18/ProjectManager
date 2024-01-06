@@ -6,6 +6,7 @@
     import toast from "svelte-french-toast";
     import {Button, Helper, Input} from "flowbite-svelte"
     import logo from "$lib/images/AlignLogo.png";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
 
     function register(event) {
@@ -20,7 +21,7 @@
         const password = event.target.password.value;
         const confirmPassword = event.target.confirmPassword.value;
 
-        fetch('http://localhost:8080/register', {
+        fetch(PUBLIC_BACKEND_URL + '/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -51,9 +52,9 @@
         formData.append('email', email);
         formData.append('password', password);
         //We'll assume that the user wants to have a remember me token
-        formData.append('rememberme', checkBox);
+        formData.append('rememberme', true);
 
-        fetch('http://localhost:8080/login', {
+        fetch(PUBLIC_BACKEND_URL + '/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'

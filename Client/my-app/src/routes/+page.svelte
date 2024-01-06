@@ -17,7 +17,7 @@
     <div class="w-full md:w-8/12 lg:w-6/12 xl:w-6/12 px-4">
       <div class="pt-32 sm:pt-0">
         <h2 class="font-semibold text-4xl text-blueGray-600">
-          Agile Ace
+          <i>BASIC</i> PROJECT MANAGER
         </h2>
         <p class="mt-4 text-lg leading-relaxed text-blueGray-500">
             Keep your projects organized, on schedule, and in one place with our easy-to-use platform.

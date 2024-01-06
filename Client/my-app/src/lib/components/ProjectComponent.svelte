@@ -14,6 +14,7 @@
     import RoleSettingsComponent from "$lib/components/RoleSettingsComponent.svelte";
     import EditBUComponent from "$lib/components/EditBUComponent.svelte";
     import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     let leavePopup = false;
     let leaveButtonDisable = false;
@@ -27,7 +28,7 @@
 
     function leaveBU(){
         leaveButtonDisable = true;
-        fetch('http://localhost:8080/company/leaveProject', {
+        fetch(PUBLIC_BACKEND_URL + '/company/leaveProject', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -63,7 +64,7 @@
 
     function deleteBU(){
         deleteButtonDisable = true;
-        fetch('http://localhost:8080/company/deleteProject', {
+        fetch(PUBLIC_BACKEND_URL + '/company/deleteProject', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

@@ -5,10 +5,11 @@
     import toast from "svelte-french-toast";
     import {Button, Checkbox, Input} from "flowbite-svelte";
     import logo from "$lib/images/AlignLogo.png";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
     let checkBox = false;
 
-    function login(event){
+    function login(event) {
         event.preventDefault();
 
         const email = event.target.email.value;
@@ -17,9 +18,12 @@
         const formData = new URLSearchParams();
         formData.append('email', email);
         formData.append('password', password);
-        formData.append('rememberme', checkBox);
+        //if I send rememberme: false, I still get a rememberme cookie cuz ...
+        if (checkBox) {
+            formData.append('rememberme', checkBox);
+        }
 
-        fetch('http://localhost:8080/login', {
+        fetch(PUBLIC_BACKEND_URL + '/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
