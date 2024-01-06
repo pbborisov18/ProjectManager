@@ -1,5 +1,4 @@
 export function passwordMatch(pass, confirmPass) {
-    console.log(pass === confirmPass);
     return pass === confirmPass;
 }
 

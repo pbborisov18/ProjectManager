@@ -92,7 +92,7 @@
 
     function handleBUDestroy(BURole) {
         BURoles = BURoles.filter(remove => remove.id !== BURole.id);
-        if (BURole.length === 0) {
+        if (BURoles.length === 0) {
             error = 204;
         }
     }

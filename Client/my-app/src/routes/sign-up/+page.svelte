@@ -86,7 +86,6 @@
     let firstTry = true;
 
     function handleInputPass() {
-        console.log("executed");
         valid = false;
 
         if(fields.pass.length < 5){
