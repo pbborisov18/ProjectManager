@@ -1,47 +1,33 @@
 import {writable} from "svelte/store";
+import {browser} from "$app/environment";
 
-let initialEmailValue = '';
-//this doesn't work for some weird reason lol
-//null as default. stupid js
-let initialLogin = "false";
-let initialCompany = "";
-let initialProject = "";
-let initialTeam = "";
+export const userEmail = writable(browser && localStorage.getItem('userEmail'));
+export const loggedIn = writable(browser && localStorage.getItem('loggedIn'));
+export const company = writable(browser && sessionStorage.getItem('company'));
+export const project = writable(browser && sessionStorage.getItem('project'));
+export const team = writable(browser && sessionStorage.getItem('team'));
 
-if (typeof window !== 'undefined') {
-    initialEmailValue = localStorage.getItem('userEmail');
-    initialLogin = localStorage.getItem('loggedIn');
-    initialCompany = sessionStorage.getItem('company');
-    initialProject = sessionStorage.getItem('project');
-    initialTeam = sessionStorage.getItem('team');
-}
+userEmail.subscribe(value => {
+    browser &&
+    (localStorage.userEmail = value);
+});
 
-export const userEmail = writable(initialEmailValue);
-export const loggedIn = writable(initialLogin);
-export const company = writable(initialCompany);
-export const project = writable(initialProject);
-export const team = writable(initialTeam);
+loggedIn.subscribe(value => {
+    browser &&
+    (localStorage.loggedIn = value);
+});
 
+company.subscribe(value => {
+    browser &&
+    (sessionStorage.company = value);
+});
 
-if (typeof window !== 'undefined') {
-    userEmail.subscribe(value => {
-        localStorage.setItem('userEmail', value);
-    });
+project.subscribe(value => {
+    browser &&
+    (sessionStorage.project = value);
+});
 
-    loggedIn.subscribe(value => {
-        localStorage.setItem('loggedIn', value);
-    });
-
-    company.subscribe(value => {
-        sessionStorage.setItem('company', value);
-    });
-
-    project.subscribe(value => {
-        sessionStorage.setItem('project', value);
-    });
-
-    team.subscribe(value => {
-        sessionStorage.setItem('team', value);
-    });
-
-}
+team.subscribe(value => {
+    browser &&
+    (sessionStorage.team = value);
+});

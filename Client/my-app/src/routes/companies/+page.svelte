@@ -1,104 +1,20 @@
 <script>
     import Header from "$lib/components/Header.svelte";
-    import {goto, afterNavigate} from "$app/navigation";
+    import {goto} from "$app/navigation";
     import CompanyComponent from "$lib/components/CompanyComponent.svelte";
     import {Button, Input, Label, Modal} from "flowbite-svelte";
     import loadingGif from "$lib/images/loading.gif";
     import plusIcon from "$lib/images/plus.png";
-    import { Toast } from 'flowbite-svelte';
+    import {userEmail, loggedIn} from "$lib/stores.js";
+    import {onMount} from "svelte";
+    import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
-    export let data;
-    export let error;
-
-    let user;
+    let error = 401;
     let BURoles;
 
-    if(data.userBURoles){
-        user = data.userBURoles[0].user;
-        BURoles = data.userBURoles.map(({ businessUnit, role }) => ({ businessUnit, role }));
-    } else if(data.user){
-        user = data.user;
-    }
-
-    function handleBUDestroy(BURole) {
-        BURoles = BURoles.filter(deleteThis => deleteThis !== BURole);
-        getCompanies();
-    }
-
-    afterNavigate(() => {
-        if(data.error === 401){
-            goto("/login");
-        }
-    })
-
-    let notifications = [];
-
-    function addNotification(message) {
-
-        const newNotification = {
-            message
-        };
-
-        notifications = [...notifications, newNotification];
-
-        setTimeout(() => {
-            removeNotification(newNotification);
-        }, 5000); // 5000 milliseconds = 5 seconds
-    }
-
-    function removeNotification(notification) {
-        notifications = notifications.filter(n => n !== notification);
-    }
-
-    let createPopup = false;
-    let value;
-
-    function createCompany(){
-        let company = {id: null,
-            name: value,
-            type: {
-                id: 1,
-                name:"COMPANY"
-            },
-            whiteboard: null
-        };
-
-        value = "";
-
-        fetch('http://localhost:8080/createCompany', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(company),
-            credentials: "include"
-        }).then(response=>{
-            if (response.status === 201) {
-                getCompanies();
-            } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-                addNotification("Something went wrong!");
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                goto("/login");
-            } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                addNotification("Something went wrong!");
-            }
-        }).catch(error => {
-            console.error(error);
-        });
-
-    }
-
-    function getCompanies(){
-        fetch('http://localhost:8080/companies', {
+    async function getCompanies(){
+        fetch(PUBLIC_BACKEND_URL + '/companies', {
             method: 'GET',
             headers: {
                 'Content-Type': "application/json",
@@ -107,47 +23,94 @@
         }).then(response=>{
             if (response.status === 200) {
                 response.json().then( value =>{
-                    BURoles = value.map(({ businessUnit, role }) => ({ businessUnit, role }));
-                    data.error = 200;
+                    BURoles = value;
+                    error = 200;
                 });
+            } else if(response.status === 204){
+                BURoles = [];
+                error = 204;
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
+                response.text().then(data => {
+                    toast.error("Bad request!");
                 });
-                addNotification("Something went wrong!");
             } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                error = 401;
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
+                response.text().then(data => {
+                    toast.error("Something went wrong");
                 });
-                addNotification("Something went wrong!");
             }
         }).catch(error => {
-            console.error(error);
+            toast.error("Server is offline!");
         });
     }
 
+    function createCompany(){
+        let company = {
+            id: null,
+            name: createBUName,
+            type: "COMPANY",
+            whiteboard: null
+        };
+
+        fetch(PUBLIC_BACKEND_URL + '/createCompany', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(company),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 201) {
+                response.json().then( data => {
+                    createBUName = "";
+                    createPopup = false;
+                    BURoles = [...BURoles, data];
+                    error = 200;
+                });
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toast.error("Bad request!");
+                });
+            } else if(response.status === 401){
+                error = 401;
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 500){
+                response.text().then(data => {
+                    toast.error("Something went wrong");
+                });
+            }
+        }).catch(error => {
+            toast.error("Server is offline!");
+        });
+    }
+
+    function handleBUDestroy(BURole) {
+        BURoles = BURoles.filter(remove => remove.id !== BURole.id);
+        if (BURole.length === 0) {
+            error = 204;
+        }
+    }
+
+    onMount(() => {
+        BURoles = getCompanies();
+    });
+
+    let createPopup = false;
+    let createBUName;
+
 </script>
 
-
-
-{#await data.userBURoles}
+{#await BURoles}
     <img src="{loadingGif}" alt="">
-{:then userBURoles}
+{:then BURoles}
 
-    {#each notifications as notification}
-        <div class="notificationDiv">
-            <Toast simple position="bottom-right">
-                {notification.message}
-            </Toast>
-        </div>
-    {/each}
-
-    {#if data.error === 204}
+    {#if error === 204 && (!BURoles || BURoles.length === 0)}
         <Header/>
         <div class="addCompany">
             <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
@@ -156,20 +119,11 @@
             <h1>You aren't part of any companies.</h1>
             <h1>Wait to be invited or make yourself one by clicking here.</h1>
         </div>
-    {:else if data.error === 500}
+    {:else if error === 500}
         <Header />
         <p>Internal server error!</p>
-    {:else if data.error === 401}
+    {:else if error === 401}
         <!--wait for the page to load and then it will redirect-->
-    {:else if BURoles.length === 0}
-        <Header />
-        <div class="addCompany">
-            <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
-        </div>
-        <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>You aren't part of any companies.</h1>
-            <h1>Wait to be invited or make yourself one by clicking here.</h1>
-        </div>
     {:else}
         <Header/>
         <div class="addCompany">
@@ -178,23 +132,22 @@
 
         <div class="mainDiv">
             {#each BURoles as BURole}
-                    <CompanyComponent BURole={BURole}  onDestroy={() => handleBUDestroy(BURole)} />
+                <CompanyComponent BURole={BURole} onDestroy={() => handleBUDestroy(BURole)} />
             {/each}
         </div>
     {/if}
 
 {/await}
 
-<Modal title="Create a company" bind:open={createPopup} size="XL" autoclose>
+
+<Modal title="Create a company" bind:open={createPopup} size="xs" outsideclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
-            <div>
+            <div class="flex flex-col">
                 <Label for="companyName" class="mb-2">Company name</Label>
-                <Input type="text" id="companyName" required>
-                    <input type="text" bind:value />
-                </Input>
+                <Input type="text" id="companyName" required bind:value={createBUName}/>
             </div>
-            <Button type="stu" on:click={createCompany}>Create</Button>
+            <Button color="blue" on:click={createCompany}>Create</Button>
         </div>
     </form>
 </Modal>
@@ -214,7 +167,7 @@
         align-items: center;
         font-family: sans-serif;
         font-weight: lighter;
-        box-shadow: 0px 0px 1px 1px #BBBBBB;
+        box-shadow: 0 0 1px 1px #BBBBBB;
         overflow-y: auto;
         overflow-x: hidden;
     }
@@ -240,12 +193,6 @@
         justify-content: flex-end;
         margin-right: 1.5vw;
         margin-top: 1vh;
-    }
-
-    .notificationDiv{
-        position: absolute;
-        height: 100vh;
-        width: 100vw;
     }
 
 </style>

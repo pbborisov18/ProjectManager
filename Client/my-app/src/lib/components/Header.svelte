@@ -2,11 +2,15 @@
     import {goto} from "$app/navigation";
     import {userEmail, loggedIn} from "$lib/stores.js";
     import {
+        Button,
         Dropdown,
         DropdownItem
     } from 'flowbite-svelte'
     import AgileAceLogo from "$lib/images/AlignLogo.png";
     import inviteIcon from "$lib/images/invite.png";
+    import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
+
     export let homePage = false;
 
     function redirectToHomepage() {
@@ -15,7 +19,6 @@
         } else {
             goto("/");
         }
-
     }
 
     function redirectToInvitesPage(){
@@ -23,23 +26,24 @@
     }
 
     function logout() {
-        loggedIn.set("false");
-        fetch('http://localhost:8080/logout', {
+        fetch(PUBLIC_BACKEND_URL + '/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             credentials: "include"
-        })
-            .then(response => {
+        }).then(response => {
                 if (response.status === 200) {
+                    userEmail.set("");
                     loggedIn.set("");
                     goto("/login");
                 } else {
-                    throw Error("Logout failed");
+                    response.text().then(data => {
+                        toast.error("Something went wrong!");
+                    });
                 }
-            }).catch(error => {
-                alert(error);
+        }).catch(error => {
+            toast.error("Server is offline!");
         })
 
     }
@@ -48,29 +52,15 @@
         goto("/login");
     }
 
-    function redirectToRegister(){
-        goto("/sign-up");
-    }
-
-
 </script>
 
 <header>
     <img class="not-selectable clickable logo" src="{AgileAceLogo}" alt="logo" on:click={redirectToHomepage} draggable="false">
-    <span class="not-selectable clickable" on:click={redirectToHomepage}>AgileAce</span>
+    <p class="not-selectable clickable text-[2vh] font-medium" on:click={redirectToHomepage}>AgileAce</p>
 
     {#if homePage && $loggedIn !== "true"}
         <div class="landingPage-section">
-            <a on:click={redirectToLogin}
-               class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blue-700 active:bg-blue-800 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"
-            >
-                Login
-            </a>
-            <a on:click={redirectToRegister}
-               class="clickable get-started text-white font-bold px-6 py-4 rounded outline-none focus:outline-none mr-1 mb-1 bg-blue-700 active:bg-blue-800 uppercase text-sm shadow hover:shadow-lg ease-linear transition-all duration-150"
-            >
-                Register
-            </a>
+            <Button class="bg-blue-500 mr-[1.5vw] rounded-md font-bold" size="lg" on:click={redirectToLogin}>Login</Button>
         </div>
     {/if}
 
@@ -78,31 +68,31 @@
         <div class="logged-in-section">
             <img class="clickable" src="{inviteIcon}" alt="invite button" draggable="false" on:click={redirectToInvitesPage}>
 
-            <div class="test clickable not-selectable" >
-                <span>{$userEmail}</span>
+            <div class="emailDivBox not-selectable" >
+                <p class="clickable text-[1.5vh] font-semibold">{$userEmail}</p>
+                <Dropdown >
+                    <DropdownItem on:click={logout}>Logout</DropdownItem>
+                </Dropdown>
             </div>
-            <Dropdown >
-                <DropdownItem on:click={logout}>Logout</DropdownItem>
-            </Dropdown>
         </div>
     {/if}
 </header>
 
 <style lang="scss">
 
-
     header {
         font-family: sans-serif;
         display: flex;
         align-items: center;
-        box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 1px;
+        box-shadow: rgba(0, 0, 0, 0.12) 0 1px 1px;
         background-color: #eae9ea;
+        height: 7vh;
+        min-height: 69px;
     }
 
     img {
-        width: 50px;
+        width: 5vh;
     }
-
 
     span {
         font-family: Bahnschrift, monospace;
@@ -120,8 +110,8 @@
     }
 
     .logo{
-      margin-left: 1vw;
-      margin-right: 1vw;
+        margin-left: 1vw;
+        margin-right: 1vw;
     }
 
     .landingPage-section{
@@ -136,37 +126,35 @@
     }
 
     .logged-in-section {
-      display: flex;
-      align-items: center;
-      margin-left: auto;
-      height: 7vh;
-
-      img {
-        width: 30px;
-        height: 30px;
-        margin-right: 3vw;
-      }
-
-      span {
-        font-size: 14px;
-        font-weight: bold;
-        color: #333333;
-        margin-right: 30px;
-        font-family: Bahnschrift, monospace;
-        flex: 1;
-        text-align: center;
-      }
-
-      .test{
-        height: 7vh;
-        margin-right: 3vw;
         display: flex;
-        justify-content: center;
         align-items: center;
-        text-align: center;
-      }
+        margin-left: auto;
+        height: 7vh;
+
+        img {
+            width: 3vh;
+            height: 3vh;
+            margin-right: 3vw;
+        }
+
+        span {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333333;
+            margin-right: 30px;
+            font-family: Bahnschrift, monospace;
+            flex: 1;
+            text-align: center;
+        }
+
+        .emailDivBox{
+            height: 7vh;
+            margin-right: 3vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
     }
-
-
 
 </style>

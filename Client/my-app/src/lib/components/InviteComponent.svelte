@@ -3,8 +3,20 @@
     import {goto} from "$app/navigation";
     import checkIcon from "$lib/images/check.png";
     import deleteIcon from "$lib/images/delete.png";
+    import {userEmail, loggedIn} from "$lib/stores";
+    import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
+
     export let invite;
     export let onDestroy;
+
+    function declineOrDeleteInvite() {
+        if(invite.state === "PENDING") {
+            declineInvite();
+        } else {
+            deleteInvite();
+        }
+    }
 
     function declineInvite(){
         let updatedInvite = {
@@ -15,7 +27,6 @@
     }
 
     function acceptInvite(){
-        //send a request to accept the invite
         let updatedInvite = {
             ...invite,
             state: "ACCEPTED"
@@ -24,57 +35,86 @@
     }
 
     function sendRequest(updatedInvite){
-        fetch('http://localhost:8080/invites', {
+        fetch(PUBLIC_BACKEND_URL + '/invites', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(updatedInvite),
             credentials: "include"
-        })
-            .then(response => {
-                if (response.ok) {
-                    //Show the user that everything was successful
-                    //Remove component after is reacted with
-                    if(updatedInvite.state === "ACCEPTED"){
-                        //Update the screen informing the user that the invite was accepted
-                    } else if (updatedInvite.state === "DECLINED"){
-                        //Update the screen informing the user that the invite was declined
-                    }
-                    onDestroy();
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
-                } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                    goto("/login");
-                } else if(response.status === 403){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
+        }).then(response => {
+            if (response.status === 200) {
+                if(updatedInvite.state === "ACCEPTED"){
+                    toast.success("Invite accepted!");
+                } else if (updatedInvite.state === "DECLINED"){
+                    toast.error("Invite declined!");
                 }
-            }).catch(error => {
-            console.error(error);
+                onDestroy();
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toast.error("Bad request!");
+                });
+            } else if(response.status === 401){
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 403){
+                toast.error("No permission!");
+            } else if(response.status === 500){
+                response.text().then(data => {
+                    toast.error("Something went wrong");
+                });
+            }
+        }).catch(error => {
+            toast.error("Server is offline!");
         });
     }
+
+    function deleteInvite() {
+        fetch(PUBLIC_BACKEND_URL + '/invites', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(invite),
+            credentials: "include"
+        }).then(response => {
+            if (response.status === 200) {
+                toast.success("Invite deleted!");
+                onDestroy();
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toast.error("Bad request!");
+                });
+            } else if(response.status === 401){
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 403){
+                toast.error("No permission!");
+            } else if(response.status === 500){
+                response.text().then(data => {
+                    toast.error("Something went wrong");
+                });
+            }
+        }).catch(error => {
+            toast.error("Server is offline!");
+        });
+    }
+
 
 </script>
 
 <div class="block">
-    <span>You are invited in {invite.businessUnit.name} by {invite.sender.email}</span>
+    <span>You are invited in {invite.businessUnit.name}</span>
+    {#if invite.state === "PENDING"}
+        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+        <div class="imageDivs clickable" on:click={acceptInvite}>
+            <img src="{checkIcon}" alt="" draggable="false" >
+        </div>
+    {/if}
     <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-    <div class="imageDivs clickable" on:click={acceptInvite}>
-        <img src="{checkIcon}" alt="" draggable="false" >
-    </div>
-    <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-    <div class="imageDivs clickable" on:click={declineInvite}>
+    <div class="imageDivs clickable" on:click={declineOrDeleteInvite}>
         <img class="xImage" src="{deleteIcon}" alt="" draggable="false" >
     </div>
 </div>

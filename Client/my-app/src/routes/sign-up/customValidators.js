@@ -1,13 +1,8 @@
-export function passwordMatch(value, form) {
-    if (value !== form.values.password) {
-        return { passwordMatch: true };
-    }
+export function passwordMatch(pass, confirmPass) {
+    console.log(pass === confirmPass);
+    return pass === confirmPass;
 }
 
-export function containNumbers(numbers) {
-    return function(value) {
-        if (value.replace(/[^0-9]/g,"").length < numbers) {
-            return { containNumbers: numbers };
-        }
-    }
+export function containNumbers(pass, numbers) {
+    return pass.replace(/[^0-9]/g,"").length >= numbers;
 }
