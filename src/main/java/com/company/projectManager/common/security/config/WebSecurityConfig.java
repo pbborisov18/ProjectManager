@@ -1,5 +1,6 @@
 package com.company.projectManager.common.security.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,9 @@ import java.util.List;
 public class WebSecurityConfig {
 
     private final UserDetailsService userDetailsService;
+
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     public WebSecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
@@ -49,7 +53,7 @@ public class WebSecurityConfig {
                             configuration.applyPermitDefaultValues();
                             //Letting the frontend do whatever types of methods it wants
                             configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
-                            configuration.setAllowedOriginPatterns(List.of("http://localhost:5173*"));
+                            configuration.setAllowedOriginPatterns(List.of(frontendUrl));
                             configuration.setAllowCredentials(true);
 //                                configuration.setAllowedHeaders(List.of("Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "content-type", "x-xsrf-token"));
 //                                configuration.setExposedHeaders(List.of("Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"));
@@ -59,7 +63,7 @@ public class WebSecurityConfig {
                 ))
 
                 .formLogin(login -> login
-                        .loginPage("http://localhost:5176/login")
+                        .loginPage(frontendUrl+"/login")
                         .loginProcessingUrl("/login")
                         .usernameParameter("email")
                         .successHandler((request, response, authentication) -> {
@@ -77,9 +81,6 @@ public class WebSecurityConfig {
                         .rememberMeParameter("rememberme")
                         .userDetailsService(userDetailsService)
                 )
-//                .rememberMe(remember -> {
-//                    remember.rememberMeServices(rememberMeServices).rememberMeCookieDomain("http://localhost:5176*").tokenValiditySeconds(60 * 60 * 24 * 7).alwaysRemember(true);
-//                })
 
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/", "/login", "/register", "/*.html", "/style/**", "/error", "/favicon").permitAll()
@@ -98,7 +99,7 @@ public class WebSecurityConfig {
                             response.setStatus(HttpStatus.OK.value());
                             response.getWriter().flush();
                         })
-                        .logoutSuccessUrl("http://localhost:5176/login")
+                        .logoutSuccessUrl(frontendUrl + "/login")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
 
