@@ -25,22 +25,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    /*TODO:
-       Probably will delete this once I figure out how to make svelte (the frontend) work
-     */
-    @GetMapping("/authenticatedUser")
-    public ResponseEntity<Object> getAuthenticatedUser(){
-        try {
-            UserNoPassDTO user = userService.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } catch (FailedToSelectException e) {
-            return new ResponseEntity<>("Error: " + e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-    }
-
+    //TODO: Email verification
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody Map<String, String> requestBody) {
 

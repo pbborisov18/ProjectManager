@@ -24,6 +24,8 @@ public class NoteController {
         this.noteService = noteService;
     }
 
+    //TODO: Remove all the endpoints and leave only 1 per method
+
     //Why is this Post? Cuz something something GET requests with bodies is bad (and spring doesn't read it),
     //something something, expose the data in the url (no)
     //I'm either breaking one standard or the other. This one is worse to break but easier to implement. (You might say I'm a total idiot for doing this and I'd agree with you)

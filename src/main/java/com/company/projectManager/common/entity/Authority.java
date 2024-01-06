@@ -10,7 +10,7 @@ import java.util.Objects;
 //This is readonly but from the repository (if you use an entity manager you can overwrite this)
 //As I don't want anyone changing this table from the code
 @Entity
-@Table(name = "Authorities", uniqueConstraints = {@UniqueConstraint(columnNames = {"Name"})})
+@Table(name = "authorities", schema = "v1", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"})})
 public class Authority {
 
     @Id

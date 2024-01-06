@@ -21,6 +21,8 @@ public class RoleController {
         this.roleService = roleService;
     }
 
+    //TODO: Remove all the endpoints and leave only 1 per method
+
     @PostMapping({"/company/roles", "/company/project/roles", "/company/project/team/roles"})
     @PreAuthorize("authorityCheck(#businessUnitDTO.id(), \"SeePermissions\")")
     public ResponseEntity<Object> getAllRolesOfBusinessUnit(@RequestBody BusinessUnitDTO businessUnitDTO) {
@@ -37,9 +39,9 @@ public class RoleController {
     @PreAuthorize("authorityCheck(#role.businessUnit().id(), \"ChangePermissions\")") //Hopefully nobody sends an empty list...
     public ResponseEntity<Object> createPermissions(@RequestBody RoleDTO role){
         try {
-            roleService.saveRole(role);
+            RoleDTO roleDTO = roleService.saveRole(role);
 
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(roleDTO, HttpStatus.OK);
         } catch (FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (InvalidRoleRequest e) {
@@ -51,9 +53,9 @@ public class RoleController {
     @PreAuthorize("authorityCheck(#role.businessUnit().id(), \"ChangePermissions\")") //Hopefully nobody sends an empty list...
     public ResponseEntity<Object> updatePermissions(@RequestBody RoleDTO role){
         try {
-            roleService.updateRole(role);
+            RoleDTO roleDTO = roleService.updateRole(role);
 
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(roleDTO, HttpStatus.OK);
         } catch (FailedToUpdateException | EntityNotFoundException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -66,12 +68,10 @@ public class RoleController {
             roleService.deleteRole(role);
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (FailedToDeleteException | EntityNotFoundException e) {
+        } catch (FailedToDeleteException | InvalidRoleRequest | EntityNotFoundException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NoSuchElementException e){
             return new ResponseEntity<>("Error: WTF??? Default role doesn't exist somehow...", HttpStatus.INTERNAL_SERVER_ERROR);
-        }catch (InvalidRoleRequest e) {
-            throw new RuntimeException(e);
         }
     }
 

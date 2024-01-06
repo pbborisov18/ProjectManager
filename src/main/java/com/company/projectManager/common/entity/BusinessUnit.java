@@ -14,7 +14,7 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Objects;
 
 @Entity
-@Table(name = "BusinessUnits")
+@Table(name = "business_units", schema = "v1")
 //Could've used @Inheritance() but I'm basically doing it manually
 //And I'm doing a combination of JOINED and SINGLE_TABLE (which could've been made just SINGLE_TABLE but I didn't think of it then)
 public class BusinessUnit {
@@ -28,30 +28,29 @@ public class BusinessUnit {
     private String name;
 
     @NotNull
+    @Enumerated(EnumType.ORDINAL)
     private TypeName type;
 
     @Nullable
     @ManyToOne
-    @JoinColumn(name = "CompaniesId", referencedColumnName = "Id")
-    @Cascade(CascadeType.MERGE)
+    @JoinColumn(name = "companies_id", referencedColumnName = "id")
     private BusinessUnit company;
 
     @Nullable
     @ManyToOne
-    @JoinColumn(name = "ProjectsId", referencedColumnName = "Id")
-    @Cascade(CascadeType.MERGE)
+    @JoinColumn(name = "projects_id", referencedColumnName = "id")
     private BusinessUnit project;
 
     @Nullable
     @ManyToOne
-    @JoinColumn(name = "WhiteboardsId", referencedColumnName = "Id")
+    @JoinColumn(name = "whiteboards_id", referencedColumnName = "id")
     @Cascade(CascadeType.MERGE)
     private Whiteboard whiteboard;
 
     public BusinessUnit() {}
 
-    //probably can make a few more constructors so I don't have to use nulls in so many places
-    //but I'll end up with 24 constructors (yes I calculated it) so no
+    //TODO: Builder pattern
+
 
     public BusinessUnit(Long id, String name, TypeName type, @Nullable BusinessUnit company, @Nullable BusinessUnit project, @Nullable Whiteboard whiteboard) {
         this.id = id;

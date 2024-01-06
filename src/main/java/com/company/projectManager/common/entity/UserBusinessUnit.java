@@ -1,15 +1,13 @@
 package com.company.projectManager.common.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "UsersBusinessUnits", uniqueConstraints = {@UniqueConstraint(columnNames = {"UsersId", "BusinessUnitsId"})})
+@Table(name = "users_business_units", schema = "v1", uniqueConstraints = {@UniqueConstraint(columnNames = {"users_id", "business_units_id"})})
 public class UserBusinessUnit {
 
     @Id
@@ -17,22 +15,19 @@ public class UserBusinessUnit {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "UsersId", referencedColumnName = "Id")
-    @Cascade(CascadeType.MERGE)
+    @JoinColumn(name = "users_id", referencedColumnName = "id")
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "BusinessUnitsId", referencedColumnName = "Id")
-    @Cascade(CascadeType.MERGE)
+    @JoinColumn(name = "business_units_id", referencedColumnName = "id")
     private BusinessUnit businessUnit;
 
     @ManyToMany
     @JoinTable(
-            name = "UsersBusinessUnitsRoles",
-            joinColumns = @JoinColumn(name = "UsersBusinessUnitsId"),
-            inverseJoinColumns = @JoinColumn(name = "RolesId")
+            name = "users_business_units_roles", schema = "v1",
+            joinColumns = @JoinColumn(name = "users_business_units_id"),
+            inverseJoinColumns = @JoinColumn(name = "roles_id")
     )
-    @Cascade(CascadeType.MERGE)
     private List<Role> roles;
 
     public UserBusinessUnit() {

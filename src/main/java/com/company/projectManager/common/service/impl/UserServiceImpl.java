@@ -2,19 +2,14 @@ package com.company.projectManager.common.service.impl;
 
 import com.company.projectManager.common.dto.user.UserDTO;
 import com.company.projectManager.common.dto.user.UserNoPassDTO;
-import com.company.projectManager.common.entity.Role;
 import com.company.projectManager.common.entity.User;
-import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.repository.UserRepository;
-import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
-import com.company.projectManager.common.security.SecurityIds;
 import com.company.projectManager.common.security.SecurityUser;
 import com.company.projectManager.common.service.UserService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,13 +31,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
 
-    private final UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository;
-
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
-        this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
     }
 
 
@@ -89,7 +80,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void deleteAuthenticatedUser() throws FailedToDeleteException, EntityNotFoundException {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            Optional<User> existingUser = userRepository.findUserByEmail(email);
+            Optional<User> existingUser = userRepository.findUserByEmailIgnoreCase(email);
 
             if(existingUser.isEmpty()){
                 throw new EntityNotFoundException("User not found!");
@@ -104,7 +95,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     public UserNoPassDTO findUserByEmail(String email) throws FailedToSelectException, EntityNotFoundException {
         try {
-            Optional<User> existingUser = userRepository.findUserByEmail(email);
+            Optional<User> existingUser = userRepository.findUserByEmailIgnoreCase(email);
 
             if(existingUser.isEmpty()){
                 throw new EntityNotFoundException("User not found!");
@@ -122,41 +113,29 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             if(checkIfUserExists(userDTO.email())){
                 throw new UserAlreadyExistsException("User already exists with this email!");
             }
+            User user = userMapper.toEntity(userDTO);
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            userRepository.save(userMapper.toEntity(userDTO));
+            userRepository.save(user);
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSaveException("Failed to register! " + e.getMessage());
         }
     }
 
     private boolean checkIfUserExists(String email){
-        return userRepository.findUserByEmail(email).isPresent();
+        return userRepository.findUserByEmailIgnoreCase(email).isPresent();
     }
 
     @Override
     @Transactional //Transactional so I can get the role ids
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findUserByEmail(username);
+        Optional<User> user = userRepository.findUserByEmailIgnoreCase(username);
 
         if(user.isEmpty()) {
             throw new UsernameNotFoundException("Email not found " + username);
         }
 
-        List<UserBusinessUnit> userBURole = usersBusinessUnitsRolesRepository.findAllByUserId(user.get().getId());
-
-        List<GrantedAuthority> roles = new ArrayList<>();
-
-        for (UserBusinessUnit ubr : userBURole) {
-            SecurityIds securityRole = new SecurityIds(
-                    ubr.getId(),
-                    ubr.getUser().getId(),
-                    ubr.getBusinessUnit().getId(),
-                    ubr.getRoles().stream().mapToLong(Role::getId).boxed().toList()
-            );
-            roles.add(securityRole);
-        }
-
-        return new SecurityUser(user.get(), roles);
+        return new SecurityUser(user.get(), new ArrayList<>());
     }
 
 }

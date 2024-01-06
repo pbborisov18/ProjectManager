@@ -2,14 +2,12 @@
     import { flip } from 'svelte/animate';
     import { dndzone } from 'svelte-dnd-action';
     import {Button, Card, Input, Label, Modal, Textarea, CloseButton} from "flowbite-svelte";
-    import {company, project, team} from "$lib/stores.js";
     import {goto} from "$app/navigation";
+    import {userEmail, loggedIn} from "$lib/stores";
+    import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
-    let companyObj = JSON.parse($company);
-    let projectObj = JSON.parse($project);
-    let teamObj = JSON.parse($team);
-
-    let currentUrl = window.location.pathname;
+    export let BURole;
 
     const flipDurationMs = 150;
 
@@ -28,6 +26,7 @@
         onDrop(e.detail.items);
     }
 
+    //TODO: Fix up popups get autoclosed only on success
     let deletePopup = false;
     let editPopup = false;
 
@@ -36,104 +35,90 @@
     let noteDescription;
 
     function editNote(){
-        if(clickedNote){
-            clickedNote = {...clickedNote, name: noteName, description: noteDescription};
-
-            let fetchUrl;
-            let bu;
-
-            if(currentUrl === "/company/whiteboard"){
-                fetchUrl = "http://localhost:8080/company/whiteboard/updateNote"
-                bu = companyObj;
-            } else if(currentUrl === "/company/project/whiteboard"){
-                fetchUrl = "http://localhost:8080/company/project/whiteboard/updateNote"
-                bu = projectObj;
-            } else if(currentUrl === "/company/project/team/whiteboard"){
-                fetchUrl = "http://localhost:8080/company/project/team/whiteboard/updateNote"
-                bu = teamObj;
-            }
-
-            fetch(fetchUrl, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(clickedNote),
-                credentials: "include"
-            }).then(response=>{
-                if (response.status === 200) {
-
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
-                } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                    goto("/login");
-                } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-            }).catch(error => {
-                console.error(error);
-            });
-
-            items = items.map(item => {
-                if (item.id === clickedNote.id) {
-                    return clickedNote;
-                } else {
-                    return item;
-                }
-            });
-
+        if(!clickedNote) {
+            return;
         }
+
+        clickedNote = {...clickedNote, name: noteName, description: noteDescription};
+
+        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/updateNote", {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                noteDTO: clickedNote,
+                businessUnitDTO: BURole.businessUnit
+            }),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 200) {
+                toast.success("Saved");
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toast.error("Bad request!");
+                });
+            } else if(response.status === 401){
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 403){
+                toast.error("No permission!");
+            } else if(response.status === 500){
+                response.text().then(data => {
+                    toast.error("Something went wrong");
+                });
+            }
+        }).catch(error => {
+            toast.error("Server is offline!");
+        });
+
+        items = items.map(item => {
+            if (item.id === clickedNote.id) {
+                return clickedNote;
+            } else {
+                return item;
+            }
+        });
+
     }
 
     function deleteNote(){
-        if(clickedNote) {
-            let fetchUrl;
-
-            if (currentUrl === "/company/whiteboard") {
-                fetchUrl = "http://localhost:8080/company/whiteboard/deleteNote"
-            } else if (currentUrl === "/company/project/whiteboard") {
-                fetchUrl = "http://localhost:8080/company/project/whiteboard/deleteNote"
-            } else if (currentUrl === "/company/project/team/whiteboard") {
-                fetchUrl = "http://localhost:8080/company/project/team/whiteboard/deleteNote"
-            }
-
-            fetch(fetchUrl, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(clickedNote),
-                credentials: "include"
-            }).then(response=>{
-                if (response.status === 200) {
-
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
-                } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                    goto("/login");
-                } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-            }).catch(error => {
-                console.error(error);
-            });
-
-            items = items.filter(item => item.id !== clickedNote.id);
+        if(!clickedNote) {
+            return;
         }
+
+        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/deleteNote", {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                noteDTO: clickedNote,
+                businessUnitDTO: BURole.businessUnit
+            }),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 200) {
+                items = items.filter(item => item.id !== clickedNote.id);
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toast.error("Bad request!");
+                });
+            } else if(response.status === 401){
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 403){
+                toast.error("No permission!");
+            } else if(response.status === 500){
+                response.text().then(data => {
+                    toast.error("Something went wrong");
+                });
+            }
+        }).catch(error => {
+            toast.error("Server is offline!");
+        });
     }
 
     let hoveredItem = null;
@@ -152,8 +137,6 @@
             hoveredItem = null;
         }
     }
-
-
 
 </script>
 
@@ -174,7 +157,7 @@
                     editPopup = true;
                  }}
                  on:mouseenter={handleHover(item)} on:mouseleave={handleHoverEnd}>
-                <Card>
+                <Card class="min-w-full">
                     <div class="parent">
                         <h5 class="card mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{item.name}</h5>
                         {#if hoveredItem === item}
@@ -186,7 +169,6 @@
                     </div>
                         <hr>
                         <p class="card font-normal text-gray-700 dark:text-gray-400 leading-tight">{item.description}</p>
-
                 </Card>
             </div>
         {/each}
@@ -194,27 +176,25 @@
     </div>
 </div>
 
-<Modal title="Edit note" bind:open={editPopup} size="XL" autoclose>
+<Modal title="Edit note" bind:open={editPopup} size="xs" autoclose>
     <div class="grid gap-6 mb-6 md:grid-cols-1">
         <div>
             <Label for="noteName" class="mb-2">Name</Label>
-            <Input type="text" id="noteName" required>
-                <input type="text" bind:value={noteName}/>
-            </Input>
+            <Input type="text" id="noteName" required bind:value={noteName}/>
             <Label for="noteDescription" class="mb-2">Description</Label>
             <Textarea id="noteDescription" rows="3" bind:value={noteDescription}/>
         </div>
-        <Button type="submit" on:click={editNote}>Edit</Button>
+        <Button type="submit" on:click={editNote} color="green">Edit</Button>
     </div>
 </Modal>
 
-<Modal bind:open={deletePopup} size="xs" autoclose>
-    <div class="text-center">
-        <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Are you sure you want to delete the note?
-        <Button color="red" class="mr-2" on:click={deleteNote}>Yes</Button>
-        <Button color='alternative'>No</Button>
-    </div>
+<Modal bind:open={deletePopup} size="xs" autoclose outsideclose>
+        <div class="text-center">
+            <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to delete the note?</h3>
+            <Button color="alternative" class="me-2">No</Button>
+            <Button color="red" on:click={deleteNote}>Yes</Button>
+        </div>
 </Modal>
 
 <style>
@@ -244,6 +224,7 @@
         overflow-wrap: anywhere;
         max-height: 20vh;
         line-height: normal;
+        white-space: pre-line;
     }
 
     img{

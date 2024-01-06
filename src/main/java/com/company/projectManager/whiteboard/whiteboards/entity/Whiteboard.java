@@ -8,7 +8,7 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Whiteboards")
+@Table(name = "whiteboards", schema = "v1")
 public class Whiteboard {
 
     @Id

@@ -1,40 +1,70 @@
 <script>
 
-    import {afterNavigate, goto} from "$app/navigation";
+    import {goto} from "$app/navigation";
     import Header from "$lib/components/Header.svelte";
     import loadingGif from "$lib/images/loading.gif";
     import plusIcon from "$lib/images/plus.png";
     import {Breadcrumb, BreadcrumbItem, Button, Input, Label, Modal} from 'flowbite-svelte';
-    import {company} from "$lib/stores.js";
+    import {company, loggedIn, userEmail} from "$lib/stores.js";
     import ProjectComponent from "$lib/components/ProjectComponent.svelte";
+    import {onMount} from "svelte";
+    import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
 
-    let companyObj = JSON.parse($company);
-    export let data;
+    let companyBURole = JSON.parse($company);
 
-    export let error;
+    let error = 401;
+    let BURoles = [];
 
-    let BURoles;
-
-    if(data.userBURoles){
-        BURoles = data.userBURoles.map(({ businessUnit, role }) => ({ businessUnit, role }));
-    }
-
-    function handleBUDestroy(BURole) {
-        BURoles = BURoles.filter(deleteThis => deleteThis !== BURole);
-        getProjects();
+    async function getProjects(){
+        fetch(PUBLIC_BACKEND_URL + '/company/projects', {
+            method: 'POST',
+            headers: {
+                'Content-Type': "application/json",
+            },
+            body: JSON.stringify(companyBURole.businessUnit),
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 200){
+                response.json().then( value =>{
+                    BURoles = value;
+                    error = 200;
+                });
+            } else if(response.status === 204){
+                //WTF SVELTEEEE
+                //WHY TF ARE YOU TOUCHING BUROLES AND SETTING IT TO UNDEFINED
+                BURoles = [];
+                error = 204;
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toast.error("Bad request!");
+                });
+            } else if(response.status === 401){
+                error = 401;
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if (response.status === 403){
+                toast.error("No permission!");
+            } else if(response.status === 500){
+                response.text().then(data => {
+                    toast.error("Something went wrong");
+                });
+            }
+        }).catch(error => {
+            toast.error("Server is offline!");
+        });
     }
 
     function createProject(){
         let project = {id: null,
             name: projectName,
             type: "PROJECT",
-            company: companyObj.businessUnit,
+            company: companyBURole.businessUnit,
             whiteboard:null
         }
 
-        projectName = "";
-
-        fetch('http://localhost:8080/company/createProject', {
+        fetch(PUBLIC_BACKEND_URL + '/company/createProject', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -42,130 +72,100 @@
             body: JSON.stringify(project),
             credentials: "include"
         }).then(response=>{
-            if (response.status === 201) {
-                getProjects();
-            } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
+            if (response.status === 201){
+                response.json().then( data => {
+                    projectName = "";
+                    createPopup = false;
+                    BURoles = [...BURoles, data];
+                    error = 200;
                 });
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toast.error("Bad request!");
+                });
+            } else if(response.status === 401){
+                error = 401;
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
+            } else if(response.status === 403){
+                toast.error("No permission!");
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
+                response.text().then(data => {
+                    toast.error("Something went wrong");
                 });
             }
         }).catch(error => {
-            console.error(error);
+            toast.error("Server is offline!");
         });
     }
 
-    function getProjects(){
-        fetch('http://localhost:8080/company/projects', {
-            method: 'POST',
-            headers: {
-                'Content-Type': "application/json",
-            },
-            body: JSON.stringify(companyObj.businessUnit),
-            credentials: "include"
-        }).then(response=>{
-            if (response.status === 200) {
-                response.json().then( value =>{
-                    BURoles = value;
-                    data.error = 200;
-                });
-            } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                goto("/login");
-            } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            }
-        }).catch(error => {
-            console.error(error);
-        });
+    function handleBUDestroy(BURole) {
+        BURoles = BURoles.filter(remove => remove.id !== BURole.id);
+        if(BURoles.length === 0){
+            error = 204;
+        }
     }
+
+    onMount(() => {
+        //Have to do this cuz in getProjects I try to use companyBURole.
+        //That will happen if you think you are funny and access /company/projects without
+        //"selecting" a company (Probably would also happen if you access it from another page cuz
+        //company is in session storage and not local storage).
+        //Pretty much impossible to implement with local storage cuz there will be "funky" behavior if you
+        //have more than 1 page
+        if(companyBURole === null){
+            error = 401;
+            goto("/companies");
+        } else {
+            BURoles = getProjects();
+        }
+    })
 
     let createPopup = false;
     let projectName;
 
-    afterNavigate(() => {
-        if(data.error === 401){
-            goto("/login");
-        }
-    })
-
 </script>
 
-{#await data.userBURoles}
+{#await BURoles}
     <img src="{loadingGif}" alt="">
-{:then userBURoles}
-
-
-    {#if data.error === 204}
+{:then BURoles}
+    {#if error === 204 && (!BURoles || BURoles.length === 0)}
         <Header/>
         <div class="lowerMenuDiv">
-            <Breadcrumb >
-                <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
+            <Breadcrumb>
+                <BreadcrumbItem href="/companies" home>{companyBURole.businessUnit.name}</BreadcrumbItem>
             </Breadcrumb>
-            {#if companyObj.role.name === "MANAGER"}
+            {#if companyBURole.authorityDTOList.some(a => a.name === "CreateChildren")}
                 <div class="addProject">
                     <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
                 </div>
             {/if}
         </div>
-        <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>You aren't part of any projects in this company.</h1>
-            {#if companyObj.role.name === "MANAGER"}
-                <h1>Wait to be invited or make yourself one by clicking here.</h1>
-            {:else if companyObj.role.name === "EMPLOYEE"}
-                <h1>Wait to be invited.</h1>
-            {/if}
-        </div>
-    {:else if data.error === 500}
+        {#if companyBURole.authorityDTOList.some(a => a.name === "CreateChildren")}
+            <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
+                <h1 class="not-selectable">You aren't part of any projects in this company.</h1>
+                <h1 class="not-selectable">Wait to be invited or make yourself one by clicking here.</h1>
+            </div>
+            {:else}
+            <div class="mainDiv">
+                <h1 class="not-selectable">You aren't part of any projects in this company.</h1>
+                <h1 class="not-selectable">Wait to be invited.</h1>
+            </div>
+
+        {/if}
+    {:else if error === 500}
         <Header/>
         <p>Internal server error!</p>
-
-    {:else if data.error === 401}
+    {:else if error === 401}
         <!--wait for the page to load and then it will redirect-->
-
-    {:else if BURoles.length === 0}
-        <Header />
-        <div class="lowerMenuDiv">
-            <Breadcrumb >
-                <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
-            </Breadcrumb>
-            {#if companyObj.role.name === "MANAGER"}
-                <div class="addProject">
-                    <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
-                </div>
-            {/if}
-        </div>
-        <div class="cursor-pointer mainDiv" on:click={() => createPopup = true}>
-            <h1>You aren't part of any projects in this company.</h1>
-            {#if companyObj.role.name === "MANAGER"}
-                <h1>Wait to be invited or make yourself one by clicking here.</h1>
-            {:else if companyObj.role.name === "EMPLOYEE"}
-                <h1>Wait to be invited.</h1>
-            {/if}
-        </div>
     {:else}
         <Header/>
         <div class="lowerMenuDiv">
             <Breadcrumb >
-                <BreadcrumbItem href="/companies" home>{companyObj.businessUnit.name}</BreadcrumbItem>
+                <BreadcrumbItem href="/companies" home>{companyBURole.businessUnit.name}</BreadcrumbItem>
             </Breadcrumb>
-            {#if companyObj.role.name === "MANAGER"}
+            {#if companyBURole.authorityDTOList.some(a => a.name === "CreateChildren")}
                 <div class="addProject">
                     <img class="clickable not-selectable" src="{plusIcon}" alt="" draggable="false" on:click={() => createPopup = true}/>
                 </div>
@@ -179,19 +179,16 @@
         </div>
 
     {/if}
-
 {/await}
 
-<Modal title="Create project" bind:open={createPopup} size="XL" autoclose>
+<Modal title="Create project" bind:open={createPopup} size="xs" outsideclose>
     <form>
         <div class="grid gap-6 mb-6 md:grid-cols-1">
-            <div>
+            <div class="flex flex-col">
                 <Label for="projectName" class="mb-2">Project name</Label>
-                <Input type="text" id="projectName" required>
-                    <input type="text" bind:value={projectName} />
-                </Input>
+                <Input type="text" id="projectName" required bind:value={projectName}/>
             </div>
-            <Button type="submit" on:click={createProject}>Create</Button>
+            <Button color="blue" type="submit" on:click={createProject}>Create</Button>
         </div>
     </form>
 </Modal>
@@ -212,7 +209,7 @@
         align-items: center;
         font-family: sans-serif;
         font-weight: lighter;
-        box-shadow: 0px 0px 1px 1px #BBBBBB;
+        box-shadow: 0 0 1px 1px #BBBBBB;
         overflow-y: auto;
         overflow-x: hidden;
     }
@@ -223,11 +220,10 @@
         justify-content: space-between;
         margin-top: 1vh;
         margin-left: 1.5vw;
-        .addProject{
 
+        .addProject{
             margin-right: 1.5vw;
         }
-
     }
 
     img{
@@ -244,7 +240,5 @@
         -ms-user-select: none; /* IE 10+ */
         user-select: none; /* Standard syntax */
     }
-
-
 
 </style>

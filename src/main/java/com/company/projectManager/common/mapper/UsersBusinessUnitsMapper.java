@@ -21,6 +21,14 @@ public interface UsersBusinessUnitsMapper {
 
     List<UserNoPassBusinessUnitDTO> toDTO(@Valid Iterable<UserBusinessUnit> usersBusinessUnitsRoles);
 
+    @Mapping(target = "user", qualifiedByName = {"toUserWithoutPasswordDTO"})
+    @Mapping(target = "businessUnit", qualifiedByName = {"toBusinessUnitDTO"})
+    @Mapping(target = "roles", qualifiedByName = {"toRoleDTO"})
+    UserNoPassBusinessUnitRoleDTO toDTOwithRole(@Valid UserBusinessUnit userBusinessUnit);
+
+    List<UserNoPassBusinessUnitRoleDTO> toDTOwithRole(@Valid Iterable<UserBusinessUnit> usersBusinessUnitsRoles);
+
+    //TODO: Better name needed for toAuthoritiesDTO method
     @Mapping(target = "authorityDTOList", //Expression here basically gets the authorities from the roles
             expression = """
                     java(authorityMapper.toDTO(

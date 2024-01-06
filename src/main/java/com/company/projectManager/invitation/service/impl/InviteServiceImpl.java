@@ -2,25 +2,28 @@ package com.company.projectManager.invitation.service.impl;
 
 import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
 import com.company.projectManager.common.dto.user.UserNoPassDTO;
+import com.company.projectManager.common.entity.BusinessUnit;
 import com.company.projectManager.common.entity.User;
 import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.BusinessUnitMapper;
 import com.company.projectManager.common.repository.RoleRepository;
 import com.company.projectManager.common.repository.UserRepository;
-import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
+import com.company.projectManager.common.repository.UsersBusinessUnitsRepository;
 import com.company.projectManager.common.utils.InviteState;
+import com.company.projectManager.common.utils.TypeName;
 import com.company.projectManager.invitation.dto.InviteDTONoPass;
 import com.company.projectManager.invitation.entity.Invite;
 import com.company.projectManager.invitation.mapper.InviteMapper;
 import com.company.projectManager.invitation.repository.InviteRepository;
 import com.company.projectManager.invitation.service.InviteService;
-import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -39,16 +42,16 @@ public class InviteServiceImpl implements InviteService {
 
     private final BusinessUnitMapper businessUnitMapper;
 
-    private final UsersBusinessUnitsRolesRepository userBURoleRepository;
+    private final UsersBusinessUnitsRepository usersBURepository;
     private final RoleRepository roleRepository;
 
-    public InviteServiceImpl(InviteRepository inviteRepository, InviteMapper inviteMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper, UsersBusinessUnitsRolesRepository userBURoleRepository,
-                             RoleRepository roleRepository) {
+    public InviteServiceImpl(InviteRepository inviteRepository, InviteMapper inviteMapper, UserRepository userRepository, BusinessUnitMapper businessUnitMapper,
+                             UsersBusinessUnitsRepository usersBURepository, RoleRepository roleRepository) {
         this.inviteRepository = inviteRepository;
         this.inviteMapper = inviteMapper;
         this.userRepository = userRepository;
         this.businessUnitMapper = businessUnitMapper;
-        this.userBURoleRepository = userBURoleRepository;
+        this.usersBURepository = usersBURepository;
         this.roleRepository = roleRepository;
     }
 
@@ -57,7 +60,7 @@ public class InviteServiceImpl implements InviteService {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
             return inviteMapper.toDTO(
-                    inviteRepository.findByReceiverEmailAndState(email, inviteState));
+                    inviteRepository.findByReceiverEmailIgnoreCaseAndState(email, inviteState));
 
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToSelectException("Failed to select! " + e.getMessage());
@@ -98,13 +101,45 @@ public class InviteServiceImpl implements InviteService {
             //Make sure to (manually) cascade delete the invites
             inviteRepository.save(invite.get());
 
-            userBURoleRepository.save(
+            usersBURepository.save(
                     new UserBusinessUnit(null,
                             invite.get().getReceiver(),
                             invite.get().getBusinessUnit(),
                             //Get the default role in the business unit
                             List.of(roleRepository.findByNameAndBusinessUnitId("Default", invite.get().getBusinessUnit().getId())
                                     .get())));
+
+            if(invite.get().getBusinessUnit().getType() == TypeName.TEAM){
+                acceptInvitesToParents(invite.get().getReceiver(), invite.get().getBusinessUnit().getCompany());
+                acceptInvitesToParents(invite.get().getReceiver(), invite.get().getBusinessUnit().getProject());
+            } else if (invite.get().getBusinessUnit().getType() == TypeName.PROJECT){
+                acceptInvitesToParents(invite.get().getReceiver(), invite.get().getBusinessUnit().getCompany());
+            }
+
+
+        } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e){
+            throw new FailedToUpdateException("Failed to update! " + e.getMessage());
+        }
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void acceptInvitesToParents(User user, BusinessUnit businessUnit) throws FailedToUpdateException {
+        try {
+
+            Invite invite = new Invite(null, InviteState.ACCEPTED, user, businessUnit);
+
+            //Keep the invite in the db so a user can't be invited to the same BU that they are already in
+            //Make sure to (manually) cascade delete the invites
+            inviteRepository.save(invite);
+
+            usersBURepository.save(
+                    new UserBusinessUnit(null,
+                            invite.getReceiver(),
+                            invite.getBusinessUnit(),
+                            //Get the default role in the business unit
+                            List.of(roleRepository.findByNameAndBusinessUnitId("Default", invite.getBusinessUnit().getId())
+                                    .get())));
+
         } catch (ConstraintViolationException | DataAccessException | NoSuchElementException e){
             throw new FailedToUpdateException("Failed to update! " + e.getMessage());
         }
@@ -173,15 +208,15 @@ public class InviteServiceImpl implements InviteService {
     }
 
 
-    public void createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws InvalidInvitationException, FailedToSaveException {
+    public InviteDTONoPass createInvite(BusinessUnitDTO businessUnitDTO, UserNoPassDTO receiver) throws InvalidInvitationException, FailedToSaveException {
         try {
-            Optional<User> receiverEntity = userRepository.findUserByEmail(receiver.email());
+            Optional<User> receiverEntity = userRepository.findUserByEmailIgnoreCase(receiver.email());
 
             if(receiverEntity.isEmpty()){
                 throw new InvalidInvitationException("User doesn't exist");
             }
 
-            Optional<Invite> inviteExists = inviteRepository.findInviteByBusinessUnitIdAndReceiverEmail(businessUnitDTO.id(), receiver.email());
+            Optional<Invite> inviteExists = inviteRepository.findByReceiverEmailIgnoreCaseAndBusinessUnitId(receiver.email(), businessUnitDTO.id());
 
             //Checks if invite already exists. Or the user is being a smartass trying to invite themselves
             if(inviteExists.isPresent() ||
@@ -194,8 +229,9 @@ public class InviteServiceImpl implements InviteService {
                     receiverEntity.get(),
                     businessUnitMapper.toBusinessUnitEntity(businessUnitDTO));
 
-            inviteRepository.save(invite);
+            Invite i = inviteRepository.save(invite);
 
+            return inviteMapper.toDTO(i);
         } catch (ConstraintViolationException | DataAccessException e){
             throw new FailedToSaveException("Failed to save! " + e.getMessage());
         }

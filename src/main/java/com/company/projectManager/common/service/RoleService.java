@@ -10,12 +10,10 @@ public interface RoleService {
 
     List<RoleDTO> findRolesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException;
 
-    void saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest;
+    RoleDTO saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest;
 
-    void updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException;
+    RoleDTO updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException;
 
     void deleteRole(RoleDTO role) throws FailedToDeleteException, EntityNotFoundException, InvalidRoleRequest;
-
-    List<RoleDTO> findRolesByIds(List<Long> ids) throws FailedToSelectException, EntityNotFoundException;
 
 }

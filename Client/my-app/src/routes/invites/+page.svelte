@@ -1,53 +1,101 @@
 <script>
 
     import Header from "$lib/components/Header.svelte";
-    import {afterNavigate, goto} from "$app/navigation";
     import InviteComponent from "$lib/components/InviteComponent.svelte";
-    import NoInviteComponent from "$lib/components/NoInviteComponent.svelte";
     import loadingGif from "$lib/images/loading.gif";
-    export let data;
-    export let error;
+    import {Select} from "flowbite-svelte";
+    import {onMount} from "svelte";
+    import {loggedIn, userEmail} from "$lib/stores.js";
+    import {goto} from "$app/navigation";
+    import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
+
+    let error = 401;
     let invites;
 
-    if(data.invites){
-        invites = data.invites;
-    }
-
-    function handleInviteDestroy(invite){
-        invites = invites.filter(deleteThis => deleteThis !== invite);
-    }
-
-    afterNavigate(() => {
-        if(data.error === 401){
-            goto("/login");
+    function handleInviteDestroy(inviteToChange){
+        invites = invites.filter(invite => invite !== inviteToChange);
+        if(invites.length === 0){
+            error = 204;
         }
-    })
+    }
+
+    let currentSelection = "PENDING";
+
+    onMount(() => {
+        getInvitesByCurrentSelection();
+    });
+
+    let selection = [
+        { value: 'PENDING', name: 'Pending' },
+        { value: 'DECLINED', name: 'Declined' }
+    ];
+
+    function getInvitesByCurrentSelection(){
+        fetch(PUBLIC_BACKEND_URL + '/invites?' + new URLSearchParams({inviteState:currentSelection}), {
+            method: 'GET',
+            headers: {
+                'Content-Type': "application/json",
+            },
+            credentials: "include"
+        }).then(response=>{
+            if (response.status === 200) {
+                response.json().then( value =>{
+                    error = 200;
+                    invites = value;
+                });
+            } else if(response.status === 204){
+                error = 204;
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toast.error("Bad request!");
+                });
+            } else if(response.status === 401){
+                error = 401;
+                userEmail.set("");
+                loggedIn.set("");
+                goto("/login");
+            } else if(response.status === 500){
+                response.text().then(data => {
+                    toast.error("Something went wrong!");
+                });
+            }
+        }).catch(error => {
+            toast.error("Server is offline!");
+        });
+    }
 
 </script>
+
 
 {#await invites}
     <img src="{loadingGif}" alt="">
 {:then invites}
 
-    {#if data.error === 204}
+    {#if error === 204 && (!invites || invites.length === 0)}
         <Header />
-        <NoInviteComponent />
-    {:else if data.error === 401}
+        <div class="invitationState">
+            <Select class="mt-2" size="sm" placeholder="" items={selection} bind:value={currentSelection} on:change={getInvitesByCurrentSelection}/>
+        </div>
+
+        <div class="mainDiv">
+            <h1>No invites</h1>
+        </div>
+    {:else if error === 401}
         <!--wait for the page to load and then it will redirect-->
-    {:else if data.error === 400}
-        <Header />
-        <p>Bad request!</p>
-    {:else if data.error === 403}
-        <Header/>
-        <p>Not authorized to do that!</p>
-    {:else if data.error === 500}
+    {:else if error === 500}
         <Header />
         <p>Internal server error!</p>
     {:else }
         <Header/>
-        <div>
+        <div class="invitationState">
+            <Select class="mt-2" size="sm" placeholder="" items={selection} bind:value={currentSelection} on:change={getInvitesByCurrentSelection}/>
+        </div>
+        <div class="mainDiv">
             {#each invites as invite}
-                <InviteComponent invite={invite} onDestroy={() => handleInviteDestroy(invite)}/>
+                {#if invite.state === currentSelection}
+                    <InviteComponent invite={invite} onDestroy={() => handleInviteDestroy(invite)}/>
+                {/if}
             {/each}
         </div>
     {/if}
@@ -55,20 +103,31 @@
 
 <style>
 
-    div{
+    .mainDiv{
         border-radius: 2px;
         background-color: #F8F8F8;
         width: 97vw;
-        margin-top: 5vh;
+        margin-top: 1vh;
         margin-left: 1.5vw;
         height: 85vh;
         border: 0 solid #BBBBBB;
-        font-family: sans-serif;
-        font-weight: lighter;
-        box-shadow: 0px 0px 1px 1px #BBBBBB;
         display: flex;
         flex-direction: column;
+        align-items: center;
+        font-family: sans-serif;
+        font-weight: lighter;
+        box-shadow: 0 0 1px 1px #BBBBBB;
         overflow-y: auto;
         overflow-x: hidden;
     }
+
+    .invitationState{
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        margin-right: 25px;
+        margin-top: 1vh;
+        margin-left: 25px;
+    }
+
 </style>

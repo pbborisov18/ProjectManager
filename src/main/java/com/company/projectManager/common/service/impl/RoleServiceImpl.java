@@ -7,7 +7,7 @@ import com.company.projectManager.common.entity.UserBusinessUnit;
 import com.company.projectManager.common.exception.*;
 import com.company.projectManager.common.mapper.RoleMapper;
 import com.company.projectManager.common.repository.RoleRepository;
-import com.company.projectManager.common.repository.UsersBusinessUnitsRolesRepository;
+import com.company.projectManager.common.repository.UsersBusinessUnitsRepository;
 import com.company.projectManager.common.service.RoleService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
@@ -19,17 +19,18 @@ import java.util.*;
 @Service
 public class RoleServiceImpl implements RoleService {
 
-    private final UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository;
+    private final UsersBusinessUnitsRepository usersBURepository;
 
     private final RoleRepository roleRepository;
     private final RoleMapper roleMapper;
 
-    public RoleServiceImpl(UsersBusinessUnitsRolesRepository usersBusinessUnitsRolesRepository, RoleRepository roleRepository, RoleMapper roleMapper) {
-        this.usersBusinessUnitsRolesRepository = usersBusinessUnitsRolesRepository;
+    public RoleServiceImpl(UsersBusinessUnitsRepository usersBURepository, RoleRepository roleRepository, RoleMapper roleMapper) {
+        this.usersBURepository = usersBURepository;
         this.roleRepository = roleRepository;
         this.roleMapper = roleMapper;
     }
 
+    @Transactional
     public List<RoleDTO> findRolesByBusinessUnit(BusinessUnitDTO businessUnitDTO) throws FailedToSelectException {
         try{
             List<Role> roles = roleRepository.findAllByBusinessUnitId(businessUnitDTO.id());
@@ -44,13 +45,14 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
-    public void saveRole(RoleDTO role) throws FailedToSaveException, InvalidRoleRequest {
+    public RoleDTO saveRole(RoleDTO roleDTO) throws FailedToSaveException, InvalidRoleRequest {
         try {
-            if(roleRepository.countAllByBusinessUnitId(role.businessUnit().id()) > 50){
+            if(roleRepository.countAllByBusinessUnitId(roleDTO.businessUnit().id()) > 50){
                 throw new InvalidRoleRequest("Too many roles!");
             }
 
-            roleRepository.save(roleMapper.toEntity(role));
+            Role role = roleRepository.save(roleMapper.toEntity(roleDTO));
+            return roleMapper.toDTO(role);
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToSaveException("Failed to save!" + e.getMessage());
         }
@@ -59,7 +61,7 @@ public class RoleServiceImpl implements RoleService {
     //As much as I want to just do .save() (or call saveRole())
     //I can't. I have to make sure that nobody is playing funny here
     //Performance will be worse but it has to happen
-    public void updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException {
+    public RoleDTO updateRole(RoleDTO role) throws FailedToUpdateException, EntityNotFoundException {
         try {
             Optional<Role> foundRole = roleRepository.findById(role.id());
 
@@ -68,8 +70,7 @@ public class RoleServiceImpl implements RoleService {
             }
 
             //Default and Admin won't be allowed to have name changes
-            if(!foundRole.get().getName().equals("Default") ||
-                !foundRole.get().getName().equals("Admin")) {
+            if(!foundRole.get().getName().equals("Default") || !foundRole.get().getName().equals("Admin")) {
                 foundRole.get().setName(role.name());
             }
 
@@ -78,6 +79,8 @@ public class RoleServiceImpl implements RoleService {
             //Id is already the same
 
             roleRepository.save(foundRole.get());
+
+            return roleMapper.toDTO(foundRole.get());
         } catch (ConstraintViolationException | DataAccessException e) {
             throw new FailedToUpdateException("Failed to update!" + e.getMessage());
         }
@@ -94,9 +97,9 @@ public class RoleServiceImpl implements RoleService {
                 throw new InvalidRoleRequest("These roles aren't allowed to be deleted");
             }
 
-            //Need check and re-assign roles for all users who have them
+            //Need to check and re-assign roles for all users who have them
             //If the user has no roles left - give him default
-            List<UserBusinessUnit> uburs = usersBusinessUnitsRolesRepository.findAllByBusinessUnitIdAndRolesId(role.businessUnit().id(), role.id());
+            List<UserBusinessUnit> uburs = usersBURepository.findAllByBusinessUnitIdAndRolesId(role.businessUnit().id(), role.id());
 
             //if it's empty means no one has this role
             //so no need to do checks and assign new roles
@@ -106,9 +109,9 @@ public class RoleServiceImpl implements RoleService {
                     //if current user has 1 role in the current bu
                     //that means the user has the role we are trying to delete and it's his last one
                     //so give him the default role of the current bu
-                    if (usersBusinessUnitsRolesRepository.countAllByUserIdAndBusinessUnitId(current.getUser().getId(), current.getBusinessUnit().getId())
-                            == 1L) {
-                        usersBusinessUnitsRolesRepository.save(
+
+                    if (current.getRoles().size() == 1L) {
+                        usersBURepository.save(
                                 new UserBusinessUnit(
                                         null, current.getUser(), current.getBusinessUnit(),
                                         List.of(
@@ -116,10 +119,14 @@ public class RoleServiceImpl implements RoleService {
                                                         //This role should always exist for a bu so we can straight up do .get()
                                                         current.getBusinessUnit().getId()).get())));
                     }
+                    //Probably inefficient
+                    current.getRoles().remove(foundRole.get());
                 }
 
                 //Then we just delete the roles after we've made sure no user is left without a role
-                usersBusinessUnitsRolesRepository.deleteAll(uburs);
+                //by using save (remember we removed stuff inside the roles list inside)
+                //(If we had used delete we would just delete the ubur itself which is not what we want)
+                usersBURepository.saveAll(uburs);
             }
 
             roleRepository.delete(foundRole.get());
@@ -129,12 +136,4 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
-    @Transactional
-    public List<RoleDTO> findRolesByIds(List<Long> ids) throws FailedToSelectException, EntityNotFoundException {
-        try {
-            return roleMapper.toDTO(roleRepository.findAllById(ids));
-        } catch (ConstraintViolationException | DataAccessException e) {
-            throw new FailedToSelectException("Failed to select!" + e.getMessage());
-        }
-    }
 }

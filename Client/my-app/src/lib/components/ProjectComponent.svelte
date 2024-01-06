@@ -1,30 +1,35 @@
 <script>
     import whiteboardIcon from "$lib/images/rectangle.png";
-    import editIcon from "$lib/images/edit.png";
+    import settingsIcon from "$lib/images/settings.png";
     import leaveIcon from "$lib/images/leave.png";
     import deleteIcon from "$lib/images/delete.png";
-    import {Button, Input, Label, Listgroup, Modal} from "flowbite-svelte";
-    import {project} from "$lib/stores.js";
+    import {
+        Button,
+        Modal,
+        Sidebar, SidebarGroup, SidebarItem, SidebarWrapper
+    } from "flowbite-svelte";
+    import {loggedIn, project, userEmail} from "$lib/stores.js";
     import {goto} from "$app/navigation";
-    import inviteToCompanyIcon from "$lib/images/invite.png";
-
-    let buName;
+    import SettingsInviteComponent from "$lib/components/SettingsInviteComponent.svelte";
+    import RoleSettingsComponent from "$lib/components/RoleSettingsComponent.svelte";
+    import EditBUComponent from "$lib/components/EditBUComponent.svelte";
+    import toast from "svelte-french-toast";
+    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
+    import SettingsUsersComponent from "$lib/components/SettingsUsersComponent.svelte";
 
     let leavePopup = false;
+    let leaveButtonDisable = false;
     let deletePopup = false;
-    let editPopup = false;
-    let inviteToProjectPopup = false;
-    let alreadyInvited = [];
-
-    let inviteeEmail;
-
+    let deleteButtonDisable = false;
+    let settingsPopup = false;
 
     export let onDestroy;
     export let BURole;
 
 
     function leaveBU(){
-        fetch('http://localhost:8080/company/leaveProject', {
+        leaveButtonDisable = true;
+        fetch(PUBLIC_BACKEND_URL + '/company/leaveProject', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -32,37 +37,35 @@
             body: JSON.stringify(BURole.businessUnit),
             credentials: "include"
         }).then(response=>{
-            if (response.ok) {
+            leaveButtonDisable = false;
+
+            if (response.status === 200) {
+                leavePopup = false;
                 onDestroy();
-            } else if(response.status === 204){
-                response.text().then(text => {
-                    onDestroy();
-                })
-            }else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
+            } else if(response.status === 400){
+                response.text().then(data => {
+                    toast.error("Bad request!");
                 });
+            } else if(response.status === 401){
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                toast.error("No permission!");
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
+                response.text().then(data => {
+                    toast.error("Something went wrong");
                 });
             }
         }).catch(error => {
-            console.error(error);
+            leaveButtonDisable = false;
+            toast.error("Server is offline!");
         });
     }
 
     function deleteBU(){
-        fetch('http://localhost:8080/company/deleteProject', {
+        deleteButtonDisable = true;
+        fetch(PUBLIC_BACKEND_URL + '/company/deleteProject', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -70,146 +73,29 @@
             body: JSON.stringify(BURole.businessUnit),
             credentials: "include"
         }).then(response=>{
-            if (response.ok) {
-                onDestroy();
-            } else if(response.status === 204){
-                response.text().then(text => {
-                    onDestroy();
-                })
-            }else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                goto("/login");
-            } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            }
-        }).catch(error => {
-            console.error(error);
-        });
-    }
+            deleteButtonDisable = false;
 
-    function editBU(){
-        if(!buName){
-            alert("The field can't be empty");
-        }else {
-            let updatedBURole = {
-                ...BURole.businessUnit,
-                name: buName
-            };
-
-            fetch('http://localhost:8080/company/updateProject', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(updatedBURole),
-                credentials: "include"
-            }).then(response=>{
-                if (response.status === 200) {
-                    onDestroy();
-                } else if(response.status === 400){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    })
-                } else if(response.status === 401){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                    goto("/login");
-                } else if(response.status === 403){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                } else if(response.status === 500){
-                    response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-            }).catch(error => {
-                alert(error);
-            });}
-    }
-
-    function invitePersonToProject(){
-        fetch('http://localhost:8080/company/project/invite', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({projectDTO: BURole.businessUnit,
-                receiver: {id:null, email: inviteeEmail}}),
-            credentials: "include"
-        }).then(response=>{
-            if (response.status === 201) {
-                console.log("success");
-            } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-                goto("/login");
-            } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
-            }
-        }).catch(error => {
-            console.error(error);
-        });
-    }
-
-    function getAllInvitesByProject(){
-
-        fetch('http://localhost:8080/businessUnit/invites', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(BURole.businessUnit),
-            credentials: "include"
-        }).then(response=>{
             if (response.status === 200) {
-                response.json().then(data => {
-                    alreadyInvited = data.filter(obj => obj.state === 'PENDING')
-                });
+                deletePopup = false;
+                onDestroy();
             } else if(response.status === 400){
-                response.text().then(text => {
-                    throw new Error(text);
-                })
-            } else if(response.status === 401){
-                response.text().then(text => {
-                    throw new Error(text);
+                response.text().then(data => {
+                    toast.error("Bad request!");
                 });
+            } else if(response.status === 401){
+                userEmail.set("");
+                loggedIn.set("");
                 goto("/login");
             } else if(response.status === 403){
-                response.text().then(text => {
-                    throw new Error(text);
-                });
+                toast.error("No permission!");
             } else if(response.status === 500){
-                response.text().then(text => {
-                    throw new Error(text);
+                response.text().then(data => {
+                    toast.error("Something went wrong");
                 });
             }
         }).catch(error => {
-            console.error(error);
+            deleteButtonDisable = false;
+            toast.error("Server is offline!");
         });
     }
 
@@ -223,115 +109,129 @@
         goto('/company/project/whiteboard');
     }
 
+    function nameChange(name){
+        BURole.businessUnit.name = name;
+    }
+
+    function openSettings(){
+        for(const a of BURole.authorityDTOList){
+            if(a.name === "UpdateBU") {
+                activeNum = Math.min(activeNum, 1);
+                break;
+            } else if(a.name === "SeePermissions"){
+                activeNum = Math.min(activeNum, 2);
+            } else if(a.name === "ChangePermissions"){
+                activeNum = Math.min(activeNum, 3);
+            } else if(a.name === "ManageSentInvites"){
+                activeNum = Math.min(activeNum, 4);
+            }
+        }
+        settingsPopup = true;
+    }
+
+    //Bastards have broken the active attribute on the sidebar.
+    //Don't think they'll fix it. Only way to fix it is finding another one or creating my own
+    //Active num is 50 cuz I'm trying to show the top menu based on the user authorities
+    //(check openSettings function)
+    let activeNum = 50;
+
 </script>
 
 <div class="clickable not-selectable BUwindow">
-    {#if BURole.role.name === "MANAGER"}
-        <!--the manager stuff here-->
 
-        <span on:click={redirectToTeams}>{BURole.businessUnit.name}</span>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
+    <p on:click={redirectToTeams}>{BURole.businessUnit.name}</p>
+
+    {#if BURole.authorityDTOList.some(authority => authority.name === "InteractWithWhiteboard")}
+        <div style="border-left:1px solid #BBBBBB;height:80%"/>
         <div class="imageDivs" on:click={redirectToWhiteboard}>
             <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" >
         </div>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs" on:click={() => editPopup = true}>
-            <img class="clickable not-selectable" src="{editIcon}" alt="" draggable="false" >
+    {/if}
+
+    {#if BURole.authorityDTOList.some(a => a.name === "UpdateBU" || a.name === "SeePermissions" || a.name === "ChangePermissions" || a.name === "ManageSentInvites")}
+        <div style="border-left:1px solid #BBBBBB;height:80%"/>
+        <div class="imageDivs" on:click={openSettings}>
+            <img class="clickable not-selectable" src="{settingsIcon}" alt="" draggable="false" >
         </div>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs" on:click={() => leavePopup = true}>
-            <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" >
-        </div>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs"  on:click={() => deletePopup = true}>
-            <img class="clickable not-selectable xImage" src="{deleteIcon}" alt="" draggable="false">
-        </div>
-    {:else if BURole.role.name === "EMPLOYEE"}
-        <!--the employee stuff here-->
-        <span on:click={redirectToTeams}>{BURole.businessUnit.name}</span>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs" on:click={redirectToWhiteboard}>
-            <img class="clickable not-selectable" src="{whiteboardIcon}" alt="" draggable="false" >
-        </div>
-        <div style="border-left:1px solid #BBBBBB;height:80%"></div>
-        <div class="imageDivs"  on:click={() => leavePopup = true}>
-            <img class="clickable not-selectable xImage" src="{leaveIcon}" alt="" draggable="false">
+    {/if}
+
+    <div style="border-left:1px solid #BBBBBB;height:80%"/>
+    <div class="imageDivs" on:click={() => leavePopup = true}>
+        <img class="clickable not-selectable" src="{leaveIcon}" alt="" draggable="false" >
+    </div>
+
+    {#if BURole.authorityDTOList.some(authority => authority.name === "DeleteBU")}
+        <div style="border-left:1px solid #BBBBBB;height:80%"/>
+        <div class="imageDivs" on:click={() => deletePopup = true}>
+            <img class="clickable not-selectable xImage" src="{deleteIcon}" alt="" draggable="false" >
         </div>
     {/if}
 </div>
 
-<Modal bind:open={leavePopup} size="xs" autoclose>
+<Modal bind:open={leavePopup} size="xs" outsideclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Are you sure you want to leave the project?
-        <Button color="red" class="mr-2" on:click={leaveBU}>Yes</Button>
-        <Button color='alternative'>No</Button>
+        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to leave the project?</h3>
+        <Button color="alternative" class="me-2" on:click={() => leavePopup = false}>No</Button>
+        <Button color="red" on:click={leaveBU} disabled="{leaveButtonDisable}">Yes</Button>
     </div>
 </Modal>
 
-<Modal bind:open={deletePopup} size="xs" autoclose>
+<Modal bind:open={deletePopup} size="xs" outsideclose>
     <div class="text-center">
         <svg aria-hidden="true" class="mx-auto mb-4 w-14 h-14 text-gray-400 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Are you sure you want to delete the project?
-        <Button color="red" class="mr-2" on:click={deleteBU}>Yes</Button>
-        <Button color='alternative'>No</Button>
+        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to delete the project?</h3>
+        <Button color="alternative" class="me-2" on:click={() => deletePopup = false}>No</Button>
+        <Button color="red" on:click={deleteBU} disabled="{deleteButtonDisable}">Yes</Button>
     </div>
 </Modal>
 
-<Modal title="Edit project" bind:open={editPopup} size="XL" autoclose>
-    <div class="bodyPopup">
+<Modal title="Settings for {BURole.businessUnit.name}" bind:open={settingsPopup} size="xl" placement="center">
 
-        <div class="editDiv">
-            <div class="projectNameLabel">
-                <Label for="projectName" class="mb-2">Project name</Label>
-                <Input type="text" id="projectName" required >
-                    <input class="text-black inputName" type="text" placeholder="{BURole.businessUnit.name}" bind:value={buName} required/>
-                </Input>
-            </div>
+    <div class="sideBySide">
+        <Sidebar class="mr-1 bg-[#F8F8F8]">
+            <SidebarWrapper class="bg-[#F8F8F8]">
+                <SidebarGroup>
+                    {#if BURole.authorityDTOList.some(authority => authority.name === "UpdateBU")}
+                        <SidebarItem label="General Settings" active="{activeNum === 1}" on:click={() => activeNum = 1}/>
+                    {/if}
+                    {#if BURole.authorityDTOList.some(authority => authority.name === "SeePermissions")}
+                        <SidebarItem label="Roles" active="{activeNum === 2}" on:click={() => activeNum = 2}/>
+                    {/if}
+                    <!--Might need to update roles for this-->
+                    {#if BURole.authorityDTOList.some(authority => authority.name === "SeePermissions")}
+                        <SidebarItem label="Users" active="{activeNum === 3}" on:click={() => activeNum = 3}/>
+                    {/if}
+                    {#if BURole.authorityDTOList.some(authority => authority.name === "ManageSentInvites")}
+                        <SidebarItem label="Invites" active="{activeNum === 4}" on:click={() => activeNum = 4}/>
+                    {/if}
+                </SidebarGroup>
+            </SidebarWrapper>
+        </Sidebar>
 
-                <img class="clickable not-selectable inviteImg" src="{inviteToCompanyIcon}" alt="" draggable="false"
-                     on:click={() => {
-                    getAllInvitesByProject();
-                    inviteToProjectPopup = true;
-                 }}>
-
-        </div>
-        <Button type="submit" on:click={editBU}>Edit</Button>
-    </div>
-</Modal>
-
-<Modal title="Invite people in {BURole.businessUnit.name}" bind:open={inviteToProjectPopup} size="XL" autoclose>
-    <form>
-        <div class="grid gap-6 mb-6 md:grid-cols-1">
-            {#if alreadyInvited.length > 0}
-                <div class="invited text-black">
-                    <span>Invited people</span>
-                    <Listgroup items="{alreadyInvited}" let:item class="w-48">
-                        <div class="parent text-black">
-                            <div class="text">
-                                {item.receiver.email}
-                            </div>
-                        </div>
-                    </Listgroup>
-                </div>
+        <div class="settingsMain">
+            {#if activeNum === 1}
+                <EditBUComponent onChangeName="{(name) => nameChange(name)}" bind:BURole="{BURole}"/>
             {/if}
-
-            <div>
-                <Label for="projectName" class="mb-2">Email invite to</Label>
-                <Input type="text" id="projectName" required>
-                    <input type="text" bind:value={inviteeEmail} />
-                </Input>
-            </div>
-            <Button type="submit" on:click={invitePersonToProject}>Send</Button>
+            {#if activeNum === 2}
+                <RoleSettingsComponent bind:BURole={BURole}/>
+            {/if}
+            {#if activeNum === 3}
+                <SettingsUsersComponent BURole={BURole}/>
+            {/if}
+            {#if activeNum === 4}
+                <SettingsInviteComponent BURole={BURole}/>
+            {/if}
         </div>
-    </form>
+    </div>
+
 </Modal>
 
 <style lang="scss">
+
     :root{
         background-color: #F8F8F8;
     }
-
 
     .BUwindow {
         background-color: #e7e7e7;
@@ -344,8 +244,7 @@
         border: 1px solid #BBBBBB;
         min-height: 8vh;
 
-
-        span {
+        p {
             flex-basis: 65%;
             flex-grow: 1;
             white-space: nowrap; /* prevent text from wrapping */
@@ -353,7 +252,7 @@
             text-overflow: ellipsis; /* show ellipsis for truncated text */
             font-family: Bahnschrift, monospace;
             height: 100%;
-            font-size: 35px;
+            font-size:calc(10px + 1.5vw);
             display: inline-flex;
             align-items: center;
             vertical-align: middle;
@@ -372,15 +271,37 @@
         }
 
         img {
-            max-width: 40px;
-            max-height: 40px;
+            max-width: 4.5vw;
+            max-height: 4.5vh;
         }
 
         .xImage{
-            max-width: 35px;
-            max-height: 35px;
+            max-width: 4vw;
+            max-height: 4vh;
         }
 
+    }
+
+    .settingsMain{
+        border-radius: 2px;
+        background-color: #F8F8F8;
+        width: 85%;
+        height: 80vh;
+        border: 0 solid #BBBBBB;
+        font-family: sans-serif;
+        font-weight: lighter;
+        box-shadow: 0 0 1px 1px #BBBBBB;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .settingsRoles{
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .sideBySide{
+        display: flex;
     }
 
     .clickable {
@@ -400,42 +321,11 @@
         align-items: center;
     }
 
-    .inputName{
-        margin-bottom: 3vh;
-    }
-
-    .editDiv{
-        display: flex;
-        flex-direction: row;
-    }
-
     .inviteImg{
         height: 40px;
         width: 40px;
         margin-left: 1.5vw;
         margin-top: 3vh;
-    }
-
-    .projectNameLabel{
-        display: flex;
-        flex-direction: column
-    }
-
-    .parent{
-        position: relative;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center; /* Align child elements horizontally */
-    }
-
-    .invited{
-        max-height: 40vh;
-        overflow-y: auto;
-    }
-
-    .text{
-        text-align: center;
     }
 
 </style>

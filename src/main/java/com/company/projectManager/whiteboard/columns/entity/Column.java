@@ -11,7 +11,7 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Columns", uniqueConstraints = {@UniqueConstraint(columnNames = {"WhiteboardsId", "Position"})})
+@Table(name = "columns", schema = "v1", uniqueConstraints = {@UniqueConstraint(columnNames = {"whiteboards_id", "position"})})
 public class Column {
 
     @Id
@@ -27,7 +27,7 @@ public class Column {
     //You'd wonder why I can't use PERSIST here together with merge? Well JPA considers persist first and
     //throws an exception before it can try merge (so the transaction is rolled back)
     @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "WhiteboardsId")
+    @JoinColumn(name = "whiteboards_id")
     @Cascade({org.hibernate.annotations.CascadeType.MERGE}) //This isn't substitute (hibernate documentation)
     private Whiteboard whiteboard;
 
