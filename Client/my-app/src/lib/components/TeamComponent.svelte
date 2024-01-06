@@ -19,6 +19,7 @@
     import SettingsInviteComponent from "$lib/components/SettingsInviteComponent.svelte";
     import toast from "svelte-french-toast";
     import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
+    import SettingsUsersComponent from "$lib/components/SettingsUsersComponent.svelte";
 
     let leavePopup = false;
     let leaveButtonDisable = false;
@@ -136,7 +137,8 @@
 
 <div class="clickable not-selectable BUwindow">
 
-    <span on:click={redirectToWhiteboard}>{BURole.businessUnit.name}</span>
+    <p on:click={redirectToWhiteboard}>{BURole.businessUnit.name}</p>
+
     {#if BURole.authorityDTOList.some(authority => authority.name === "InteractWithWhiteboard")}
         <div style="border-left:1px solid #BBBBBB;height:80%"></div>
         <div class="imageDivs" on:click={redirectToWhiteboard}>
@@ -214,7 +216,7 @@
                 <RoleSettingsComponent bind:BURole={BURole}/>
             {/if}
             {#if activeNum === 3}
-                <!--User role management component-->
+                <SettingsUsersComponent BURole={BURole}/>
             {/if}
             {#if activeNum === 4}
                 <SettingsInviteComponent BURole={BURole}/>
@@ -240,7 +242,7 @@
         border: 1px solid #BBBBBB;
         min-height: 8vh;
 
-        span {
+        p {
             flex-basis: 65%;
             flex-grow: 1;
             white-space: nowrap; /* prevent text from wrapping */
@@ -248,7 +250,7 @@
             text-overflow: ellipsis; /* show ellipsis for truncated text */
             font-family: Bahnschrift, monospace;
             height: 100%;
-            font-size: 35px;
+            font-size:calc(10px + 1.5vw);
             display: inline-flex;
             align-items: center;
             vertical-align: middle;
@@ -267,13 +269,13 @@
         }
 
         img {
-            max-width: 40px;
-            max-height: 40px;
+            max-width: 4.5vw;
+            max-height: 4.5vh;
         }
 
         .xImage{
-            max-width: 35px;
-            max-height: 35px;
+            max-width: 4vw;
+            max-height: 4vh;
         }
 
     }

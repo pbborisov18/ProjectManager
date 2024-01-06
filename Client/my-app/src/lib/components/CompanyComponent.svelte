@@ -142,7 +142,7 @@
 
 <div class="clickable not-selectable BUwindow">
 
-    <span on:click={redirectToProjects}> {BURole.businessUnit.name} </span>
+    <p on:click={redirectToProjects}> {BURole.businessUnit.name} </p>
 
     {#if BURole.authorityDTOList.some(authority => authority.name === "InteractWithWhiteboard")}
         <div style="border-left:1px solid #BBBBBB;height:80%"/>
@@ -247,7 +247,7 @@
         border: 1px solid #BBBBBB;
         min-height: 8vh;
 
-        span {
+        p {
             flex-basis: 65%;
             flex-grow: 1;
             white-space: nowrap; /* prevent text from wrapping */
@@ -255,7 +255,7 @@
             text-overflow: ellipsis; /* show ellipsis for truncated text */
             font-family: Bahnschrift, monospace;
             height: 100%;
-            font-size: 35px;
+            font-size:calc(10px + 1.5vw);
             display: inline-flex;
             align-items: center;
             vertical-align: middle;
@@ -274,13 +274,13 @@
         }
 
         img {
-            max-width: 40px;
-            max-height: 40px;
+            max-width: 4.5vw;
+            max-height: 4.5vh;
         }
 
         .xImage{
-            max-width: 35px;
-            max-height: 35px;
+            max-width: 4vw;
+            max-height: 4vh;
         }
 
     }

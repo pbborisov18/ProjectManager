@@ -3,7 +3,7 @@ package com.company.projectManager.common.controller;
 import com.company.projectManager.common.dto.RoleDTO;
 import com.company.projectManager.common.dto.UserNoPassBusinessUnitDTO;
 import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
-import com.company.projectManager.common.dto.businessUnit.CompanyDTO;
+import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
 import com.company.projectManager.common.dto.user.UserNoPassDTO;
 import com.company.projectManager.common.exception.EntityNotFoundException;
 import com.company.projectManager.common.exception.FailedToSelectException;
@@ -33,10 +33,10 @@ public class BusinessUnitController {
     }
 
     @PostMapping("/bu/getLast30Users")
-    @PreAuthorize("authorityCheck(#companyDTO.id(), \"SeePermissions\")")
-    public ResponseEntity<Object> getLast30UsersWhoJoinedCompany(@RequestBody CompanyDTO companyDTO){
+    @PreAuthorize("authorityCheck(#businessUnit.id(), \"SeePermissions\")")
+    public ResponseEntity<Object> getLast30UsersWhoJoinedCompany(@RequestBody BusinessUnitDTO businessUnit){
         try {
-            List<UserNoPassDTO> users = usersBusinessUnitsService.findTheLast30UsersWhoJoinedBU(companyDTO.id());
+            List<UserNoPassDTO> users = usersBusinessUnitsService.findTheLast30UsersWhoJoinedBU(businessUnit.id());
 
             if(users.isEmpty()){
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
