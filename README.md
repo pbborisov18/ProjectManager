@@ -23,7 +23,7 @@ Focus will be mainly on the backend unless changes on the frontend are needed.
 #### If a step isn't mentioned, that means it wasn't necessary.
 
 1. DB setup
-   1. [Install PostgreSQL](https://www.postgresql.org/download/)
+   1. [Install PostgreSQL 16+](https://www.postgresql.org/download/)
    2. [Create two roles](https://www.postgresql.org/docs/current/sql-createrole.html) - "Admin" and "Backend". 
    Give them at least "Can log in" permission.
    3. [Create a database](https://www.postgresql.org/docs/current/sql-createdatabase.html) called "ProjectManager" (case is important)
