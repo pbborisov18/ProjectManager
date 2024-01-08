@@ -1,2 +1,2 @@
-//doesn't work. noice. fucking js
+export const prerender = true;
 //export const ssr = false;

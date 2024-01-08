@@ -14,7 +14,7 @@
     export let homePage = false;
 
     function redirectToHomepage() {
-        if($loggedIn){
+        if($loggedIn === "true"){
             goto("/companies");
         } else {
             goto("/");
