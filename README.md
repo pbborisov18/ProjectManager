@@ -66,3 +66,9 @@ Annnnnnnnd you're done! You can check out the site at http://localhost:5173 (def
 * Upgrade to web sockets in certain places (whiteboards)
 * Optimize query performance in certain places
 * Give the ability to play with the columns in the whiteboard (backend is ready to handle that)
+
+<br>
+<a href="https://www.flaticon.com/authors/freepik" title="settings icons">Settings, leave, plus, rectangle and settings icons created by Freepik</a><br>
+<a href="https://www.flaticon.com/authors/pixel-perfect" title="right icons">Check, delete and edit icons created by Pixel perfect</a><br>
+<a href="https://www.flaticon.com/authors/tempo-doloe" title="invite icons">Invite icon created by Tempo_doloe</a><br>
+
