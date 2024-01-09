@@ -122,7 +122,7 @@
         <div class="logo">
             <img src="{logo}" alt="gfdgdf" draggable="false" >
         </div>
-
+        <p>Enter fake data! No recaptcha yet</p>
         <form on:submit={e => register(e)}>
 
             <Input class="mb-3" type="email" name="email" placeholder="Email" required/>

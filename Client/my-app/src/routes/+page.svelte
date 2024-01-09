@@ -18,7 +18,7 @@
     <div class="flex-1 flex items-center">
         <div class="ml-64  max-w-lg">
             <h2 class="font-semibold text-[2.5em] text-blueGray-600">
-                <i>BASIC</i> PROJECT MANAGER
+                PROJECT MANAGER
             </h2>
             <p class="mt-4 text-[1.5em] leading-relaxed text-blueGray-500">
                 Keep your projects organized, on schedule, and in one place with our easy-to-use platform.
@@ -32,7 +32,7 @@
 </div>
 
 <div class="min-w-fit flex justify-center">
-    <a href="https://github.com/pbborisov18/ProjectManager" class="underline text-blue-600">Github</a>
+    <p>How to use -></p><a target="_blank" href="https://github.com/pbborisov18/ProjectManager#demo" class="underline text-blue-600">Github</a>
 </div>
 
 <style>
