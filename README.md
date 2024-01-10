@@ -16,7 +16,9 @@ Focus will be mainly on the backend unless changes on the frontend are needed.
 ## Demo
 **DISCLAIMER: The frontend has been mainly made for 1080p resolution. I understand that's not ideal and how important this is, but as I said earlier, the focus of this project is the backend.**
 <br><br>
-**Coming soon!**
+[Live demo](https://agile-ace.tech)
+
+https://github.com/pbborisov18/ProjectManager/assets/56866287/0c12b121-c5a6-4a46-8811-e80ca18b6d55
 
 ## Launch yourself
 
