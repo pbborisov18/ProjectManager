@@ -6,6 +6,7 @@ import com.company.projectManager.common.dto.UserNoPassBusinessUnitRoleDTO;
 import com.company.projectManager.common.dto.businessUnit.BusinessUnitDTO;
 import com.company.projectManager.common.dto.user.UserNoPassDTO;
 import com.company.projectManager.common.exception.EntityNotFoundException;
+import com.company.projectManager.common.exception.FailedToSaveException;
 import com.company.projectManager.common.exception.FailedToSelectException;
 import com.company.projectManager.common.service.RoleService;
 import com.company.projectManager.common.service.UsersBusinessUnitsService;
@@ -34,7 +35,7 @@ public class BusinessUnitController {
 
     @PostMapping("/bu/getLast30Users")
     @PreAuthorize("authorityCheck(#businessUnit.id(), \"SeePermissions\")")
-    public ResponseEntity<Object> getLast30UsersWhoJoinedCompany(@RequestBody BusinessUnitDTO businessUnit){
+    public ResponseEntity<Object> getLast30UsersWhoJoinedBU(@RequestBody BusinessUnitDTO businessUnit){
         try {
             List<UserNoPassDTO> users = usersBusinessUnitsService.findTheLast30UsersWhoJoinedBU(businessUnit.id());
 
@@ -71,8 +72,11 @@ public class BusinessUnitController {
             usersBusinessUnitsService.saveUserRoles(ubuDTO);
 
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e){ //TODO: fix
+        } catch (FailedToSaveException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+
         }
     }
 
