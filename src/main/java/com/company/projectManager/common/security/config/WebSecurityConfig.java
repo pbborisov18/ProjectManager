@@ -1,5 +1,6 @@
 package com.company.projectManager.common.security.config;
 
+import com.company.projectManager.common.security.config.filters.RecaptchaFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Arrays;
@@ -17,11 +19,14 @@ public class WebSecurityConfig {
 
     private final UserDetailsService userDetailsService;
 
+    private final RecaptchaFilter recaptchaFilter;
+
     @Value("${frontend.url}")
     private String frontendUrl;
 
-    public WebSecurityConfig(UserDetailsService userDetailsService) {
+    public WebSecurityConfig(UserDetailsService userDetailsService, RecaptchaFilter recaptchaFilter) {
         this.userDetailsService = userDetailsService;
+        this.recaptchaFilter = recaptchaFilter;
     }
 
     @Bean
@@ -61,6 +66,8 @@ public class WebSecurityConfig {
                             return configuration;
                         }
                 ))
+
+                .addFilterBefore(recaptchaFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .formLogin(login -> login
                         .loginPage(frontendUrl+"/login")

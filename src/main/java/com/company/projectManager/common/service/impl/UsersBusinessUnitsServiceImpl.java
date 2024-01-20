@@ -496,6 +496,10 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             }
 
             //Hopefully the merge works correctly
+            //TODO: Actually kinda a bad idea. If somebody decides to be funny
+            // and send in a role that doesn't exist it will be created
+            // (Only the frontend can do this cuz that's the only service allowed to
+            // communicate with the backend)
             ubu.get().setRoles(roleMapper.toEntity(ubuDTO.roles()));
 
             usersBURepository.save(ubu.get());

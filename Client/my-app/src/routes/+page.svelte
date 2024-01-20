@@ -32,7 +32,8 @@
 </div>
 
 <div class="min-w-fit flex justify-center">
-    <p>How to use -></p><a target="_blank" href="https://github.com/pbborisov18/ProjectManager#demo" class="underline text-blue-600">Github</a>
+    <p class="ml-5"><b>DISCLAIMER:</b> The frontend has been mainly made for 1080p resolution. More details and a "How to use" guide -> </p>
+    <a target="_blank" href="https://github.com/pbborisov18/ProjectManager#demo" class="underline text-blue-600">Github</a>
 </div>
 
 <style>

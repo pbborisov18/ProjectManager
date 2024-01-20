@@ -5,20 +5,20 @@
     import toast from "svelte-french-toast";
     import {Button, Checkbox, Input} from "flowbite-svelte";
     import logo from "$lib/images/AlignLogo.png";
-    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
+    import {PUBLIC_BACKEND_URL, PUBLIC_RECAPTCHA_KEY} from "$lib/Env.js";
+    import {onMount} from "svelte";
+    import {handleCaptchaError, resetCaptcha} from "$lib/RecaptchaMethods.js";
 
     let checkBox = false;
+    let email = "";
+    let password = "";
 
-    function login(event) {
-        event.preventDefault();
-
-        const email = event.target.email.value;
-        const password = event.target.password.value;
+    export const login = async(token) => {
 
         const formData = new URLSearchParams();
         formData.append('email', email);
         formData.append('password', password);
-        //if I send rememberme: false, I still get a rememberme cookie cuz ...
+        //if I send rememberme: false, I still get a rememberme cookie just cuz ...
         if (checkBox) {
             formData.append('rememberme', checkBox);
         }
@@ -26,7 +26,8 @@
         fetch(PUBLIC_BACKEND_URL + '/login', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Recaptcha-Token': token
             },
             body: formData,
             credentials: "include"
@@ -49,6 +50,23 @@
         });
     }
 
+    onMount(() => {
+        const script = document.createElement('script');
+        script.src = 'https://www.google.com/recaptcha/api.js';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+
+        window.handleCaptchaCallback = login;
+        window.handleCaptchaError = handleCaptchaError;
+        window.resetCaptcha = resetCaptcha;
+    });
+
+    async function captcha(e){
+        e.preventDefault();
+        grecaptcha.execute();
+    }
+
     function goToRegisterPage(){
         goto("/sign-up");
     }
@@ -62,17 +80,23 @@
             <img src="{logo}" alt="gfdgdf" draggable="false" >
         </div>
 
-        <form on:submit={e => login(e)}>
-            <Input class="mb-3" type="email" name="email" placeholder="Email" required/>
-            <Input class="mb-3" type="password" name="password" placeholder="Password" required/>
+        <form on:submit={e => captcha(e)}>
+            <Input class="mb-3" type="email" name="email" placeholder="Email" bind:value={email} required/>
+            <Input class="mb-3" type="password" name="password" placeholder="Password" bind:value={password} required/>
             <div class="w-[100%] mb-3">
                 <Checkbox bind:checked={checkBox}>Remember me</Checkbox>
             </div>
-            <Button type="submit" color="blue">Login</Button>
 
+            <Button type="submit" color="blue">Login</Button>
         </form>
         <h3 class="not-selectable clickable" on:click={goToRegisterPage}>No account?</h3>
     </div>
+    <div
+        class="g-recaptcha"
+        data-sitekey={PUBLIC_RECAPTCHA_KEY}
+        data-callback="handleCaptchaCallback"
+        data-size="invisible"
+    />
 </main>
 
 <style lang="scss">

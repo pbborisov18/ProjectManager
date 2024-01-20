@@ -3,50 +3,69 @@
     import Header from "$lib/components/Header.svelte";
     import {userEmail, loggedIn} from "$lib/stores.js";
     import { passwordMatch, containNumbers } from "./customValidators.js";
+    import {resetCaptcha, handleCaptchaError} from "$lib/RecaptchaMethods.js";
     import toast from "svelte-french-toast";
     import {Button, Helper, Input} from "flowbite-svelte"
     import logo from "$lib/images/AlignLogo.png";
-    import {PUBLIC_BACKEND_URL} from "$lib/Env.js";
+    import {PUBLIC_BACKEND_URL, PUBLIC_RECAPTCHA_KEY} from "$lib/Env.js";
+    import {onMount} from "svelte";
 
+    let registerButtonDisable = false;
 
-    function register(event) {
-        event.preventDefault();
+    //Yes I reset recaptcha everywhere an error is thrown. Why?
+    //Cuz the google script doesn't want to send any more requests in some cases when an error is thrown
+    //So I'll just reset it everytime an error is thrown
+
+    export const register = async(token) => {
+        registerButtonDisable = true;
         firstTry = false;
 
         if(handleInputPass() || handleInputPassConfirm()){
+            registerButtonDisable = true;
             return;
         }
 
-        const email = event.target.email.value;
-        const password = event.target.password.value;
-        const confirmPassword = event.target.confirmPassword.value;
+        const email = fields.email;
+        const password = fields.pass;
+        const confirmPassword = fields.confirmPass;
 
         fetch(PUBLIC_BACKEND_URL + '/register', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
                 // 'X-XSRF-TOKEN': ffs
             },
-            body: JSON.stringify({email: email, password: password, confirmPassword: confirmPassword}),
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                confirmPassword: confirmPassword
+            }),
             credentials: "include"
         }).then(response => {
             if (response.status === 200) {
-                sendLoginRequestAfterRegister(email, password);
+                //Enable the button inside there
+                sendLoginRequestAfterRegister(email, password, token);
             } else if(response.status === 400){
+                registerButtonDisable = true;
+                resetCaptcha();
                 response.text().then(data => {
-                    toast.error("Bad request!");
+                    toast.error(data);
                 });
             } else if(response.status === 500){
+                registerButtonDisable = true;
+                resetCaptcha();
                 response.text().then(data => {
                     toast.error("Something went wrong!");
                 });
             }
         }).catch(error => {
+            registerButtonDisable = true;
+            resetCaptcha();
             toast.error("Server is offline!");
         });
     }
 
-    function sendLoginRequestAfterRegister(email, password){
+    function sendLoginRequestAfterRegister(email, password, token){
         const formData = new URLSearchParams();
 
         formData.append('email', email);
@@ -57,7 +76,8 @@
         fetch(PUBLIC_BACKEND_URL + '/login', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Recaptcha-Token': token
             },
             body: formData,
             credentials: "include"
@@ -67,15 +87,21 @@
                 loggedIn.set("true");
                 goto("/companies")
             } else if(response.status === 400){
+                registerButtonDisable = true;
+                resetCaptcha();
                 response.text().then(data => {
                     toast.error(data);
                 });
             } else if(response.status === 500){
+                registerButtonDisable = true;
+                resetCaptcha();
                 response.json().then(data => {
                     toast.error(data.message);
                 });
             }
         }).catch(error => {
+            registerButtonDisable = true;
+            resetCaptcha();
             toast.error("Server is offline!");
         });
     }
@@ -107,11 +133,27 @@
         }
     }
 
+    onMount(() => {
+        const script = document.createElement('script');
+        script.src = 'https://www.google.com/recaptcha/api.js';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+
+        window.handleCaptchaCallback = register;
+        window.handleCaptchaError = handleCaptchaError;
+        window.resetCaptcha = resetCaptcha;
+    });
+
+    async function captcha(e){
+        e.preventDefault();
+        firstTry = false;
+        grecaptcha.execute();
+    }
+
     function goToLoginPage() {
         goto("/login");
     }
-
-
 
 </script>
 
@@ -122,10 +164,8 @@
         <div class="logo">
             <img src="{logo}" alt="gfdgdf" draggable="false" >
         </div>
-        <p>Enter fake data! No recaptcha yet</p>
-        <form on:submit={e => register(e)}>
-
-            <Input class="mb-3" type="email" name="email" placeholder="Email" required/>
+        <form on:submit={e => captcha(e)}>
+            <Input class="mb-3" type="email" name="email" placeholder="Email" required bind:value={fields.email}/>
 
             {#if !valid && !firstTry}
                 <Helper >{errors.pass}</Helper>
@@ -137,11 +177,18 @@
             {/if}
             <Input class="mb-8" type="password" name="confirmPassword" placeholder="Confirm password" bind:value={fields.confirmPass} on:input={handleInputPassConfirm} required />
 
-            <Button type="submit" color="blue">Register</Button>
+            <Button type="submit" color="blue" disable="{registerButtonDisable}">Register</Button>
         </form>
         <h3 class="mt-10 not-selectable clickable" on:click={goToLoginPage}>Already have an account?</h3>
     </div>
+    <div
+        class="g-recaptcha"
+        data-sitekey={PUBLIC_RECAPTCHA_KEY}
+        data-callback="handleCaptchaCallback"
+        data-size="invisible"
+    />
 </main>
+
 
 <style lang="scss">
     :root{
@@ -209,4 +256,5 @@
         padding: 30px 50px;
         font-weight: lighter;
     }
+
 </style>
