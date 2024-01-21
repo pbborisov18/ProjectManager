@@ -31,7 +31,7 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        var builder = http
 
                 /*
                 I read too much contradicting info on using httpOnly true cookie
@@ -46,71 +46,74 @@ public class WebSecurityConfig {
                 //I can't figure out how to get the csrf token in the frontend
                 //I'm not looking to do the "send a request on x endpoint which exposes the token before the actual request"
                 //And I couldn't find a better solution
-                .csrf(c -> c.disable())
+                .csrf(c -> c.disable());
 //                        ( c ->  c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) //this puts the csrf token in the cookies
 //                                // no idea wtf this does. Can't read the X-XSRF-TOKEN header in the request without it
 //                                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
 
-                .cors(c -> c.configurationSource(
-                        r -> {
-                            CorsConfiguration configuration = new CorsConfiguration();
+        builder.cors(c -> c.configurationSource(
+                r -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
 
-                            configuration.applyPermitDefaultValues();
-                            //Letting the frontend do whatever types of methods it wants
-                            configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
-                            configuration.setAllowedOriginPatterns(List.of(frontendUrl));
-                            configuration.setAllowCredentials(true);
-//                                configuration.setAllowedHeaders(List.of("Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "content-type", "x-xsrf-token"));
-//                                configuration.setExposedHeaders(List.of("Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"));
+                    configuration.applyPermitDefaultValues();
+                    //Letting the frontend do whatever types of methods it wants
+                    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
+                    configuration.setAllowedOriginPatterns(List.of(frontendUrl));
+                    configuration.setAllowCredentials(true);
+                    //configuration.setAllowedHeaders(List.of("Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "content-type", "x-xsrf-token"));
+                    //configuration.setExposedHeaders(List.of("Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin"));
 
-                            return configuration;
-                        }
-                ))
+                    return configuration;
+                }
+        ));
 
-                .addFilterBefore(recaptchaFilter, UsernamePasswordAuthenticationFilter.class)
+        builder.addFilterBefore(recaptchaFilter, UsernamePasswordAuthenticationFilter.class);
 
-                .formLogin(login -> login
-                        .loginPage(frontendUrl+"/login")
-                        .loginProcessingUrl("/login")
-                        .usernameParameter("email")
-                        .successHandler((request, response, authentication) -> {
-                            response.setStatus(HttpStatus.OK.value());
-                            response.getWriter().flush();
-                        })
-                        .failureHandler((request, response, exception) -> {
-                            response.setStatus(HttpStatus.BAD_REQUEST.value());
-                            response.setContentType("text/plain");
-                            response.getWriter().write("Incorrect email or password!");
-                        }))
+        builder.formLogin(login -> login
+                .loginPage(frontendUrl+"/login")
+                .loginProcessingUrl("/login")
+                .usernameParameter("email")
+                .successHandler((request, response, authentication) -> {
+                    response.setStatus(HttpStatus.OK.value());
+                    response.getWriter().flush();
+                })
+                .failureHandler((request, response, exception) -> {
+                    response.setStatus(HttpStatus.BAD_REQUEST.value());
+                    response.setContentType("text/plain");
+                    response.getWriter().write("Incorrect email or password!");
+                })
+        );
 
-                .rememberMe(me -> me
-                        .key("RandomAssPrivateKey")
-                        .rememberMeParameter("rememberme")
-                        .userDetailsService(userDetailsService)
-                )
+        builder.rememberMe(me -> me
+                .key("RandomAssPrivateKey")
+                .rememberMeParameter("rememberme")
+                .userDetailsService(userDetailsService)
+        );
 
-                .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/", "/login", "/register", "/*.html", "/style/**", "/error", "/favicon").permitAll()
-                        .anyRequest().authenticated())
+        builder.authorizeHttpRequests(requests -> requests
+                .requestMatchers("/", "/login", "/register", "/*.html", "/style/**", "/error", "/favicon").permitAll()
+                .anyRequest().authenticated()
+        );
 
-                .exceptionHandling(eh -> eh
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            response.setContentType("text/plain");
-                            response.getWriter().write("Unauthenticated!");
-                        }))
+        builder.exceptionHandling(eh -> eh
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    response.setContentType("text/plain");
+                    response.getWriter().write("Unauthenticated!");
+                })
+        );
 
+        builder.logout(logout -> logout.
+                logoutSuccessHandler((request, response, authentication) -> {
+                    response.setStatus(HttpStatus.OK.value());
+                    response.getWriter().flush();
+                })
+                .logoutSuccessUrl(frontendUrl + "/login")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+        );
 
-                .logout(logout -> logout.
-                        logoutSuccessHandler((request, response, authentication) -> {
-                            response.setStatus(HttpStatus.OK.value());
-                            response.getWriter().flush();
-                        })
-                        .logoutSuccessUrl(frontendUrl + "/login")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"))
-
-                .build();
+        return builder.build();
     }
 
 }

@@ -34,10 +34,7 @@ https://github.com/pbborisov18/ProjectManager/assets/56866287/0c12b121-c5a6-4a46
       - Use the StartingPointCustom.sql file to [restore the database](https://www.postgresql.org/docs/8.1/backup.html)
 
 2. Clone the repository
-3. [Get Recaptcha code from Google](https://www.google.com/recaptcha/admin/create) (I'll see if I can somehow disable this in dev in the future)
-   1. Create a classic key
-      - Recaptcha type - v2, invisible
-      - Domains - localhost
+
 3. Backend setup
    1. [Install Java](https://www.oracle.com/cis/java/technologies/downloads/#java17)
    2. Open the project using your preferred IDE
@@ -48,14 +45,12 @@ https://github.com/pbborisov18/ProjectManager/assets/56866287/0c12b121-c5a6-4a46
       - `--dbUsername=Backend` (the username of the role)
       - `--dbPassword=123` (the password of the role depending on what you set it to in step 1.2)
       - `--frontendUrl=http://localhost:5173` (the default url the frontend runs on)
-      - `--recaptchaSecretKey=YourSecretKey`
    4. Run the backend with maven build `mvn spring-boot:run` (this will install all the dependencies if they are missing)
 
 4. Frontend setup
    1. [Install Node (20+) and npm](https://nodejs.org/en/download)
    2. Create a file named `.env` in `Client/my-app`
       - `VITE_BACKEND_URL='http://localhost:8080'` (or whatever port you set the backend to run on)
-      - `VITE_RECAPTCHA_KEY=YourPublicKey`
    3. Open a terminal and navigate to `*/ProjectManager/Client/my-app`
    4. Install the dependencies for the frontend with `npm install`
    5. Run the frontend with `npm run dev`

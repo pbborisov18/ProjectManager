@@ -12,6 +12,7 @@
     let checkBox = false;
     let email = "";
     let password = "";
+    let loginButtonDisabled = false;
 
     export const login = async(token) => {
 
@@ -23,12 +24,22 @@
             formData.append('rememberme', checkBox);
         }
 
-        fetch(PUBLIC_BACKEND_URL + '/login', {
-            method: 'POST',
-            headers: {
+        let headersToSend;
+
+        if(token){
+            headersToSend = {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Recaptcha-Token': token
-            },
+            }
+        } else {
+            headersToSend = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }
+
+        fetch(PUBLIC_BACKEND_URL + '/login', {
+            method: 'POST',
+            headers: headersToSend,
             body: formData,
             credentials: "include"
         }).then(response => {
@@ -36,7 +47,11 @@
                 userEmail.set(email);
                 loggedIn.set("true");
                 goto("/companies")
-            } else if(response.status === 400){
+            } else if (PUBLIC_RECAPTCHA_KEY){
+                resetCaptcha();
+            }
+
+            if(response.status === 400){
                 response.text().then(data => {
                     toast.error(data);
                 });
@@ -45,26 +60,38 @@
                     toast.error("Server failed!");
                 });
             }
+            loginButtonDisabled = false;
         }).catch(error => {
+            loginButtonDisabled = false;
             toast.error("Something went wrong!");
+            if (PUBLIC_RECAPTCHA_KEY){
+                resetCaptcha();
+            }
         });
     }
 
     onMount(() => {
-        const script = document.createElement('script');
-        script.src = 'https://www.google.com/recaptcha/api.js';
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
+        if (PUBLIC_RECAPTCHA_KEY) {
+            const script = document.createElement('script');
+            script.src = 'https://www.google.com/recaptcha/api.js';
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
 
-        window.handleCaptchaCallback = login;
-        window.handleCaptchaError = handleCaptchaError;
-        window.resetCaptcha = resetCaptcha;
+            window.handleCaptchaCallback = login;
+            window.handleCaptchaError = handleCaptchaError;
+            window.resetCaptcha = resetCaptcha;
+        }
     });
 
     async function captcha(e){
         e.preventDefault();
-        grecaptcha.execute();
+        loginButtonDisabled = true;
+        if (!PUBLIC_RECAPTCHA_KEY) {
+            login("");
+        } else {
+            grecaptcha.execute();
+        }
     }
 
     function goToRegisterPage(){
@@ -87,16 +114,18 @@
                 <Checkbox bind:checked={checkBox}>Remember me</Checkbox>
             </div>
 
-            <Button type="submit" color="blue">Login</Button>
+            <Button type="submit" color="blue" disabled="{loginButtonDisabled}">Login</Button>
         </form>
         <h3 class="not-selectable clickable" on:click={goToRegisterPage}>No account?</h3>
     </div>
-    <div
-        class="g-recaptcha"
-        data-sitekey={PUBLIC_RECAPTCHA_KEY}
-        data-callback="handleCaptchaCallback"
-        data-size="invisible"
-    />
+    {#if PUBLIC_RECAPTCHA_KEY}
+        <div
+            class="g-recaptcha"
+            data-sitekey={PUBLIC_RECAPTCHA_KEY}
+            data-callback="handleCaptchaCallback"
+            data-size="invisible"
+        />
+    {/if}
 </main>
 
 <style lang="scss">

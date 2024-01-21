@@ -17,7 +17,6 @@
     //So I'll just reset it everytime an error is thrown
 
     export const register = async(token) => {
-        registerButtonDisable = true;
         firstTry = false;
 
         if(handleInputPass() || handleInputPassConfirm()){
@@ -45,23 +44,28 @@
             if (response.status === 200) {
                 //Enable the button inside there
                 sendLoginRequestAfterRegister(email, password, token);
-            } else if(response.status === 400){
-                registerButtonDisable = true;
+            } else if (PUBLIC_RECAPTCHA_KEY){
                 resetCaptcha();
+            }
+
+            if(response.status === 400){
+                registerButtonDisable = true;
                 response.text().then(data => {
                     toast.error(data);
                 });
             } else if(response.status === 500){
                 registerButtonDisable = true;
-                resetCaptcha();
                 response.text().then(data => {
                     toast.error("Something went wrong!");
                 });
             }
         }).catch(error => {
             registerButtonDisable = true;
-            resetCaptcha();
             toast.error("Server is offline!");
+
+            if(PUBLIC_RECAPTCHA_KEY){
+                resetCaptcha();
+            }
         });
     }
 
@@ -73,12 +77,22 @@
         //We'll assume that the user wants to have a remember me token
         formData.append('rememberme', true);
 
-        fetch(PUBLIC_BACKEND_URL + '/login', {
-            method: 'POST',
-            headers: {
+        let headersToSend;
+
+        if(token){
+            headersToSend = {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Recaptcha-Token': token
-            },
+            }
+        } else {
+            headersToSend = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }
+
+        fetch(PUBLIC_BACKEND_URL + '/login', {
+            method: 'POST',
+            headers: headersToSend,
             body: formData,
             credentials: "include"
         }).then(response => {
@@ -86,23 +100,26 @@
                 userEmail.set(email);
                 loggedIn.set("true");
                 goto("/companies")
-            } else if(response.status === 400){
-                registerButtonDisable = true;
+            } else if (PUBLIC_RECAPTCHA_KEY){
                 resetCaptcha();
+            }
+
+            if(response.status === 400){
                 response.text().then(data => {
                     toast.error(data);
                 });
             } else if(response.status === 500){
-                registerButtonDisable = true;
-                resetCaptcha();
                 response.json().then(data => {
                     toast.error(data.message);
                 });
             }
+            registerButtonDisable = true;
         }).catch(error => {
             registerButtonDisable = true;
-            resetCaptcha();
             toast.error("Server is offline!");
+            if (PUBLIC_RECAPTCHA_KEY){
+                resetCaptcha();
+            }
         });
     }
 
@@ -134,21 +151,28 @@
     }
 
     onMount(() => {
-        const script = document.createElement('script');
-        script.src = 'https://www.google.com/recaptcha/api.js';
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
+        if (PUBLIC_RECAPTCHA_KEY){
+            const script = document.createElement('script');
+            script.src = 'https://www.google.com/recaptcha/api.js';
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
 
-        window.handleCaptchaCallback = register;
-        window.handleCaptchaError = handleCaptchaError;
-        window.resetCaptcha = resetCaptcha;
+            window.handleCaptchaCallback = register;
+            window.handleCaptchaError = handleCaptchaError;
+            window.resetCaptcha = resetCaptcha;
+        }
     });
 
-    async function captcha(e){
+    async function captcha(e) {
         e.preventDefault();
         firstTry = false;
-        grecaptcha.execute();
+        registerButtonDisable = true;
+        if (!PUBLIC_RECAPTCHA_KEY) {
+            register("");
+        } else {
+            grecaptcha.execute();
+        }
     }
 
     function goToLoginPage() {
@@ -177,16 +201,18 @@
             {/if}
             <Input class="mb-8" type="password" name="confirmPassword" placeholder="Confirm password" bind:value={fields.confirmPass} on:input={handleInputPassConfirm} required />
 
-            <Button type="submit" color="blue" disable="{registerButtonDisable}">Register</Button>
+            <Button type="submit" color="blue" disabled="{registerButtonDisable}">Register</Button>
         </form>
         <h3 class="mt-10 not-selectable clickable" on:click={goToLoginPage}>Already have an account?</h3>
     </div>
-    <div
-        class="g-recaptcha"
-        data-sitekey={PUBLIC_RECAPTCHA_KEY}
-        data-callback="handleCaptchaCallback"
-        data-size="invisible"
-    />
+    {#if PUBLIC_RECAPTCHA_KEY}
+        <div
+            class="g-recaptcha"
+            data-sitekey={PUBLIC_RECAPTCHA_KEY}
+            data-callback="handleCaptchaCallback"
+            data-size="invisible"
+        />
+    {/if}
 </main>
 
 

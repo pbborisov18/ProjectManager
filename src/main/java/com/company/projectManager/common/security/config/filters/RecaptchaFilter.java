@@ -22,6 +22,11 @@ public class RecaptchaFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+        //Skip the filter when no secret key is set
+        if (secretKey == null || secretKey.isEmpty()){
+            return true;
+        }
+
         String path = request.getRequestURI();
         //Send only during login. If you send more than 1 request from the same page you get the timeout-or-duplicate error
         //Since I'm sending register and login request right afterwards I'm using the same token from the same page.
