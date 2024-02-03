@@ -10,6 +10,7 @@
     export let BURole;
 
     let whiteboardName;
+    let permission = !BURole?.authorityDTOList.some(a => a.name === "CreateWhiteboard");
 
     function createWhiteboard(){
         fetch(PUBLIC_BACKEND_URL + "/createWhiteboard", {
@@ -95,10 +96,9 @@
                 <Input type="text" id="name" placeholder="Whiteboard name" bind:value={whiteboardName} required />
             </div>
             <Button on:click={redirectToLastPage} color="red">Cancel</Button>
-            {#if BURole?.authorityDTOList.some(a => a.name === "CreateWhiteboard")}
-                <Button type="submit" class="w-32" color="blue">Create</Button>
-            {:else}
-                <Button type="submit" class="w-32" color="blue" disabled>Create</Button>
+            <Button type="submit" class="w-32" color="blue" disabled="{permission}">Create</Button>
+
+            {#if permission}
                 <p class="col-span-2">No permission</p>
             {/if}
 
