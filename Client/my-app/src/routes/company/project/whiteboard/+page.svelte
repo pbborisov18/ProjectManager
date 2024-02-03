@@ -16,7 +16,7 @@
     });
 
     async function getWhiteboard(){
-        fetch(PUBLIC_BACKEND_URL + '/company/project/whiteboard', {
+        fetch(PUBLIC_BACKEND_URL + '/whiteboard', {
             method: 'POST',
             headers: {
                 'Content-Type': "application/json",

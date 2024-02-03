@@ -11,8 +11,8 @@
 
     let whiteboardName;
 
-    function handleSubmit(){
-        fetch(PUBLIC_BACKEND_URL + "/company/createWhiteboard", {
+    function createWhiteboard(){
+        fetch(PUBLIC_BACKEND_URL + "/createWhiteboard", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -88,7 +88,7 @@
 </div>
 <div class="mainDiv">
     <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Create whiteboard</h2>
-    <form on:submit={handleSubmit}>
+    <form on:submit={createWhiteboard}>
         <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
             <div class="sm:col-span-2">
                 <Label for="name" class="mb-2">Name</Label>
@@ -101,6 +101,7 @@
                 <Button type="submit" class="w-32" color="blue" disabled>Create</Button>
                 <p class="col-span-2">No permission</p>
             {/if}
+
         </div>
     </form>
 </div>

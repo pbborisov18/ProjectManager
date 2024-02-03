@@ -26,7 +26,7 @@
         onDrop(e.detail.items);
     }
 
-    //TODO: Fix up popups get autoclosed only on success
+    //TODO: Fix up so popups get autoclosed only on success
     let deletePopup = false;
     let editPopup = false;
 
@@ -41,7 +41,7 @@
 
         clickedNote = {...clickedNote, name: noteName, description: noteDescription};
 
-        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/updateNote", {
+        fetch(PUBLIC_BACKEND_URL + "/updateNote", {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -88,7 +88,7 @@
             return;
         }
 
-        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/deleteNote", {
+        fetch(PUBLIC_BACKEND_URL + "/deleteNote", {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

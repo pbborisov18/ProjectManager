@@ -22,12 +22,10 @@ public class WhiteboardController {
         this.whiteboardService = whiteboardService;
     }
 
-    //TODO: Remove all the endpoints and leave only 1 per method
-
     //Why is this Post? Cuz something something GET requests with bodies is bad (and spring doesn't read it),
     //something something, expose the data in the url (no)
     //I'm either breaking one standard or the other. This one is worse to break but easier to implement. (You might say I'm a total idiot for doing this and I'd agree with you)
-    @PostMapping(value = {"/company/whiteboard","/company/project/whiteboard", "/company/project/team/whiteboard"})
+    @PostMapping("whiteboard")
     @PreAuthorize("partOfBU(#businessUnitDTO.id())")
     public ResponseEntity<Object> getWhiteboardOfCompany(@RequestBody @Valid BusinessUnitDTO businessUnitDTO) {
         try {
@@ -42,9 +40,9 @@ public class WhiteboardController {
         }
     }
 
-    @PostMapping(value = {"/company/createWhiteboard", "/company/project/createWhiteboard", "/company/project/team/createWhiteboard"})
+    @PostMapping("/createWhiteboard")
     @PreAuthorize("authorityCheck(#whiteboardBUDTO.businessUnitDTO().id(),\"CreateWhiteboard\")")
-    //TODO: This is stupid. There's already a whiteboard inside the BU object
+    //This is stupid. There's already a whiteboard inside the BU object
     public ResponseEntity<Object> createWhiteboard(@RequestBody @Valid WhiteboardBusinessUnitDTO whiteboardBUDTO){
         try {
             whiteboardService.createWhiteboard(whiteboardBUDTO.whiteboardDTO(), whiteboardBUDTO.businessUnitDTO());
@@ -57,7 +55,9 @@ public class WhiteboardController {
         }
     }
 
-    @PostMapping(value = {"/company/createCustomWhiteboard", "/company/project/createCustomWhiteboard", "/company/project/team/createCustomWhiteboard"})
+    //TODO: Frontend for this
+
+    @PostMapping("/createCustomWhiteboard")
     @PreAuthorize("authorityCheck(#whiteboardBUColumnsDTO.businessUnitDTO().id(),\"CreateWhiteboard\")")
     public ResponseEntity<Object> createCustomWhiteboard(@RequestBody @Valid WhiteboardBusinessUnitColumnsDTO whiteboardBUColumnsDTO){
         try {
@@ -74,8 +74,9 @@ public class WhiteboardController {
         }
     }
 
+    //TODO: Frontend for this
 
-    @DeleteMapping(value = {"/company/deleteWhiteboard", "/company/project/deleteWhiteboard", "/company/project/team/deleteWhiteboard"})
+    @DeleteMapping("/deleteWhiteboard")
     @PreAuthorize("authorityCheck(#whiteboardBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
     public ResponseEntity<Object> deleteWhiteboard(@RequestBody @Valid WhiteboardBusinessUnitDTO whiteboardBUDTO){
         try {

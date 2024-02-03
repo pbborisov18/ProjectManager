@@ -27,7 +27,7 @@ public class ColumnController {
     //something something, expose the data in the url (no)
     //I'm either breaking one standard or the other. This one is worse to break but easier to implement.
     //(You might say I'm a total idiot for doing this and I'd agree with you)
-    @PostMapping(value = {"/company/columns", "/company/project/columns", "/company/project/team/columns"})
+    @PostMapping("/columns")
     @PreAuthorize("authorityCheck(#whiteboardBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
     public ResponseEntity<Object> getAllColumnsOfWhiteboard(@RequestBody @Valid WhiteboardBusinessUnitDTO whiteboardBUDTO){
         try {
@@ -41,7 +41,7 @@ public class ColumnController {
         }
     }
 
-    @PostMapping(value = {"/company/createColumn", "/company/project/createColumn", "/company/project/team/createColumn"})
+    @PostMapping("/createColumn")
     @PreAuthorize("authorityCheck(#columnBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
     public ResponseEntity<Object> createColumn(@RequestBody @Valid ColumnBusinessUnitDTO columnBUDTO) {
         try {
@@ -53,7 +53,7 @@ public class ColumnController {
         }
     }
 
-    @PostMapping(value = {"/company/updateColumns", "/company/project/updateColumns", "/company/project/team/updateColumns"})
+    @PostMapping("/updateColumns")
     @PreAuthorize("authorityCheck(#columnsBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
     public ResponseEntity<Object> updateColumns(@RequestBody @Valid ColumnsBusinessUnitDTO columnsBUDTO) {
         try {
@@ -65,7 +65,7 @@ public class ColumnController {
         }
     }
 
-    @PostMapping(value = {"/company/updateColumn", "/company/project/updateColumn", "/company/project/team/updateColumn"})
+    @PostMapping("/updateColumn")
     @PreAuthorize("authorityCheck(#columnBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
     public ResponseEntity<Object> updateColumn(@RequestBody @Valid ColumnBusinessUnitDTO columnBUDTO) {
         try {
@@ -77,7 +77,7 @@ public class ColumnController {
         }
     }
 
-    @DeleteMapping(value = {"/company/deleteColumn", "/company/project/deleteColumn", "/company/project/team/deleteColumn"})
+    @DeleteMapping("/deleteColumn")
     @PreAuthorize("authorityCheck(#columnBUDTO.businessUnitDTO().id(), \"ManageWhiteboard\")")
     public ResponseEntity<Object> deleteColumn(@RequestBody @Valid ColumnBusinessUnitDTO columnBUDTO) {
         try {

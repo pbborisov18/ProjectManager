@@ -24,12 +24,10 @@ public class NoteController {
         this.noteService = noteService;
     }
 
-    //TODO: Remove all the endpoints and leave only 1 per method
-
     //Why is this Post? Cuz something something GET requests with bodies is bad (and spring doesn't read it),
     //something something, expose the data in the url (no)
     //I'm either breaking one standard or the other. This one is worse to break but easier to implement. (You might say I'm a total idiot for doing this and I'd agree with you)
-    @PostMapping(value = {"/company/whiteboard/notes", "/company/project/whiteboard/notes", "/company/project/team/whiteboard/notes"})
+    @PostMapping("/notes")
     @PreAuthorize("authorityCheck(#columnBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
     public ResponseEntity<Object> getAllNotesOfColumn(@RequestBody @Valid ColumnBusinessUnitDTO columnBUDTO){
         try {
@@ -43,7 +41,7 @@ public class NoteController {
         }
     }
 
-    @PostMapping(value = {"/company/whiteboard/createNote", "/company/project/whiteboard/createNote", "/company/project/team/whiteboard/createNote"})
+    @PostMapping("/createNote")
     @PreAuthorize("authorityCheck(#noteBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
     public ResponseEntity<Object> createNote(@RequestBody @Valid NoteBusinessUnitDTO noteBUDTO) {
         try {
@@ -55,7 +53,7 @@ public class NoteController {
         }
     }
 
-    @PutMapping(value = {"/company/whiteboard/updateNote", "/company/project/whiteboard/updateNote", "/company/project/team/whiteboard/updateNote"})
+    @PutMapping("/updateNote")
     @PreAuthorize("authorityCheck(#noteBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
     public ResponseEntity<Object> updateNote(@RequestBody @Valid NoteBusinessUnitDTO noteBUDTO){
         try {
@@ -67,7 +65,7 @@ public class NoteController {
         }
     }
 
-    @PutMapping(value = {"/company/whiteboard/updateNotes", "/company/project/whiteboard/updateNotes", "/company/project/team/whiteboard/updateNotes"})
+    @PutMapping("/updateNotes")
     @PreAuthorize("authorityCheck(#notesBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
     public ResponseEntity<Object> updateNotes(@RequestBody @Valid NotesBusinessUnitDTO notesBUDTO){
         try {
@@ -79,7 +77,7 @@ public class NoteController {
         }
     }
 
-    @DeleteMapping(value = {"/company/whiteboard/deleteNote", "/company/project/whiteboard/deleteNote", "/company/project/team/whiteboard/deleteNote"})
+    @DeleteMapping("/deleteNote")
     @PreAuthorize("authorityCheck(#noteBUDTO.businessUnitDTO().id(), \"InteractWithWhiteboard\")")
     public ResponseEntity<Object> deleteNote(@RequestBody @Valid NoteBusinessUnitDTO noteBUDTO){
         try {

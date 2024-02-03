@@ -23,7 +23,7 @@
     });
 
     function getColumns(whiteboard) {
-        let promise = fetch(PUBLIC_BACKEND_URL + "/company/columns", {
+        let promise = fetch(PUBLIC_BACKEND_URL + "/columns", {
             method: 'POST',
             headers: {
                 'Content-Type': "application/json",
@@ -100,7 +100,7 @@
     }
 
     function getNotes(column) {
-        let promise = fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/notes", {
+        let promise = fetch(PUBLIC_BACKEND_URL + "/notes", {
             method: 'POST',
             headers: {
                 'Content-Type': "application/json",
@@ -142,7 +142,7 @@
 
     }
 
-    //I know this makes more than necessary requests but ehhh
+    //I know this makes more requests than necessary but ehhh
     //no time to optimize now
     function handleBoardUpdated(newItems){
         updatePlace(newItems);
@@ -169,10 +169,11 @@
 
         updateNotes(updatedNotes);
     }
-
-    //TODO: Update the place after 200ok
+    //I think this means that currently the notes are placed even if
+    //the update fails
+    //TODO: Update the place after 200 ok
     function updateNotes(updatedNotes){
-        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/updateNotes", {
+        fetch(PUBLIC_BACKEND_URL + "/updateNotes", {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -226,7 +227,7 @@
     }
 
     function createNoteRequest(note){
-        fetch(PUBLIC_BACKEND_URL + "/company/whiteboard/createNote", {
+        fetch(PUBLIC_BACKEND_URL + "/createNote", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
