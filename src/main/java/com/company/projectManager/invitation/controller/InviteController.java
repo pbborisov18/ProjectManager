@@ -94,9 +94,9 @@ public class InviteController {
         }
     }
 
-    @PostMapping({"/company/invite", "/company/project/invite", "/company/project/team/invite"})
+    @PostMapping("/businessUnit/invite")
     @PreAuthorize("authorityCheck(#buUserDTO.businessUnitDTO().id(), \"ManageSentInvites\")")
-    public ResponseEntity<Object> createInviteForCompany(@RequestBody BusinessUnitUserNoPassDTO buUserDTO){
+    public ResponseEntity<Object> createInviteForBU(@RequestBody BusinessUnitUserNoPassDTO buUserDTO){
         try {
             InviteDTONoPass invite = inviteService.createInvite(buUserDTO.businessUnitDTO(), buUserDTO.userNoPassDTO());
 

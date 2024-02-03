@@ -11,19 +11,13 @@
     let inviteeEmail;
     let alreadyInvited = [];
 
-    let currentUrl = window.location.pathname;
-    let fetchUrl = "";
-
-    if(currentUrl === "/companies"){
-        fetchUrl = "/company";
-    } else if(currentUrl === "/company/projects"){
-        fetchUrl = "/company/project";
-    } else if(currentUrl === "/company/project/teams"){
-        fetchUrl = "/company/project/team";
-    }
-
     function invitePersonToBU(){
-        fetch(PUBLIC_BACKEND_URL + fetchUrl + '/invite', {
+        if(inviteeEmail === "" || !inviteeEmail){
+            toast.error("Please enter an email!");
+            return;
+        }
+
+        fetch(PUBLIC_BACKEND_URL + '/businessUnit/invite', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -44,7 +38,7 @@
                 });
             } else if(response.status === 400){
                 response.text().then(data => {
-                    toast.error("Bad request!");
+                    toast.error(data);
                 });
             } else if(response.status === 401){
                 userEmail.set("");

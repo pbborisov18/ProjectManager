@@ -111,12 +111,9 @@
         setupAllAuthoritiesList();
     }
 
-    //company/roles, company/project/roles and company/project/team/roles are hitting the same method
-    //TODO: remove all the endpoints and leave only 1 per method (in the backend)
-
     function findAllRoles(){
 
-        fetch(PUBLIC_BACKEND_URL + '/company/roles', {
+        fetch(PUBLIC_BACKEND_URL + '/roles', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -149,7 +146,7 @@
     }
 
     function deleteRole(role){
-        fetch(PUBLIC_BACKEND_URL + '/company/deleteRole', {
+        fetch(PUBLIC_BACKEND_URL + '/deleteRole', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -180,7 +177,7 @@
     }
 
     function editRole(role){
-        fetch(PUBLIC_BACKEND_URL + '/company/updateRole', {
+        fetch(PUBLIC_BACKEND_URL + '/updateRole', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -216,7 +213,7 @@
     }
 
     function createRole(role){
-        fetch(PUBLIC_BACKEND_URL + '/company/createRole', {
+        fetch(PUBLIC_BACKEND_URL + '/createRole', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

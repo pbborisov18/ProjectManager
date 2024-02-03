@@ -21,9 +21,7 @@ public class RoleController {
         this.roleService = roleService;
     }
 
-    //TODO: Remove all the endpoints and leave only 1 per method
-
-    @PostMapping({"/company/roles", "/company/project/roles", "/company/project/team/roles"})
+    @PostMapping({"/roles"})
     @PreAuthorize("authorityCheck(#businessUnitDTO.id(), \"SeePermissions\")")
     public ResponseEntity<Object> getAllRolesOfBusinessUnit(@RequestBody BusinessUnitDTO businessUnitDTO) {
         try {
@@ -35,7 +33,7 @@ public class RoleController {
         }
     }
 
-    @PostMapping({"/company/createRole", "/company/project/createRole", "/company/project/team/createRole"})
+    @PostMapping({"/createRole"})
     @PreAuthorize("authorityCheck(#role.businessUnit().id(), \"ChangePermissions\")") //Hopefully nobody sends an empty list...
     public ResponseEntity<Object> createPermissions(@RequestBody RoleDTO role){
         try {
@@ -49,7 +47,7 @@ public class RoleController {
         }
     }
 
-    @PutMapping({"/company/updateRole", "/company/project/updateRole", "/company/project/team/updateRole"})
+    @PutMapping({"/updateRole"})
     @PreAuthorize("authorityCheck(#role.businessUnit().id(), \"ChangePermissions\")") //Hopefully nobody sends an empty list...
     public ResponseEntity<Object> updatePermissions(@RequestBody RoleDTO role){
         try {
@@ -61,7 +59,7 @@ public class RoleController {
         }
     }
 
-    @DeleteMapping({"/company/deleteRole", "/company/project/deleteRole", "/company/project/team/deleteRole"})
+    @DeleteMapping({"/deleteRole"})
     @PreAuthorize("authorityCheck(#role.businessUnit().id(), \"ChangePermissions\")") //Hopefully nobody sends an empty list...
     public ResponseEntity<Object> deletePermissions(@RequestBody RoleDTO role){
         try {
