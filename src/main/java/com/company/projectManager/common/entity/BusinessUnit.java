@@ -49,18 +49,6 @@ public class BusinessUnit {
 
     public BusinessUnit() {}
 
-    //TODO: Builder pattern
-
-
-    public BusinessUnit(Long id, String name, TypeName type, @Nullable BusinessUnit company, @Nullable BusinessUnit project, @Nullable Whiteboard whiteboard) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.company = company;
-        this.project = project;
-        this.whiteboard = whiteboard;
-    }
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

@@ -26,7 +26,7 @@ public class BusinessUnitDTODeserializer extends JsonDeserializer<BusinessUnitDT
         TypeName type = codec.treeToValue(tree.get("type"), TypeName.class);
         WhiteboardDTO whiteboardDTO = codec.treeToValue(tree.get("whiteboard"), WhiteboardDTO.class);
 
-        BusinessUnitDTO businessUnitDTO = null;
+        BusinessUnitDTO businessUnitDTO;
 
         switch (type) {
             case COMPANY -> businessUnitDTO = new CompanyDTO(id, name, type, whiteboardDTO);
@@ -39,9 +39,8 @@ public class BusinessUnitDTODeserializer extends JsonDeserializer<BusinessUnitDT
                 ProjectDTO projectDTO = codec.treeToValue(tree.get("project"), ProjectDTO.class);
                 businessUnitDTO = new TeamDTO(id, name, type, companyDTO1, projectDTO, whiteboardDTO);
             }
-            default -> {
-                // handle unexpected case
-            }
+            default -> throw new IllegalStateException("Unexpected value: " + type);
+
         }
 
         return businessUnitDTO;

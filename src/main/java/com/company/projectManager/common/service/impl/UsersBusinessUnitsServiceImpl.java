@@ -500,6 +500,8 @@ public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService 
             // and send in a role that doesn't exist it will be created
             // (Only the frontend can do this cuz that's the only service allowed to
             // communicate with the backend)
+            //On second thoughts it won't be created since I don't have persist cascade
+            //(Ofc will be open to this "bug" in case someone decides to add it)
             ubu.get().setRoles(roleMapper.toEntity(ubuDTO.roles()));
 
             usersBURepository.save(ubu.get());
