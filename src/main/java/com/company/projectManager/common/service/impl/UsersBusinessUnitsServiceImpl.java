@@ -13,6 +13,9 @@ import com.company.projectManager.common.mapper.UserMapper;
 import com.company.projectManager.common.mapper.UsersBusinessUnitsMapper;
 import com.company.projectManager.common.repository.*;
 import com.company.projectManager.common.service.UsersBusinessUnitsService;
+import com.company.projectManager.common.service.UsersCompaniesService;
+import com.company.projectManager.common.service.UsersProjectsService;
+import com.company.projectManager.common.service.UsersTeamsService;
 import com.company.projectManager.common.utils.TypeName;
 import com.company.projectManager.invitation.repository.InviteRepository;
 import jakarta.validation.ConstraintViolationException;
@@ -24,8 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+//TODO: Actually split them in different implementations
+
 @Service
-public class UsersBusinessUnitsServiceImpl implements UsersBusinessUnitsService {
+public class UsersBusinessUnitsServiceImpl implements UsersCompaniesService, UsersProjectsService, UsersTeamsService, UsersBusinessUnitsService {
 
     private final UsersBusinessUnitsRepository usersBURepository;
 

@@ -47,7 +47,7 @@ public interface UsersBusinessUnitsMapper {
     List<UserBusinessUnit> toEntity(@Valid Iterable<UserBusinessUnitDTO> usersWithPassBusinessUnitsRolesDTOs);
 
     //Since mapstruct is "clever" and after I tell it to use x dependency
-    //it doesn't care and still checks if it needs x dependency.
+    //it doesn't care and still checks if it "needs" x dependency.
     //This is used to trick mapstruct into thinking that this impl will need the AuthorityMapper
     @Mapping(target = "authorities", qualifiedByName = {"toAuthoritiesDTO"})
     Role doNotUse(RoleDTO roleDTO);
