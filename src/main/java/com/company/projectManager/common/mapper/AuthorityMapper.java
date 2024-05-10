@@ -3,6 +3,7 @@ package com.company.projectManager.common.mapper;
 import com.company.projectManager.common.dto.AuthorityDTO;
 import com.company.projectManager.common.entity.Authority;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
@@ -16,14 +17,14 @@ import java.util.List;
 public interface AuthorityMapper {
 
     @Named("toAuthoritiesDTO")
-    AuthorityDTO toDTO(@Valid Authority authority);
+    AuthorityDTO toDTO(@Valid @NotNull Authority authority);
 
     @IterableMapping(qualifiedByName = "toAuthoritiesDTO")
-    List<AuthorityDTO> toDTO(@Valid Iterable<Authority> authorities);
+    List<AuthorityDTO> toDTO(@Valid @NotNull Iterable<Authority> authorities);
 
 
-    Authority toEntity(@Valid AuthorityDTO authorityDTO);
+    Authority toEntity(@Valid @NotNull AuthorityDTO authorityDTO);
 
 
-    List<Authority> toEntity(@Valid List<AuthorityDTO> authorities);
+    List<Authority> toEntity(@Valid @NotNull List<AuthorityDTO> authorities);
 }
