@@ -31,6 +31,7 @@ public class Column {
     @Cascade({org.hibernate.annotations.CascadeType.MERGE}) //This isn't substitute (hibernate documentation)
     private Whiteboard whiteboard;
 
+    //Prob shouldn't be long
     @NotNull
     private Long position;
 

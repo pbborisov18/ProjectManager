@@ -118,7 +118,7 @@ public class WhiteboardMapperTest {
 
     @ParameterizedTest
     @DisplayName("Test toEntity with invalid list of WhiteboardDTOs")
-    //givne
+    //given
     @MethodSource("provideInvalidWhiteboardDTOs")
     public void testToEntityListInvalid(List<WhiteboardDTO> whiteboardDTOs) {
         //when and then
