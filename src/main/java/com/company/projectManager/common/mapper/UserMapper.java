@@ -10,7 +10,9 @@ import org.springframework.validation.annotation.Validated;
 import java.util.List;
 
 
-@Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
+@Mapper(componentModel = "spring",
+        collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 @Validated
 public interface UserMapper {
 

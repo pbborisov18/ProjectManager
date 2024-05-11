@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring", uses = {WhiteboardMapper.class}, collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
+@Mapper(componentModel = "spring", uses = {WhiteboardMapper.class},
+        collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 @Validated
 public interface BusinessUnitMapper {
 

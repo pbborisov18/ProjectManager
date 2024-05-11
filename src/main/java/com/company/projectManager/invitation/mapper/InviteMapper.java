@@ -13,7 +13,9 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class, BusinessUnitMapper.class},collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
+@Mapper(componentModel = "spring", uses = {UserMapper.class, BusinessUnitMapper.class},
+        collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
+        injectionStrategy = org.mapstruct.InjectionStrategy.CONSTRUCTOR)
 @Validated
 public interface InviteMapper {
 
