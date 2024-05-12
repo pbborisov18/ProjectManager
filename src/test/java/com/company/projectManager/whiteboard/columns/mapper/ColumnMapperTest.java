@@ -203,8 +203,7 @@ class ColumnMapperTest {
                 new Column(1L, "", new Whiteboard(1L, "whiteboard1"), 1L),
                 new Column(1L, "column1", null, 1L),
                 new Column(1L, "column1", new Whiteboard(1L, "whiteboard1"), null),
-                new Column(null, null, null, null),
-                null
+                new Column(null, null, null, null)
         );
     }
 
@@ -233,9 +232,7 @@ class ColumnMapperTest {
                 List.of(
                         new Column(1L, null, new Whiteboard(1L, "whiteboard1"), 1L),
                         new Column(1L, null, new Whiteboard(1L, "whiteboard1"), 1L)
-                ),
-
-                null
+                )
         );
     }
 
@@ -245,8 +242,7 @@ class ColumnMapperTest {
                 new ColumnDTO(1L, "", new WhiteboardDTO(1L, "whiteboard1"), 1L),
                 new ColumnDTO(1L, "column1", null, 1L),
                 new ColumnDTO(1L, "column1", new WhiteboardDTO(1L, "whiteboard1"), null),
-                new ColumnDTO(null, null, null, null),
-                null
+                new ColumnDTO(null, null, null, null)
         );
     }
 
@@ -275,9 +271,7 @@ class ColumnMapperTest {
                 List.of(
                         new ColumnDTO(1L, null, new WhiteboardDTO(1L, "whiteboard1"), 1L),
                         new ColumnDTO(1L, null, new WhiteboardDTO(1L, "whiteboard1"), 1L)
-                ),
-
-                null
+                )
         );
     }
 

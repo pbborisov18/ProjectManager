@@ -130,8 +130,7 @@ public class AuthorityMapperTest {
     static Stream<Authority> provideInvalidAuthority() {
         return Stream.of(
                 new Authority(null, null),
-                new Authority(1L, null),
-                null
+                new Authority(1L, null)
         );
     }
 
@@ -150,17 +149,14 @@ public class AuthorityMapperTest {
                 //First being invalid
                 List.of(new Authority(1L, null),
                         new Authority(2L, "authority2")
-                ),
-
-                null
+                )
         );
     }
 
     static Stream<AuthorityDTO> provideInvalidAuthorityDTO() {
         return Stream.of(
                 new AuthorityDTO(null, null),
-                new AuthorityDTO(1L, null),
-                null
+                new AuthorityDTO(1L, null)
         );
     }
 
@@ -179,9 +175,7 @@ public class AuthorityMapperTest {
                 //First being invalid
                 List.of(new AuthorityDTO(1L, null),
                         new AuthorityDTO(2L, "authority2")
-                ),
-
-                null
+                )
         );
     }
 }

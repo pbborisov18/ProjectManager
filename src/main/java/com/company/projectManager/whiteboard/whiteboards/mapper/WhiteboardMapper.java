@@ -15,12 +15,12 @@ import java.util.List;
 @Validated
 public interface WhiteboardMapper {
 
-    WhiteboardDTO toDTO(@Valid @NotNull Whiteboard whiteboard);
+    WhiteboardDTO toDTO(@Valid Whiteboard whiteboard);
 
-    List<WhiteboardDTO> toDTO(@Valid @NotNull Iterable<Whiteboard> whiteboards);
+    List<WhiteboardDTO> toDTO(@Valid Iterable<Whiteboard> whiteboards);
 
-    Whiteboard toEntity(@Valid @NotNull WhiteboardDTO whiteboardDTO);
+    Whiteboard toEntity(@Valid WhiteboardDTO whiteboardDTO);
 
-    List<Whiteboard> toEntity(@Valid @NotNull Iterable<WhiteboardDTO> whiteboardDTOs);
+    List<Whiteboard> toEntity(@Valid Iterable<WhiteboardDTO> whiteboardDTOs);
 
 }

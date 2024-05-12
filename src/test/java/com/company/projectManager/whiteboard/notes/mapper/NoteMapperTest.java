@@ -303,9 +303,7 @@ class NoteMapperTest {
                         new Note(),
                         new Note(1L, "Note 1", "valid", column1, 1L),
                         new Note(1L, "Note 1", "valid", column1, 1L)
-                ),
-
-                null
+                )
         );
     }
 
@@ -344,9 +342,7 @@ class NoteMapperTest {
                 List.of(
                         new NoteDTO(1L, null, "invalid", columnDTO1, 1L),
                         new NoteDTO(1L, "Note 1", "valid", columnDTO1, 1L)
-                ),
-
-                null
+                )
         );
     }
 

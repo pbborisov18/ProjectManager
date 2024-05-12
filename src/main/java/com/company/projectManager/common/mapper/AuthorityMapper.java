@@ -18,15 +18,15 @@ import java.util.List;
 @Validated
 public interface AuthorityMapper {
 
-    @Named("toAuthoritiesDTO")
-    AuthorityDTO toDTO(@Valid @NotNull Authority authority);
+    @Named("toAuthorityDTO")
+    AuthorityDTO toDTO(@Valid Authority authority);
 
-    @IterableMapping(qualifiedByName = "toAuthoritiesDTO")
-    List<AuthorityDTO> toDTO(@Valid @NotNull Iterable<Authority> authorities);
+//    @IterableMapping(qualifiedByName = "toAuthoritiesDTO")
+    List<AuthorityDTO> toDTO(@Valid Iterable<Authority> authorities);
+
+    @Named("toAuthorityEntity")
+    Authority toEntity(@Valid AuthorityDTO authorityDTO);
 
 
-    Authority toEntity(@Valid @NotNull AuthorityDTO authorityDTO);
-
-
-    List<Authority> toEntity(@Valid @NotNull List<AuthorityDTO> authorities);
+    List<Authority> toEntity(@Valid List<AuthorityDTO> authorities);
 }

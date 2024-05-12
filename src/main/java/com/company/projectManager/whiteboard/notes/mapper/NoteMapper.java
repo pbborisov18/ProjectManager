@@ -17,13 +17,13 @@ import java.util.List;
 public interface NoteMapper {
 
     @Mapping(target = "columnDTO", source = "column")
-    NoteDTO toDTO(@Valid @NotNull Note note);
+    NoteDTO toDTO(@Valid Note note);
 
-    List<NoteDTO> toDTO(@Valid @NotNull Iterable<Note> notes);
+    List<NoteDTO> toDTO(@Valid Iterable<Note> notes);
 
     @Mapping(target = "column", source = "columnDTO")
-    Note toEntity(@Valid @NotNull NoteDTO noteDTO);
+    Note toEntity(@Valid NoteDTO noteDTO);
 
-    List<Note> toEntity(@Valid @NotNull Iterable<NoteDTO> noteDTOs);
+    List<Note> toEntity(@Valid Iterable<NoteDTO> noteDTOs);
 
 }

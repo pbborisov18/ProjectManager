@@ -129,8 +129,7 @@ public class WhiteboardMapperTest {
     static Stream<Whiteboard> provideInvalidWhiteboard() {
         return Stream.of(
                 new Whiteboard(null, null),
-                new Whiteboard(1L, null),
-                null
+                new Whiteboard(1L, null)
         );
     }
 
@@ -149,17 +148,14 @@ public class WhiteboardMapperTest {
                 //First being invalid
                 List.of(new Whiteboard(1L, null),
                         new Whiteboard(2L, "whiteboard2")
-                ),
-
-                null
+                )
         );
     }
 
     static Stream<WhiteboardDTO> provideInvalidWhiteboardDTO() {
         return Stream.of(
                 new WhiteboardDTO(null, null),
-                new WhiteboardDTO(1L, null),
-                null
+                new WhiteboardDTO(1L, null)
         );
     }
 
@@ -178,9 +174,7 @@ public class WhiteboardMapperTest {
                 //First being invalid
                 List.of(new WhiteboardDTO(1L, null),
                         new WhiteboardDTO(2L, "whiteboard2")
-                ),
-
-                null
+                )
         );
     }
 

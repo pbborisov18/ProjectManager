@@ -19,12 +19,12 @@ import java.util.List;
 public interface ColumnMapper {
 
     @Mapping(target = "whiteboardDTO", source = "whiteboard")
-    ColumnDTO toDTO(@Valid @NotNull Column column);
+    ColumnDTO toDTO(@Valid Column column);
 
-    List<ColumnDTO> toDTO(@Valid @NotNull Iterable<Column> columns);
+    List<ColumnDTO> toDTO(@Valid Iterable<Column> columns);
 
     @Mapping(target = "whiteboard", source = "whiteboardDTO")
-    Column toEntity(@Valid @NotNull ColumnDTO columnDTO);
+    Column toEntity(@Valid ColumnDTO columnDTO);
 
-    List<Column> toEntity(@Valid @NotNull Iterable<ColumnDTO> columnDTOs);
+    List<Column> toEntity(@Valid Iterable<ColumnDTO> columnDTOs);
 }
